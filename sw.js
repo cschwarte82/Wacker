@@ -1,5 +1,5 @@
 // Offline-Cache: zuerst aus dem Netz, ohne Verbindung aus dem Cache
-const CACHE = 'u10-profil-v1';
+const CACHE = 'u10-profil-v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('u10-profil-') && k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
