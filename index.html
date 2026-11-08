@@ -22,8 +22,8 @@ header{position:sticky;top:0;z-index:5;background:var(--gd);color:#fff;padding:c
 .brand{display:flex;align-items:center;gap:8px;font:700 22px var(--fc);letter-spacing:.3px;max-width:640px;margin:0 auto}
 .brand small{background:var(--lime);color:var(--gd);border-radius:4px;padding:0 6px;font-size:14px}
 #save{margin-left:auto;font:500 12px var(--ft);opacity:.8}
-nav{display:flex;gap:4px;margin:8px auto 0;max-width:640px}
-nav button{flex:1;background:none;border:0;color:#cfe3d4;font:600 13px var(--ft);padding:10px 0 12px;border-bottom:3px solid transparent;cursor:pointer}
+nav{display:flex;justify-content:space-between;gap:0;margin:8px auto 0;max-width:640px}
+nav button{flex:0 0 auto;background:none;border:0;color:#cfe3d4;font:600 13px var(--ft);padding:10px 2px 12px;white-space:nowrap;border-bottom:3px solid transparent;cursor:pointer}
 nav button.on{color:#fff;border-color:var(--lime)}
 main{max-width:640px;margin:0 auto;padding:14px 14px calc(90px + env(safe-area-inset-bottom))}
 h2{font:700 26px var(--fc);margin:4px 0}
@@ -251,7 +251,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='12';
+const APP_VERSION='13';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
