@@ -1,4 +1,4 @@
-# Wacker U10 – Leistungsprofil
+# TrainerRadar – Wacker Mecklenbeck
 
 Web-App für Handy und Laptop: Testtage, Spielbewertungen, Stärkenprofile, Ranglisten und Aufstellungsvorschläge für eine U10-Mannschaft.
 

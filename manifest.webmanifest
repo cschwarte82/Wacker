@@ -1,6 +1,6 @@
 {
-  "name": "U10 Leistungsprofil",
-  "short_name": "U10 Profil",
+  "name": "TrainerRadar",
+  "short_name": "TrainerRadar",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
