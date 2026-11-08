@@ -153,6 +153,7 @@ details textarea{margin-top:8px}
 .lstart{flex:none;min-width:84px}
 .cardb{flex:0 0 auto!important;display:flex;align-items:center;gap:6px}
 .gkinfo a{color:var(--gd);font-weight:600}
+.pfrow{display:grid;grid-template-columns:1fr 70px 70px;gap:6px;padding:5px 0;border-top:1px solid #eef1ea;font-size:14px;align-items:center}.pfrow b{text-align:right}.pfrow b.good{color:var(--good)}.pfrow b.bad{color:var(--bad)}.pfh{border-top:0;font-size:12px;color:var(--mut)}.pfh b{font-weight:600}
 .subsug{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:8px 0 2px}.subsug button{display:block;width:100%;text-align:left;background:#f4fbd6;border:1px solid #d7f25a;border-radius:9px;padding:8px 10px;margin-top:5px;font:600 14px var(--ft);color:var(--ink);cursor:pointer}.subsug small{color:var(--mut);font-weight:500}
 .selhint{background:#f4fbd6;border:1px solid #d7f25a;border-radius:10px;padding:6px 10px;font-size:13px;margin:4px 0}
 .lslot>b .lmin{font-weight:600;font-size:10.5px}
@@ -268,14 +269,14 @@ const TESTS=[
 const TEST=Object.fromEntries(TESTS.map(t=>[t.k,t]));
 const GK_RATINGS=[{k:'tw_reak',n:'Reaktion'},{k:'tw_fang',n:'Fangen / Ballsicherheit'},{k:'tw_stell',n:'Stellungsspiel'},{k:'tw_raus',n:'Herauslaufen / 1 gegen 1'},{k:'tw_eroeff',n:'Abwurf / Spieleröffnung'},{k:'tw_komm',n:'Kommandos / Mut'}];
 const ATH_RATINGS=[{k:'schnell',n:'Schnelligkeit',app:['tempo']},{k:'dyn',n:'Dynamik / Antritt',app:['gewandt','kraft']},{k:'ausd',n:'Ausdauer',app:['ausdauer']}];
-const RATINGS=[{k:'spielv',n:'Spielverständnis'},{k:'frei',n:'Freilaufen / Anbieten'},{k:'zweik',n:'Zweikampf\u00ADverhalten'},{k:'pass',n:'Passspiel'},{k:'dribb',n:'Dribbling'},{k:'ueber',n:'Übersicht'},{k:'mut',n:'Mut'},{k:'komm',n:'Kommunikation'}];
+const RATINGS=[{k:'spielv',n:'Spielverständnis'},{k:'frei',n:'Freilaufen / Anbieten'},{k:'zweik',n:'Zweikampf\u00ADverhalten'},{k:'pass',n:'Passspiel'},{k:'dribb',n:'Dribbling'},{k:'ueber',n:'Übersicht'},{k:'mut',n:'Mut'},{k:'komm',n:'Kommunikation'},{k:'abschluss',n:'Abschluss / Torschuss'}];
 const AREAS=[{k:'tempo',n:'Tempo'},{k:'gewandt',n:'Gewandtheit'},{k:'kraft',n:'Sprungkraft'},{k:'ausdauer',n:'Ausdauer'},{k:'technik',n:'Technik'},{k:'spiel',n:'Spielverhalten',s:'Spiel'}];
 const TEST_GROUPS=[{k:'tempo',n:'Tempo'},{k:'gewandt',n:'Gewandtheit'},{k:'kraft',n:'Sprungkraft'},{k:'ausdauer',n:'Ausdauer'},{k:'technik',n:'Technik'},{k:'torwart',n:'Torwart'}];
 const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='32';
+const APP_VERSION='33';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -466,7 +467,7 @@ function vKids(s){
   const ps=plist(); if(!ps.length)return `<div class="card hint">Noch keine Spieler im Kader.</div>`;
   if(S.kidIdx>=ps.length)S.kidIdx=0;
   const p=ps[S.kidIdx]; const r=s.ratings?.[p.id]||{}; const mood=s.mood?.[p.id]; const note=s.notes?.[p.id]||'';
-  const done=q=>{const rr=s.ratings?.[q.id];return rr&&RATINGS.every(x=>isNum(rr[x.k]));};
+  const done=q=>{const rr=s.ratings?.[q.id];return rr&&RATINGS.every(x=>x.k==='abschluss'||isNum(rr[x.k]));};
   const game=s.type==='game',ev=s.type==='eval';
   let h=`<div class="kidnav"><button class="btn" onclick="A.kid(-1)" aria-label="Vorheriges Kind">‹</button><select onchange="A.kidSel(this.value)">${ps.map((q,i)=>`<option value="${i}" ${i===S.kidIdx?'selected':''}>${esc(q.name)}${done(q)?' ✓':''}</option>`).join('')}</select><button class="btn" onclick="A.kid(1)" aria-label="Nächstes Kind">›</button></div>`;
   if((p.goals||[]).some(g=>g.status!=='erreicht'))h+=goalsHtml(p.id,true);
@@ -528,6 +529,9 @@ function vPlayer(){
   if(grows){const g=latestVal('a:torwart',pid,ss.slice().reverse());h+=`<div class="card"><div class="lbl">Torwart${isNum(g)?` <small>gesamt ${fnum(Math.round(g*10)/10)} / 5</small>`:''}</div>${grows}</div>`;}
   const ms=ss.filter(s=>isNum(s.mood?.[pid]));
   if(ms.length)h+=`<div class="card"><div class="lbl">Spaß am Fußball <small>Selbstauskunft</small></div><div class="moodhist">${ms.map(s=>`<span>${MOODS[s.mood[pid]-1]||''}<small>${fdate(s.date).slice(0,5)}</small></span>`).join('')}</div></div>`;
+  {const rows=[...RATINGS,...ATH_RATINGS].map(r=>{const c='r:'+r.k,ss2=sessionsWith(c);const po=srcVal(c,pid,ss2,'pot'),fo=srcVal(c,pid,ss2,'form');if(!isNum(po)&&!isNum(fo))return'';const d=isNum(po)&&isNum(fo)?fo-po:0;
+      return `<div class="pfrow"><span>${esc(r.n)}</span><b>${isNum(po)?fnum(r1(po)):'–'}</b><b class="${d>=.3?'good':d<=-.3?'bad':''}">${isNum(fo)?fnum(r1(fo)):'–'}${d>=.3?' ▲':d<=-.3?' ▼':''}</b></div>`;}).join('');
+    if(rows)h+=`<div class="card"><div class="lbl">Potenzial &amp; Form <small>Form = letzte ${formWeeks()} Wochen</small></div><div class="pfrow pfh"><span></span><b>Potenzial</b><b>Form</b></div>${rows}<div class="sub" style="margin-top:6px">▲ / ▼ = gerade deutlich über bzw. unter dem Saisonniveau. Werte aus: ${srcMode()==='trainer'?'Trainer':srcMode()==='app'?'App':'Mix'}.</div></div>`;}
   h+=cmpCard(pid);
   const lg=ss.filter(s=>s.live&&((s.live.plus||{})[pid]||(s.live.minus||{})[pid]||(s.live.mins||{})[pid]||(s.live.goals||[]).some(g=>(g.on||[]).includes(pid))));
   if(lg.length){const tot=lg.reduce((a,s)=>{const b=gameBal(s.live,pid);a.t+=b.tore;a.f+=b.gf;a.a+=b.ga;a.m+=(s.live.mins||{})[pid]||0;return a;},{t:0,f:0,a:0,m:0});
@@ -558,14 +562,14 @@ function vRank(){
   h+=`<select class="sel" onchange="A.rk('cat',this.value)">${CATS.map(g=>`<optgroup label="${esc(g.g)}">${g.items.map(i=>`<option value="${i.id}" ${i.id===R.cat?'selected':''}>${esc(i.n)}</option>`).join('')}</optgroup>`).join('')}</select>`;
   if(type!=='a'&&type!=='g')h+=`<div class="seg">${[['best','Bestwerte'],['progress','Fortschritt']].map(([k,n])=>`<button class="${R.mode===k?'on':''}" onclick="A.rk('mode','${k}')">${n}</button>`).join('')}</div>`;
   const ps=plist(),ss=sessionsWith(R.cat);const useSrc=R.mode==='best'&&srcApplies(R.cat);
-  if(useSrc)h+=srcSeg();
+  if(R.mode==='best'&&(useSrc||R.cat[0]==='t'||R.cat[0]==='a')){if(useSrc)h+=srcSeg();h+=perSeg();}
   if(!ss.length&&!(useSrc&&srcMode()!=='trainer'&&ps.some(p=>isNum(appCat(R.cat,p.id)))))return h+`<div class="empty">Für diese Kategorie gibt es noch keine Werte.</div>`;
   let rows,note='',unit=meta.u;
   if(R.mode==='best'){
     const s=ss.find(x=>x.id===R.sess);
     if(ss.length)h+=`<select class="sel" onchange="A.rk('sess',this.value)"><option value="cur" ${s?'':'selected'}>Aktuell</option>${ss.map(x=>`<option value="${x.id}" ${s&&x.id===s.id?'selected':''}>${fdate(x.date)} – ${x.type==='game'?'⚽ ':x.type==='eval'?'📝 ':''}${esc(x.title)}</option>`).join('')}</select>`;
-    rows=ps.map(p=>({p,v:s?catVal(s,R.cat,p.id):(type==='g'?(()=>{let t=null;ss.forEach(x=>{const v=catVal(x,R.cat,p.id);if(isNum(v))t=(t||0)+v;});return t;})():(useSrc?srcVal(R.cat,p.id,ss):latestVal(R.cat,p.id,ss)))}));
-    if(!s)note=type==='g'?(R.cat==='g:tore'?'Summe aller Spiele mit Live-Erfassung.':'Tore minus Gegentore, während das Kind auf dem Feld stand – Summe aller Live-Spiele.'):(type==='t'?'Pro Kind zählt die jeweils letzte Messung – so fehlt niemand, der beim letzten Testtag krank war.':'Einschätzungen: Schnitt der letzten 3 Bewertungen je Kind (Testtage, Spiele und Einschätzungen).');
+    rows=ps.map(p=>({p,v:s?catVal(s,R.cat,p.id):(type==='g'?(()=>{let t=null;ss.forEach(x=>{const v=catVal(x,R.cat,p.id);if(isNum(v))t=(t||0)+v;});return t;})():srcVal(R.cat,p.id,ss))}));
+    if(!s&&type!=='g'){note='';}else if(!s)note=type==='g'?(R.cat==='g:tore'?'Summe aller Spiele mit Live-Erfassung.':'Tore minus Gegentore, während das Kind auf dem Feld stand – Summe aller Live-Spiele.'):(type==='t'?'Pro Kind zählt die jeweils letzte Messung – so fehlt niemand, der beim letzten Testtag krank war.':'Einschätzungen: Schnitt der letzten 3 Bewertungen je Kind (Testtage, Spiele und Einschätzungen).');
     if(!s&&useSrc&&srcMode()!=='trainer')note='';
     else if(type==='a')note+=(note?' ':'')+'Wert 3 = Teamschnitt am jeweiligen Testtag.';
     if(s&&useSrc&&srcMode()!=='trainer')note='Bei einer einzelnen Bewertung zählen immer die Trainerwerte.';
@@ -591,25 +595,42 @@ function vRank(){
 const FORMS={4:{'2-2':['A-L','A-R','S-L','S-R'],'1-2-1':['A-Z','M-L','M-R','S-Z']},5:{'2-2-1':['A-L','A-R','M-L','M-R','S-Z'],'2-1-2':['A-L','A-R','M-Z','S-L','S-R'],'3-1-1':['A-L','A-Z','A-R','M-Z','S-Z']},6:{'2-3-1':['A-L','A-R','M-L','M-Z','M-R','S-Z'],'3-2-1':['A-L','A-Z','A-R','M-L','M-R','S-Z'],'2-2-2':['A-L','A-R','M-L','M-R','S-L','S-R'],'3-1-2':['A-L','A-Z','A-R','M-Z','S-L','S-R']}};
 const POS={
   A:{n:'Abwehr',w:{'r:zweik':.3,'r:spielv':.2,'r:komm':.15,'a:tempo':.2,'a:kraft':.15}},
-  M:{n:'Mittelfeld',w:{'a:ausdauer':.2,'a:technik':.2,'r:pass':.15,'r:ueber':.15,'r:spielv':.15,'r:frei':.15}},
-  S:{n:'Sturm',w:{'a:tempo':.2,'a:technik':.2,'a:gewandt':.1,'r:dribb':.15,'r:mut':.15,'r:frei':.2}}
+  M:{n:'Mittelfeld',w:{'a:ausdauer':.15,'a:technik':.2,'r:pass':.2,'r:ueber':.15,'r:spielv':.15,'r:frei':.15}},
+  S:{n:'Sturm',w:{'a:tempo':.2,'a:technik':.15,'a:gewandt':.1,'r:dribb':.15,'r:mut':.15,'r:frei':.15,'r:abschluss':.1}}
 };
 const SIDE={L:'links',R:'rechts',Z:'zentral'};
-const catName=c=>{const[t,k]=c.split(':');return t==='a'?AREAS.find(a=>a.k===k).n:[...RATINGS,...ATH_RATINGS,...GK_RATINGS].find(r=>r.k===k).n;};
+const catName=c=>{const[t,k]=c.split(':');if(t==='x')return 'Abschluss (aus Spielen, nur App/Mix)';return t==='a'?AREAS.find(a=>a.k===k).n:[...RATINGS,...ATH_RATINGS,...GK_RATINGS].find(r=>r.k===k).n;};
 const SRC=[['trainer','Trainer'],['app','App'],['mix','Mix']];
 function srcMode(){const m=S.cfg&&S.cfg.src;return m==='app'||m==='mix'?m:'trainer';}
+// Potenzial (alle Werte der Saison) / Form (letzte X Wochen) / Mix (Mittelwert aus beiden)
+const PER=[['mix','Mix'],['pot','Potenzial'],['form','Form']];
+function perMode(){const m=S.cfg&&S.cfg.per;return m==='pot'||m==='form'?m:'mix';}
+function formWeeks(){const w=S.cfg&&S.cfg.formWeeks;return [4,6,8].includes(w)?w:6;}
+function formSince(){const d=new Date();d.setDate(d.getDate()-formWeeks()*7);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const mix2=(a,b)=>isNum(a)&&isNum(b)?(a+b)/2:(isNum(a)?a:b);
+function periodVal(cat,pid,ss,per){
+  const multi=cat.startsWith('r:')||cat==='a:spiel'||cat==='a:torwart';const lower=cat.startsWith('t:')&&TEST[cat.slice(2)]&&TEST[cat.slice(2)].lower;
+  const pick=list=>{const v=list.map(s=>catVal(s,cat,pid)).filter(isNum);if(!v.length)return null;if(multi)return avg(v);if(per==='form')return v[0];return lower?Math.min(...v):Math.max(...v);};
+  if(per==='pot')return pick(ss);
+  if(per==='form'){const since=formSince();return pick(ss.filter(s=>(s.date||'')>=since));}
+  return mix2(periodVal(cat,pid,ss,'pot'),periodVal(cat,pid,ss,'form'));
+}
 let AVC={k:null,m:{}};
-function appValsC(pid){const k=CUR+'|'+META.lastChange+'|'+(S.archView||'');if(AVC.k!==k)AVC={k,m:{}};return AVC.m[pid]||(AVC.m[pid]=appVals(pid));}
-function srcApplies(cat){const[t,k]=cat.split(':');return t==='r'||(t==='a'&&['spiel','torwart','technik'].includes(k));}
-function appCat(cat,pid){const[t,k]=cat.split(':');const AV=appValsC(pid);const m=os=>{const v=os.filter(Boolean);return v.length?avg(v.map(o=>o.v)):null;};
+function appValsC(pid,per){per=per||perMode();const k=CUR+'|'+META.lastChange+'|'+(S.archView||'')+'|'+formWeeks();if(AVC.k!==k)AVC={k,m:{}};const key=pid+'|'+per;
+  if(!AVC.m[key]){if(per==='mix'){const a=appValsC(pid,'pot'),b=appValsC(pid,'form'),o={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(x=>{const va=a[x]&&a[x].v,vb=b[x]&&b[x].v;const v=mix2(va,vb);if(isNum(v))o[x]={...(a[x]||b[x]),v};});AVC.m[key]=o;}
+    else AVC.m[key]=appVals(pid,per==='form'?formSince():'');}
+  return AVC.m[key];}
+function srcApplies(cat){const[t,k]=cat.split(':');return t==='r'||t==='x'||(t==='a'&&['spiel','torwart','technik'].includes(k));}
+function appCat(cat,pid,per){const[t,k]=cat.split(':');const AV=appValsC(pid,per);if(t==='x')return AV[k]?AV[k].v:null;const m=os=>{const v=os.filter(Boolean);return v.length?avg(v.map(o=>o.v)):null;};
   if(t==='r'){if(AV[k])return AV[k].v;const ath=ATH_RATINGS.find(x=>x.k===k);return ath?m(ath.app.map(a=>AV[a])):null;}
   if(t==='a'){if(k==='spiel')return m(RATINGS.map(r=>AV[r.k]));if(k==='torwart')return AV._tw?AV._tw.v:null;return AV[k]?AV[k].v:null;}
   return null;}
 // Wert je Kategorie nach gewählter Quelle: Trainer (Einschätzung + Messwerte), App (Live-Aktionen + Tests) oder Mix (Mittelwert).
 // Kann die App eine Kategorie nicht messen (z. B. Mut, Kommunikation), zählt der Trainerwert.
-function srcVal(cat,pid,ss){const tr=latestVal(cat,pid,ss||sessionsWith(cat));const md=srcMode();if(md==='trainer'||!srcApplies(cat))return tr;const ap=appCat(cat,pid);
+function srcVal(cat,pid,ss,per){per=per||perMode();const tr=cat.startsWith('x:')?null:periodVal(cat,pid,ss||sessionsWith(cat),per);const md=srcMode();if(md==='trainer'||!srcApplies(cat))return tr;const ap=appCat(cat,pid,per);
   if(md==='app')return isNum(ap)?ap:tr;return isNum(tr)&&isNum(ap)?(tr+ap)/2:(isNum(ap)?ap:tr);}
-function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Deine Einschätzungen und die Messwerte der Testtage.':md==='app'?'Werte aus den Live-Aktionen der letzten 8 Spiele und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':'Mittelwert aus deiner Einschätzung und dem App-Wert. Fehlt einer, zählt der andere.'}</div>`;}
+function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?'Potenzial: alle Werte der Saison (bei Tests der Bestwert).':pm==='form'?`Form: nur die letzten ${formWeeks()} Wochen. Ohne Werte in dem Zeitraum zählt nichts.`:`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`} Form-Zeitraum: ${[4,6,8].map(w=>`<button class="chip ${formWeeks()===w?'on':''}" style="padding:2px 8px" onclick="A.cfgSet('formWeeks',${w})">${w} Wo.</button>`).join(' ')}</div>`;}
+function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Deine Einschätzungen und die Messwerte der Testtage.':md==='app'?'Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':'Mittelwert aus deiner Einschätzung und dem App-Wert. Fehlt einer, zählt der andere.'}</div>`;}
 // Erklärt, woher der Torwart-Wert eines Kindes kommt (Bewertungen mit TW-Einschätzung/TW-Tests, App-Werte aus Torwart-Aktionen)
 function gkInfo(pid){
   const GKT=['tw_fangen','tw_reaktion','tw_abwurf'];
@@ -647,7 +668,7 @@ function vLineup(){
   h+=`<div class="chips">${Object.keys(FORMS[L.n]).map(f=>`<button class="chip ${L.form===f?'on':''}" onclick="A.lu('form','${f}')">${f}</button>`).join('')}</div>`;
   h+=`<div class="seg">${[['stark','Stärkste'],['ausgewogen','Ausgewogen']].map(([k,n])=>`<button class="${L.mode===k?'on':''}" onclick="A.lu('mode','${k}')">${n}</button>`).join('')}</div>`;
   h+=`<div class="sub">${L.mode==='stark'?'Höchste Gesamtstärke – kann eine schwächere Position in Kauf nehmen.':'Keine Schwachstelle – die schwächste Position wird so stark wie möglich besetzt.'}</div>`;
-  h+=srcSeg();
+  h+=srcSeg();h+=perSeg();
   h+=`<div class="lbl2">Wer ist heute dabei?</div><div class="chips">${all.map(p=>`<button class="chip ${L.absent[p.id]?'':'on'}" onclick="A.luAbs('${p.id}')">${esc(p.name)}</button>`).join('')}</div>`;
   const here=all.filter(p=>!L.absent[p.id]);
   if(L.keeper&&L.keeper!=='auto'&&!here.some(p=>p.id===L.keeper))L.keeper=null;
@@ -659,7 +680,7 @@ function vLineup(){
   const field=here.filter(p=>p.id!==kid).map(p=>({...p,_pr:profileOf(p.id)}));
   if(field.length<slots.length)return h+`<div class="empty">Für ${L.n} Feldspieler sind nur ${field.length} Kinder ausgewählt.</div>`;
   if(field.length>16)return h+`<div class="empty">Bitte höchstens 16 Feldspieler auswählen.</div>`;
-  const key=JSON.stringify([slots,field.map(p=>p.id),L.mode,META.lastChange,srcMode()]);
+  const key=JSON.stringify([slots,field.map(p=>p.id),L.mode,META.lastChange,srcMode(),perMode(),formWeeks()]);
   if(!S.luCache||S.luCache.key!==key)S.luCache={key,res:bestLineup(slots,field,L.mode)};
   const res=S.luCache.res;
   const M=L.manual&&L.manual.n===L.n&&L.manual.form===L.form?L.manual:null;
@@ -694,19 +715,19 @@ function vLineup(){
   if(bench.length)h+=`<div class="card"><div class="lbl">Wechselspieler <small>beste Position · antippen zum Einsetzen</small></div><div class="bench">${bench.map(p=>{const b=['A','M','S'].map(pt=>({pt,v:posFit(getPr(p.id),pt).v+styleAdj(p,pt)})).sort((x,y)=>y.v-x.v)[0];return `<span class="tap ${isSel('bench',p.id)?'sel':''}" onclick="A.luTap('bench','${p.id}')"><b>${esc(p.name)}</b> · ${POS[b.pt].n} ${fnum(Math.round(b.v*10)/10)}</span>`;}).join('')}</div></div>`;
   const est=filled.filter(k=>fitOf(cur[k],k).cov<.5).map(k=>esc(S.players[cur[k]].name));
   if(est.length)h+=`<div class="banner">Gestrichelt = wenig Daten, Wert teilweise geschätzt: ${est.join(', ')}. Fehlende Bereiche zählen als Teamschnitt (3).</div>`;
-  h+=`<details class="card"><summary>So rechnet die App</summary>${Object.values(POS).map(P=>`<div class="wt"><b>${P.n}:</b> ${Object.entries(P.w).map(([c,w])=>`${catName(c)} ${Math.round(w*100)} %`).join(', ')}</div>`).join('')}<div class="wt">Bonus: starker Fuß passend zur Seite (+0,1 bis +0,15). Spielweise (Kader): offensiv = Sturm +0,2 / Abwehr −0,2, defensiv umgekehrt, ausgewogen = Mittelfeld +0,1. Positionstreue: gering = Abwehr −0,3 / Mittelfeld −0,1, hoch = Abwehr +0,1 / Mittelfeld +0,05. Messwerte zählen relativ zum Team (3 = Schnitt), deine Einschätzung direkt (1–5). Je Bereich gilt der letzte Messwert des Kindes, bei deiner Einschätzung der Schnitt der letzten 3 Bewertungen (Testtage, Spiele und Einschätzungen). Mit „App“ oder „Mix“ fließen die Werte aus „Trainer vs. App“ ein (Live-Aktionen der letzten 8 Spiele).</div></details>`;
+  h+=`<details class="card"><summary>So rechnet die App</summary>${Object.values(POS).map(P=>`<div class="wt"><b>${P.n}:</b> ${Object.entries(P.w).map(([c,w])=>`${catName(c)} ${Math.round(w*100)} %`).join(', ')}</div>`).join('')}<div class="wt">Bonus: starker Fuß passend zur Seite (+0,1 bis +0,15). Spielweise (Kader): offensiv = Sturm +0,2 / Abwehr −0,2, defensiv umgekehrt, ausgewogen = Mittelfeld +0,1. Positionstreue: gering = Abwehr −0,3 / Mittelfeld −0,1, hoch = Abwehr +0,1 / Mittelfeld +0,05. Messwerte zählen relativ zum Team (3 = Schnitt), deine Einschätzung direkt (1–5). Je Bereich gilt der letzte Messwert des Kindes, bei deiner Einschätzung der Schnitt der letzten 3 Bewertungen (Testtage, Spiele und Einschätzungen). Mit „App“ oder „Mix“ fließen die Werte aus „Trainer vs. App“ ein (Live-Aktionen). Zeitraum: Potenzial = alle Werte der Saison (Tests: Bestwert), Form = letzte Wochen (Tests: letzter Wert), Mix = Mittelwert aus beiden.</div></details>`;
   return h;
 }
 
 // ---------- Aktions-Kategorien & App-Werte ----------
 const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbling',m:'Ballverlust im Dribbling'},{k:'schuss',p:'Guter Abschluss',m:'Chance vergeben'},{k:'lauf',p:'Guter Laufweg',m:'Falsch gelaufen / versteckt'},{k:'zweik',p:'Zweikampf gewonnen',m:'Zweikampf verloren'},{k:'entsch',p:'Kluge Entscheidung',m:'Falsche Entscheidung'}];
 const ACT_G=[{k:'parade',p:'Starke Parade',m:'Haltbarer Gegentreffer'},{k:'fang',p:'Sicher gefangen',m:'Abprallen lassen'},{k:'raus',p:'Gut herausgelaufen',m:'Falsch herausgelaufen'},{k:'stell',p:'Gut positioniert',m:'Falsch positioniert'},{k:'eroeff',p:'Abwurf/Abstoß angekommen',m:'Abwurf/Abstoß zum Gegner'}];
-const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5},dribb:{dribb:1,technik:1},schuss:{technik:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
+const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5},dribb:{dribb:1,technik:1},schuss:{technik:1,abschluss:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
 const PASS_TESTS=['pass_r','pass_l'];
 const GK_TEST_MAP={tw_fangen:'tw_fang',tw_reaktion:'tw_reak',tw_abwurf:'tw_eroeff'};
 const r1=x=>Math.round(x*10)/10;
-function appVals(pid){
-  const games=slist().filter(s=>s.live&&Array.isArray(s.live.actions)).slice(0,8);
+function appVals(pid,since){
+  const games=slist().filter(s=>s.live&&Array.isArray(s.live.actions)&&(!since||(s.date||'')>=since));
   const agg={};
   games.forEach(s=>s.live.actions.forEach(a=>{if(a.p!==pid||!a.c)return;const m=ACT_MAP[a.c];if(!m)return;for(const[k,w]of Object.entries(m)){const g=agg[k]||(agg[k]={p:0,m:0,n:0});if(a.t==='+')g.p+=w;else g.m+=w;g.n++;}}));
   const out={};
@@ -722,7 +743,7 @@ function appVals(pid){
     const raw=latestVal('t:'+tk,pid,sessionsWith('t:'+tk));if(!isNum(raw))continue;const t=1+Math.min(10,raw)/10*4;
     if(out[rk])out[rk]={v:(out[rk].v+t)/2,n:out[rk].n,src:'Spiele + Tests'};else out[rk]={v:t,n:null,src:'Tests'};
   }
-  const fk=['spielv','frei','zweik','pass','dribb','ueber','mut','technik','tempo','gewandt','kraft','ausdauer'].filter(k=>out[k]);
+  const fk=['spielv','frei','zweik','pass','dribb','ueber','mut','abschluss','technik','tempo','gewandt','kraft','ausdauer'].filter(k=>out[k]);
   out._gesamt=fk.length?{v:avg(fk.map(k=>out[k].v)),n:fk.length}:null;
   const gk=GK_RATINGS.map(r=>r.k).filter(k=>out[k]);
   out._tw=gk.length?{v:avg(gk.map(k=>out[k].v)),n:gk.length}:null;
@@ -749,7 +770,7 @@ function cmpCard(pid){
   if(only.length)h+=`<div class="lbl2">Nur App</div>`+only.map(([k,n])=>row(n,null,AV[k].v,AV[k])).join('');
   const gkT=GK_RATINGS.map(r=>T(r.k));
   if(gkT.some(isNum)||AV._tw){const gt=gkT.filter(isNum);h+=`<div class="lbl2">Torwart</div>`+row('Torwart gesamt',gt.length?avg(gt):null,AV._tw?AV._tw.v:null,null,true)+GK_RATINGS.map((r,i)=>row(r.n,gkT[i],AV[r.k]?.v,AV[r.k]||{n:0,src:''})).join('');}
-  h+=`<details style="margin-top:8px"><summary class="sub">So rechnet die App</summary><div class="wt">Jede kategorisierte Plus-/Minus-Aktion der letzten 8 Live-Spiele zählt für die passenden Bereiche (z. B. Toller Pass → Übersicht und Technik). Wert = 3 + 2 × (Plus − Minus) / (Plus + Minus + 4): Mit wenigen Aktionen bleibt er nahe 3, erst mit mehr Aktionen bewegt er sich Richtung 1 oder 5. Technik kommt zusätzlich aus den Testtagen; die Athletik (Schnelligkeit = Sprints, Dynamik = Slalom + Sprung, Ausdauer = Pendellauf) nur aus den Testtagen (3 = Teamschnitt). ⚠ = Trainer und App liegen mindestens 1 Punkt auseinander (ab 5 Aktionen). „Gesamt“ der App enthält auch die Athletik, deins nur deine Einschätzung.</div></details></div>`;
+  h+=`<details style="margin-top:8px"><summary class="sub">So rechnet die App</summary><div class="wt">Jede kategorisierte Plus-/Minus-Aktion aus Live-Spielen (im gewählten Zeitraum) zählt für die passenden Bereiche (z. B. Toller Pass → Übersicht und Technik). Wert = 3 + 2 × (Plus − Minus) / (Plus + Minus + 4): Mit wenigen Aktionen bleibt er nahe 3, erst mit mehr Aktionen bewegt er sich Richtung 1 oder 5. Technik kommt zusätzlich aus den Testtagen; die Athletik (Schnelligkeit = Sprints, Dynamik = Slalom + Sprung, Ausdauer = Pendellauf) nur aus den Testtagen (3 = Teamschnitt). ⚠ = Trainer und App liegen mindestens 1 Punkt auseinander (ab 5 Aktionen). „Gesamt“ der App enthält auch die Athletik, deins nur deine Einschätzung.</div></details></div>`;
   return h;
 }
 function vActs(s){
@@ -790,7 +811,7 @@ const FOCUS={
   pass:{n:'Passspiel',r:['pass'],ex:[['Passdreieck mit Nachlaufen','3 Hütchen im Dreieck (8 m), 3–4 Kinder. Passen und dem Ball hinterherlaufen; nach 2 Minuten Richtung wechseln, dann nur mit dem schwachen Fuß.','Standbein neben den Ball, mit der Innenseite spielen.'],['4 gegen 2 im Quadrat','12 × 12 m. Vier Kinder halten den Ball gegen zwei Jäger, wer den Fehlpass spielt, wird Jäger.','Vor dem Pass schauen, Kopf hoch.']]},
   mut:{n:'Mut',r:['mut'],ex:[['Mutiges 1 gegen 1','Angreifer mit Ball gegen Verteidiger auf einer Linie. Ein Punkt zählt nur, wenn der Angreifer ins Dribbling geht statt zurückzuspielen.','Den Versuch loben, nicht nur den Erfolg.'],['Wer traut sich?','Spielform 3 gegen 3: Ein gewonnener Zweikampf oder ein mutiger Torschuss bringt einen Extrapunkt.','Fehler nach mutigen Aktionen nie kritisieren.']]},
   dribb:{n:'Dribbling',r:['dribb'],ex:[['Hütchenwald','Viele Hütchen in 20 × 20 m, jedes Kind mit Ball. Auf Zuruf: Richtungswechsel, Sohle, Übersteiger.','Kleine Kontakte, Ball eng am Fuß.'],['1 gegen 1 auf zwei Minitore','10 × 15 m, je ein Minitor pro Seite, du spielst den Ball ein.','Auf den Gegner zudribbeln, nach der Finte Tempo machen.']]},
-  schuss:{n:'Torabschluss',r:[],ex:[['Dribbling und Abschluss','Zwei Gruppen, Slalom durch 4 Hütchen, dann Schuss aus 10 m. Punkte für die Ecken.','Vor dem Schuss zum Tor schauen, mit dem Spann.'],['2 gegen 1 aufs Tor','Zwei Angreifer gegen einen Verteidiger plus Torwart.','Abschluss suchen, nicht zu lange dribbeln.']]},
+  schuss:{n:'Torabschluss',r:['abschluss'],ex:[['Dribbling und Abschluss','Zwei Gruppen, Slalom durch 4 Hütchen, dann Schuss aus 10 m. Punkte für die Ecken.','Vor dem Schuss zum Tor schauen, mit dem Spann.'],['2 gegen 1 aufs Tor','Zwei Angreifer gegen einen Verteidiger plus Torwart.','Abschluss suchen, nicht zu lange dribbeln.']]},
   lauf:{n:'Freilaufen & Anbieten',r:['frei'],ex:[['Funiño 3 gegen 3','25 × 20 m, zwei Minitore pro Grundlinie.','In die freie Seite laufen, Abstand zum Mitspieler halten.'],['Pass und geh','Viereck aus 4 Hütchen; nach dem Pass sofort zum nächsten freien Hütchen sprinten.','Direkt nach dem Pass loslaufen.']]},
   zweik:{n:'Zweikampf',r:['zweik'],ex:[['Zweikampf-Start','Zwei Kinder 5 m vom Ball entfernt, auf Signal zum Ball, dann 1 gegen 1 auf Minitore.','Körper zwischen Gegner und Ball bringen.'],['König der Insel','Alle dribbeln im Kreis und versuchen, anderen den Ball rauszuspielen, ohne den eigenen zu verlieren.','Seitlich stellen, nicht anspringen.']]},
   entsch:{n:'Spielverständnis',r:['spielv'],ex:[['3 gegen 3 auf je zwei Tore','Ist ein Tor zugestellt, wird auf das andere verlagert.','Kopf hoch, die freie Seite erkennen.'],['Überzahl-Wellen 3 gegen 2','Angriffe in Wellen, die Verteidiger wechseln regelmäßig.','Pass oder Dribbling – wo ist Platz?']]},
@@ -819,8 +840,8 @@ function focusCard(){
   const top=fs.slice(0,3);
   return `<details class="card"><summary><b>🎯 Trainingsschwerpunkte:</b> ${top.map(f=>f.F.n).join(', ')}</summary><div class="sub" style="margin:6px 0">Die schwächsten Team-Bereiche aus deinen Einschätzungen und den Live-Aktionen der letzten 4 Spiele. Die Übungen sind Vorschläge – pass sie an euer Training an.</div>${top.map(f=>`<div class="focus"><div class="row between"><b>${f.F.n}</b><span class="pill">${fnum(r1(f.v))} / 5</span></div><div class="sub">${f.basis.join(' · ')}${f.kids.length?` · besonders fördern: ${f.kids.map(x=>esc(short(x.p.id))).join(', ')}`:''}</div>${f.F.ex.map(e=>`<div class="ex"><b>${esc(e[0])}</b><div>${esc(e[1])}</div><div class="sub">Worauf achten: ${esc(e[2])}</div></div>`).join('')}</div>`).join('')}</details>`;
 }
-const STRENGTH_TXT={spielv:'Du verstehst das Spiel richtig gut und weißt oft schon vorher, wohin der Ball muss.',frei:'Du bietest dich super an und läufst dich clever frei.',zweik:'Im Zweikampf bist du stark und gibst nicht auf.',ueber:'Du hast den Überblick und siehst deine Mitspieler.',mut:'Du bist mutig – im Zweikampf, im Dribbling und wenn es drauf ankommt.',pass:'Deine Pässe kommen an – du spielst richtig gut ab.',dribb:'Du dribbelst richtig stark und hast den Ball eng am Fuß.',komm:'Du redest mit deinen Mitspielern und hilfst dem Team.',technik:'Du hast eine tolle Ballbehandlung.',tempo:'Du bist richtig schnell!',gewandt:'Du bist super wendig, flink und hast einen starken Antritt.',kraft:'Du hast eine starke Sprungkraft.',ausdauer:'Du hast eine Riesen-Ausdauer und läufst bis zum Schluss.',torwart:'Im Tor kann sich das Team auf dich verlassen.'};
-const STRENGTH_NAME={spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',ueber:'Überblick',mut:'Mut',pass:'Passspiel',dribb:'Dribbling',komm:'Teamgeist & Reden',technik:'Technik',tempo:'Schnelligkeit',gewandt:'Dynamik',kraft:'Sprungkraft',ausdauer:'Ausdauer',torwart:'Torwart'};
+const STRENGTH_TXT={spielv:'Du verstehst das Spiel richtig gut und weißt oft schon vorher, wohin der Ball muss.',frei:'Du bietest dich super an und läufst dich clever frei.',zweik:'Im Zweikampf bist du stark und gibst nicht auf.',ueber:'Du hast den Überblick und siehst deine Mitspieler.',mut:'Du bist mutig – im Zweikampf, im Dribbling und wenn es drauf ankommt.',pass:'Deine Pässe kommen an – du spielst richtig gut ab.',dribb:'Du dribbelst richtig stark und hast den Ball eng am Fuß.',komm:'Du redest mit deinen Mitspielern und hilfst dem Team.',abschluss:'Vor dem Tor bist du eiskalt und triffst richtig gut.',technik:'Du hast eine tolle Ballbehandlung.',tempo:'Du bist richtig schnell!',gewandt:'Du bist super wendig, flink und hast einen starken Antritt.',kraft:'Du hast eine starke Sprungkraft.',ausdauer:'Du hast eine Riesen-Ausdauer und läufst bis zum Schluss.',torwart:'Im Tor kann sich das Team auf dich verlassen.'};
+const STRENGTH_NAME={spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',ueber:'Überblick',mut:'Mut',pass:'Passspiel',dribb:'Dribbling',komm:'Teamgeist & Reden',abschluss:'Abschluss',technik:'Technik',tempo:'Schnelligkeit',gewandt:'Dynamik',kraft:'Sprungkraft',ausdauer:'Ausdauer',torwart:'Torwart'};
 function vStrength(){
   const pid=S.playerId,p=S.players[pid];if(!p)return `<div class="empty">Spieler nicht gefunden.</div>`;
   const AV=appVals(pid);const T=k=>latestVal('r:'+k,pid,sessionsWith('r:'+k));
@@ -853,6 +874,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:33,items:['<b>Potenzial &amp; Form:</b> Potenzial = alle Werte der Saison, Form = die letzten 4, 6 oder 8 Wochen. Aufstellung und Ranglisten rechnen standardmäßig mit dem Mittelwert (Mix), umschaltbar. Im Spielerprofil stehen beide nebeneinander.','Gewichtung angepasst: Im Mittelfeld zählt Passspiel mehr, im Sturm zählt der <b>Abschluss</b> mit (10 %).','Neue Kategorie <b>Abschluss / Torschuss</b> in der Trainereinschätzung. Bisherige Bewertungen bleiben, du kannst Abschluss einfach nachtragen. Die App rechnet ihn zusätzlich aus „Guter Abschluss“ und Toren.']},
  {v:32,items:['Aufstellung: Unter dem Feld zeigt „🧤 Torwart“, woher der Torwart-Wert kommt (welche Bewertung, welche Einträge) und warum das Kind im Tor steht.']},
  {v:31,items:['<b>Wechselvorschlag</b> im Live-Spiel: Die App schlägt vor, wer als Nächstes reinkommt – nach Spielzeit und passender Position. Ein Tipp wechselt.','<b>Saisonbericht pro Kind</b> als PDF (Einstellungen): Spiele, Minuten, Tore, Stärken, Entwicklung und Ziele – ideal fürs Elterngespräch, auch für archivierte Saisons.','Nach „Spiel beenden“ bietet die App direkt an, eine <b>Sicherung</b> zu speichern.']},
  {v:30,items:['Im <b>Kader</b> pro Kind jetzt auch <b>Spielweise</b> (offensiv, ausgewogen, defensiv) und <b>Positionstreue</b> (hoch, mittel, gering). Der Aufstellungsvorschlag berücksichtigt das – z. B. Abzug für einen offensiven Verteidiger, der seine Position oft verlässt.','Aufstellung zeigt, aus welchen Bewertungen der Torwart-Wert stammt.']},
@@ -878,9 +900,9 @@ function whatsNew(all){
 const GUIDE=[
  ['Erste Schritte',`<ol class="st"><li><b>Mannschaft benennen:</b> oben auf den Mannschaftsnamen (z. B. „U10 ▾“) tippen. Dort legst du auch weitere Mannschaften an.</li><li><b>Kader anlegen:</b> Reiter <b>Kader</b> → „+ Spieler“. Vornamen reichen. Optional: Spielweise und Positionstreue – beides fließt in die Aufstellung ein.</li><li><b>Daten sammeln:</b> Testtag, Trainereinschätzung oder direkt ein Live-Spiel.</li><li><b>Sichern:</b> Einstellungen oder Kader → „Sicherung speichern“ → z. B. iCloud Drive.</li></ol>`],
  ['Live-Erfassung im Spiel',`<ol class="st"><li><b>Aufstellung</b> vorbereiten (Spielform, Formation, Torwart, wer ist da) und per Antippen anpassen. Darunter die <b>Spielzeit-Einteilung</b> wählen: durchgehend, 2 Halbzeiten oder 4 Viertel, Minuten pro Abschnitt. Dann „▶ Live mit dieser Aufstellung“.</li><li><b>Anpfiff</b> startet die Uhr, „Pause“ hält sie an. Sie läuft weiter, auch wenn das Handy gesperrt ist.</li><li><b>Halbzeit/Viertel:</b> Ist die Zeit um, wird die Uhr rot und zeigt die Nachspielzeit. „Halbzeit beenden“ stoppt die Uhr, danach „2. Halbzeit anpfeifen“. Am Ende „Abpfiff“.</li><li><b>Spielminuten</b> wie im Fußball: Nachspielzeit als „15+1“, das 2. Viertel beginnt bei 16′.</li><li><b>Plus/Minus</b> unter jedem Spieler. Danach 5 Sekunden Zeit für eine Kategorie (z. B. „Toller Pass“) – oder „Später“.</li><li><b>Tor</b> zählt sofort, danach 7 Sekunden den Torschützen antippen. Der Torschütze bekommt automatisch ein Plus „Guter Abschluss“ (abschaltbar unter „Optionen“). <b>Gegentor</b> mit einem Tipp.</li><li><b>Karten:</b> „Karte“ antippen, Gelb, Gelb-Rot oder Rot wählen, dann den Spieler. Die zweite Gelbe wird automatisch Gelb-Rot. Platzverweise verlassen das Feld.</li><li><b>Wechseln:</b> Spieler antippen (leuchtet), dann Bankspieler = Wechsel oder Feldspieler = Positionstausch. Ausgewechselte Kinder können beliebig oft zurück – alle Einsätze werden addiert.</li><li><b>💡 Wechselvorschlag:</b> Ab Minute 3 schlägt die App über der Bank bis zu zwei Wechsel vor (wenig gespielt rein, lange gespielt raus, passende Position). Antippen = Wechsel.</li><li><b>Spielzeit-Ampel:</b> grün im Ziel, orange knapp, rot zu wenig. Das Ziel, die Formation und „Tor = Plus“ stellst du unter <b>Optionen</b> ein. Die Bank ist nach Spielzeit sortiert. Unter „Spielzeiten“ siehst du jeden Einsatz.</li><li><b>↶</b> (neben „Halbzeit beenden“) nimmt die letzte Aktion zurück – auch Tore, Karten, Wechsel und das Ende eines Abschnitts.</li><li><b>Spiel beenden &amp; speichern:</b> Ergebnis ist eingetragen. Die App bietet direkt an, eine Sicherung zu speichern. Danach bewerten, unter „Aktionen“ offene Kategorien und Torschützen zuordnen, unter „Verlauf“ den Spielverlauf ansehen.</li></ol>`],
- ['Bewertung',`<ul class="dot"><li><b>⏱ Testtag:</b> nur messen. Tests auswählen, Anleitung beachten, Zeiten mit der Stoppuhr übernehmen (der bessere Versuch bleibt).</li><li><b>📝 Trainereinschätzung:</b> 1–5 für Spielverständnis, Passspiel, Dribbling, Mut, Athletik u. v. m., optional Torwart. Dazu Ziele und Notiz.</li><li><b>⚽ Spiel:</b> entsteht aus dem Live-Spiel oder über „+ Spiel“. Danach die Kinder bewerten.</li><li>Es zählt der Schnitt der letzten 3 Bewertungen je Kind.</li></ul>`],
- ['Aufstellung',`<ul class="dot"><li>„Stärkste“ = höchste Gesamtstärke, „Ausgewogen“ = keine Schwachstelle.</li><li>Spielweise und Positionstreue aus dem Kader geben Zu- oder Abschläge je Position (z. B. offensiver Verteidiger mit geringer Positionstreue: −0,5 in der Abwehr).</li><li><b>Werte aus:</b> „Trainer“ = deine Einschätzung und Messwerte, „App“ = Werte aus Live-Aktionen und Testtagen, „Mix“ = Mittelwert. Gilt auch für die Ranglisten.</li><li>Torwart fest wählen oder „Automatisch“. „🧤 Torwart“ zeigt, aus welchen Bewertungen der Torwart-Wert stammt und warum das Kind im Tor steht.</li><li>Spieler antippen, dann Ziel antippen = eigene Aufstellung. Sie bleibt gespeichert.</li></ul>`],
- ['Profil, Ranglisten &amp; Stärkenkarte',`<ul class="dot"><li><b>Profil:</b> Stärkenprofil, Entwicklung der Messwerte, Trainer vs. App, Live-Bilanz, Ziele.</li><li><b>Trainer vs. App:</b> deine Einschätzung neben dem Wert aus Tests und Spielen. ⚠ = deutliche Abweichung.</li><li><b>Ranglisten:</b> nur für dich. Bei Einschätzungs-Kategorien wählst du Trainer, App oder Mix. Zum Zeigen eignet sich die Fortschritts-Rangliste.</li><li><b>Saisonbericht</b> (Einstellungen): pro Kind ein PDF mit Entwicklung, Stärken, Spielminuten und Zielen fürs Elterngespräch – auch für archivierte Saisons.</li><li><b>Stärkenkarte:</b> kindgerecht, ohne Ranglisten und Minuspunkte – per Screenshot teilen.</li></ul>`],
+ ['Bewertung',`<ul class="dot"><li><b>⏱ Testtag:</b> nur messen. Tests auswählen, Anleitung beachten, Zeiten mit der Stoppuhr übernehmen (der bessere Versuch bleibt).</li><li><b>📝 Trainereinschätzung:</b> 1–5 für Spielverständnis, Passspiel, Dribbling, Mut, Abschluss, Athletik u. v. m., optional Torwart. Dazu Ziele und Notiz.</li><li><b>⚽ Spiel:</b> entsteht aus dem Live-Spiel oder über „+ Spiel“. Danach die Kinder bewerten.</li><li>Es zählt der Schnitt der letzten 3 Bewertungen je Kind.</li></ul>`],
+ ['Aufstellung',`<ul class="dot"><li>„Stärkste“ = höchste Gesamtstärke, „Ausgewogen“ = keine Schwachstelle.</li><li><b>Zeitraum:</b> Potenzial (ganze Saison), Form (letzte 4/6/8 Wochen) oder Mix (Standard). Gilt auch für die Ranglisten.</li><li>Spielweise und Positionstreue aus dem Kader geben Zu- oder Abschläge je Position (z. B. offensiver Verteidiger mit geringer Positionstreue: −0,5 in der Abwehr).</li><li><b>Werte aus:</b> „Trainer“ = deine Einschätzung und Messwerte, „App“ = Werte aus Live-Aktionen und Testtagen, „Mix“ = Mittelwert. Gilt auch für die Ranglisten.</li><li>Torwart fest wählen oder „Automatisch“. „🧤 Torwart“ zeigt, aus welchen Bewertungen der Torwart-Wert stammt und warum das Kind im Tor steht.</li><li>Spieler antippen, dann Ziel antippen = eigene Aufstellung. Sie bleibt gespeichert.</li></ul>`],
+ ['Profil, Ranglisten &amp; Stärkenkarte',`<ul class="dot"><li><b>Profil:</b> Stärkenprofil, Potenzial &amp; Form (▲/▼ = gerade über/unter Saisonniveau), Entwicklung der Messwerte, Trainer vs. App, Live-Bilanz, Ziele.</li><li><b>Trainer vs. App:</b> deine Einschätzung neben dem Wert aus Tests und Spielen. ⚠ = deutliche Abweichung.</li><li><b>Ranglisten:</b> nur für dich. Bei Einschätzungs-Kategorien wählst du Trainer, App oder Mix. Zum Zeigen eignet sich die Fortschritts-Rangliste.</li><li><b>Saisonbericht</b> (Einstellungen): pro Kind ein PDF mit Entwicklung, Stärken, Spielminuten und Zielen fürs Elterngespräch – auch für archivierte Saisons.</li><li><b>Stärkenkarte:</b> kindgerecht, ohne Ranglisten und Minuspunkte – per Screenshot teilen.</li></ul>`],
  ['Co-Trainer &amp; Datensicherung',`<ul class="dot"><li>Alle Daten liegen nur auf diesem Gerät – kein Konto, keine Cloud.</li><li>Gleicher Kader für den Co-Trainer: „Sicherung speichern“, Datei schicken, beim Co-Trainer „Sicherung einlesen“.</li><li>Gegenseitig eingelesene Sicherungen ergänzen fehlende Daten – gelöscht wird nichts.</li><li><b>Saison-Archiv</b> (Einstellungen): „Saison abschließen“ verschiebt alte Bewertungen ins Archiv und speichert eine Archiv-Datei. „Ansehen“ zeigt Ranglisten und Profile der alten Saison, „Zurückholen“ macht es rückgängig.</li></ul>`],
  ['Datenschutz',`<ul class="dot"><li>Vornamen oder Kürzel verwenden, Handy mit Code sperren.</li><li>Spielerprofil-PDFs und Sicherungen nicht öffentlich teilen.</li><li>Empfehlung: Eltern informieren, dass du zur Förderung Trainingsdaten notierst.</li></ul>`]
 ];

@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 32, 08.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 33, 08.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -49,7 +49,9 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 
 ## Bewertungslogik
 - Einschätzung 1–5: Spielverständnis, Freilaufen, Zweikampf, Passspiel, Dribbling, Übersicht, Mut, Kommunikation; Athletik (Schnelligkeit, Dynamik, Ausdauer) **nur in der Trainereinschätzung**; Torwart-Kategorien optional
-- Es zählt der Schnitt der letzten 3 Bewertungen je Kind; Testwerte relativ zum Teamschnitt (3 = Schnitt)
+- Zeitraum (`cfg.per`, Standard `mix`, Wunsch des Trainers): Potenzial = alle Werte der Saison (Einschätzungen: Schnitt, Tests/Bereiche: Bestwert, App: alle Spiele), Form = letzte `cfg.formWeeks` (4/6/8, Standard 6) Wochen (Tests: letzter Wert), Mix = Mittelwert; gilt für Aufstellung, Ranglisten, Profil-Karte „Potenzial & Form“. „Trainer vs. App“ im Profil nutzt weiter den Schnitt der letzten 3 Bewertungen
+- Testwerte relativ zum Teamschnitt (3 = Schnitt)
+- Gewichte V33: Mittelfeld Passspiel 20 %, Ausdauer 15 %; Sturm mit `r:abschluss` 10 % (Trainer-Einschätzung „Abschluss / Torschuss“, seit V33 in RATINGS; App-Wert aus „Guter Abschluss“/Toren; zählt nicht für das ✓ „fertig bewertet“, damit alte Bewertungen vollständig bleiben), Technik 15 %, Freilaufen 15 %
 - App-Wert aus Live-Aktionen der letzten 8 Spiele: 3 + 2 × (Plus − Minus) / (Plus + Minus + 4); Abweichung Trainer vs. App wird ab 5 Aktionen markiert
 - Aufstellung: Zu-/Abschläge aus Spielweise (offensiv: Sturm +0,2/Abwehr −0,2, defensiv umgekehrt, ausgewogen: Mittelfeld +0,1) und Positionstreue (gering: Abwehr −0,3/Mittelfeld −0,1, hoch: Abwehr +0,1/Mittelfeld +0,05)
 - Werte-Quelle: Trainer = Einschätzung + Messwerte (wie bisher); App = Werte aus „Trainer vs. App“; Mix = Mittelwert, fehlt einer, zählt der andere. Was die App nicht misst (Mut, Kommunikation), kommt immer vom Trainer
