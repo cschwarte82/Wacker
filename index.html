@@ -267,7 +267,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='26';
+const APP_VERSION='27';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -807,7 +807,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
- {v:26,items:['Fehlerbehebungen im Live-Spiel: Kein Spieler kann mehr doppelt (Feld und Bank) auftauchen, auch nach mehrfachem „Zurück“.','„↶ Zurück“ nimmt jetzt auch ein versehentliches „Halbzeit beenden“ oder den Abpfiff zurück.','Anleitung in den Einstellungen aktualisiert.']},
+ {v:26,items:['Spielverlauf wird immer exakt nach Spielzeit sortiert.','Fehlerbehebungen im Live-Spiel: Kein Spieler kann mehr doppelt (Feld und Bank) auftauchen, auch nach mehrfachem „Zurück“.','„↶ Zurück“ nimmt jetzt auch ein versehentliches „Halbzeit beenden“ oder den Abpfiff zurück.','Anleitung in den Einstellungen aktualisiert.']},
  {v:25,items:['Spielminuten wie im Fußball: Nachspielzeit als <b>„15+1“</b>, der nächste Abschnitt beginnt immer bei der richtigen Minute (z. B. <b>16′</b>).']},
  {v:24,items:['<b>Spielzeit-Einteilung</b> vor dem Spiel: durchgehend, 2 Halbzeiten oder 4 Viertel, Minuten frei wählbar. Halbzeit/Viertel beenden, Nachspielzeit-Anzeige.','<b>Wieder einwechseln</b> klappt beliebig oft – alle Einsätze werden mit Minuten notiert und die Spielzeit addiert.']},
  {v:23,items:['Bei Toren, Karten und Wechseln wird die <b>Spielminute</b> notiert. Neuer <b>Spielverlauf</b> im Live-Spiel und im gespeicherten Spiel.','Neuer Bereich <b>Einstellungen</b> (⚙︎ oben rechts): Spielerprofile als PDF, aktuelle Anleitung, Datensicherung.','„Was ist neu“ erscheint nach jedem Update einmal automatisch.']},
@@ -922,7 +922,7 @@ const fmtP=(ps,fmt,starts)=>ps.map(([a,b])=>`${minLbl(fmt,starts,a).ml}–${b==n
 const PART_N=n=>n===4?'Viertel':n===2?'Halbzeit':'Spielzeit';
 function minLbl(fmt,starts,sec){fmt=fmt||{parts:1,len:40};starts=starts&&starts.length?starts:[0];const len=fmt.len*60;let p=0;for(let i=0;i<starts.length;i++)if(sec>=starts[i])p=i;const s=Math.max(0,sec-starts[p]);const base=p*fmt.len;
   if(s<len||p>=fmt.parts){const m=base+Math.floor(s/60)+1;return{at:m,ml:m+"'"};}return{at:base+fmt.len,ml:`${base+fmt.len}+${Math.floor((s-len)/60)+1}'`};}
-function gameMin(L){return minLbl(liveFmt(L),L.partStarts,liveSecs(L));}
+function gameMin(L){const sec=Math.round(liveSecs(L));return{...minLbl(liveFmt(L),L.partStarts,sec),sec};}
 const mlOf=e=>e.ml||(isNum(e.at)?e.at+"'":'');
 function liveFmt(L){return L.fmt||{parts:1,len:40};}
 function partInfo(L){const F=liveFmt(L);const part=L.part||1;const ps=L.partStart||0;const inPart=Math.max(0,liveSecs(L)-ps);return{F,part,inPart,over:inPart-F.len*60,last:part>=F.parts,done:!!L.finished};}
@@ -951,11 +951,11 @@ function gameBal(lv,pid){const g=(lv&&lv.goals)||[];let tore=0,gf=0,ga=0;g.forEa
 function score(L){const g=L.goals||[];return{gf:g.filter(e=>e.t==='goal').length,ga:g.filter(e=>e.t==='conc').length};}
 function tlHtml(goals,cards,subs){
   const ev=[];let i=0;
-  (goals||[]).forEach(g=>ev.push({at:g.at||0,ts:g.ts||0,i:i++,k:g.t,g}));
-  (cards||[]).forEach(c=>ev.push({at:c.at||0,ts:c.ts||0,i:i++,k:'card',c}));
-  (subs||[]).forEach(s=>ev.push({at:s.at||0,ts:s.ts||0,i:i++,k:'sub',s}));
+  (goals||[]).forEach(g=>ev.push({at:g.at||0,sec:g.sec,ts:g.ts||0,i:i++,k:g.t,g}));
+  (cards||[]).forEach(c=>ev.push({at:c.at||0,sec:c.sec,ts:c.ts||0,i:i++,k:'card',c}));
+  (subs||[]).forEach(s=>ev.push({at:s.at||0,sec:s.sec,ts:s.ts||0,i:i++,k:'sub',s}));
   if(!ev.length)return'<div class="sub">Noch keine Ereignisse.</div>';
-  ev.sort((a,b)=>(a.ts&&b.ts)?a.ts-b.ts:(a.at-b.at||a.i-b.i));let gf=0,ga=0;
+  ev.sort((a,b)=>(isNum(a.sec)&&isNum(b.sec)&&a.sec!==b.sec)?a.sec-b.sec:(a.ts&&b.ts&&a.ts!==b.ts)?a.ts-b.ts:(a.at-b.at||a.i-b.i));let gf=0,ga=0;
   return ev.map(e=>{let t='';
     if(e.k==='goal'){gf++;t=`<b>⚽ ${gf}:${ga}</b> ${e.g.p?esc(short(e.g.p)):e.g.og?'Eigentor Gegner':'Torschütze offen'}`;}
     else if(e.k==='conc'){ga++;t=`<b class="neg">${gf}:${ga}</b> Gegentor`;}
@@ -994,7 +994,7 @@ function vLive(){
   const inGame=new Set([...liveField(L),...L.bench,...(L.sentOff||[])]);const others=plist().filter(p=>!inGame.has(p.id));
   if(others.length)h+=`<details class="card"><summary>Weitere Spieler zur Bank (${others.length})</summary><div class="chips">${others.map(p=>`<button class="chip" onclick="A.liveAddBench('${p.id}')">+ ${esc(short(p.id))}</button>`).join('')}</div></details>`;
   {const all=[...liveField(L),...L.bench,...(L.sentOff||[])].filter(p=>periodsOf(L,p).length).sort((a,b)=>liveSecs(L,b)-liveSecs(L,a));if(all.length)h+=`<details class="card"><summary><b>Spielzeiten</b> <small class="sub">mehrere Einsätze werden addiert</small></summary><div style="margin-top:6px">${all.map(p=>`<div class="tl"><span class="tlm">${Math.floor(liveSecs(L,p)/60)}'</span><span><b>${esc(short(p))}</b> <span class="sub">${fmtP(periodsOf(L,p),liveFmt(L),L.partStarts)}</span></span></div>`).join('')}</div></details>`;}
-  {const subs=L.log.filter(e=>e.t==='sub').map(e=>({at:e.at,ml:e.ml,in:e.inP,out:e.outP,ts:e.ts}));const n=(L.goals||[]).length+(L.cards||[]).length+subs.length;h+=`<details class="card" ${S.tlOpen?'open':''} ontoggle="S.tlOpen=this.open"><summary><b>Spielverlauf</b> <small class="sub">(${n})</small></summary><div style="margin-top:6px">${tlHtml(L.goals,L.cards,subs)}</div></details>`;}
+  {const subs=L.log.filter(e=>e.t==='sub').map(e=>({at:e.at,ml:e.ml,sec:e.sec,in:e.inP,out:e.outP,ts:e.ts}));const n=(L.goals||[]).length+(L.cards||[]).length+subs.length;h+=`<details class="card" ${S.tlOpen?'open':''} ontoggle="S.tlOpen=this.open"><summary><b>Spielverlauf</b> <small class="sub">(${n})</small></summary><div style="margin-top:6px">${tlHtml(L.goals,L.cards,subs)}</div></details>`;}
   h+=`<div class="row gap" style="margin-top:14px"><button class="btn pri grow" onclick="A.liveEndModal()">Spiel beenden &amp; speichern</button><button class="btn danger" onclick="A.liveAskDiscard()">Verwerfen</button></div><div class="sub" style="margin-top:6px">Die Uhr läuft auch weiter, wenn du die App kurz schließt. Spielminuten zählen nur, solange die Uhr läuft.</div>`;
   return h;
 }
@@ -1117,7 +1117,7 @@ const A={
     const mins={};Object.entries(L.mins).forEach(([p,s])=>{if(s>=1)mins[p]=Math.round(s/60);});
     const periods={};Object.entries(L.per||{}).forEach(([p,ps])=>{const v=ps.filter(([a,b])=>b-a>=10);if(v.length)periods[p]=v;});
     const id=uid('s');const title=($('#m_title').value||'').trim()||'Spiel';
-    const doc={type:'game',date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{plus:L.plus,minus:L.minus,mins,periods,fmt:liveFmt(L),n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({t:g.t,p:g.p||null,og:!!g.og,at:g.at,ml:g.ml,on:g.on||[],ts:g.ts||0})),cards:(L.cards||[]).map(c=>({c:c.c,p:c.p,at:c.at,ml:c.ml,ts:c.ts||0})),subs:L.log.filter(e=>e.t==='sub').map(e=>({at:isNum(e.at)?e.at:0,ml:e.ml,in:e.inP,out:e.outP||null,ts:e.ts||0})),partStarts:L.partStarts||[0],actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,ml:e.ml,gk:!!e.gk}))}};
+    const doc={type:'game',date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{plus:L.plus,minus:L.minus,mins,periods,fmt:liveFmt(L),n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({t:g.t,p:g.p||null,og:!!g.og,at:g.at,ml:g.ml,sec:g.sec,on:g.on||[],ts:g.ts||0})),cards:(L.cards||[]).map(c=>({c:c.c,p:c.p,at:c.at,ml:c.ml,sec:c.sec,ts:c.ts||0})),subs:L.log.filter(e=>e.t==='sub').map(e=>({at:isNum(e.at)?e.at:0,ml:e.ml,sec:e.sec,in:e.inP,out:e.outP||null,ts:e.ts||0})),partStarts:L.partStarts||[0],actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,ml:e.ml,gk:!!e.gk}))}};
     A.sheetHide();
     S.live=null;S.liveSel=null;saveDoc('sessions',id,doc);closeModal();A.openSession(id);toast('Spiel gespeichert – jetzt kurz bewerten');
   },
