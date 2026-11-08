@@ -640,6 +640,8 @@ function vLineup(){
   const gkList=here.map(p=>({p,v:gkS(p.id)})).filter(x=>isNum(x.v)).sort((a,b)=>b.v-a.v);
   const kid=L.keeper==='auto'?(gkList[0]?gkList[0].p.id:null):L.keeper;
   h+=`<div class="lbl2">Torwart</div><select class="sel" onchange="A.lu('keeper',this.value||null)"><option value="">– kein fester Torwart –</option><option value="auto" ${L.keeper==='auto'?'selected':''}>Automatisch: bester Torwart${gkList[0]?' ('+esc(short(gkList[0].p.id))+')':' (noch keine Daten)'}</option>${here.map(p=>{const v=gkS(p.id);return `<option value="${p.id}" ${L.keeper===p.id?'selected':''}>${esc(p.name)}${isNum(v)?' · TW '+fnum(Math.round(v*10)/10):''}</option>`;}).join('')}</select>`;
+  if(L.keeper==='auto'&&gkList[0]){const pid=gkList[0].p.id;const src=sessionsWith('a:torwart').filter(x=>isNum(catVal(x,'a:torwart',pid))).slice(0,3);
+    h+=`<div class="sub">Torwart-Wert von ${esc(short(pid))} stammt aus: ${src.map(x=>`<a href="#" onclick="A.openSession('${x.id}');return false">${fdate(x.date)} ${x.type==='game'?'⚽':x.type==='eval'?'📝':'⏱'} ${esc(x.title||'')}</a>`).join(', ')||'App-Werten'}. Falsche Einträge dort entfernen, dann rechnet die App neu.</div>`;}
   const slots=FORMS[L.n][L.form];
   const field=here.filter(p=>p.id!==kid).map(p=>({...p,_pr:profileOf(p.id)}));
   if(field.length<slots.length)return h+`<div class="empty">Für ${L.n} Feldspieler sind nur ${field.length} Kinder ausgewählt.</div>`;
@@ -663,7 +665,7 @@ function vLineup(){
     const f=fitOf(pid,k);return `<div class="slot tap ${f.cov<.5?'est':''} ${isSel('slot',k)?'sel':''}" onclick="A.luTap('slot','${k}')"><b>${esc(S.players[pid].name)}</b><small>${POS[pt].n} ${SIDE[sd]}</small><span class="fit">${fnum(Math.round(f.v*10)/10)}</span></div>`;
   };
   const order=['L','Z','R'];const line=pt=>slots.filter(k=>k[0]===pt).sort((a,b)=>order.indexOf(a[2])-order.indexOf(b[2]));
-  h+=M?`<div class="row between" style="margin-top:12px"><b>✎ Eigene Aufstellung</b><button class="btn sm2" onclick="A.luReset()">Vorschlag wiederherstellen</button></div>`:`<div class="sub" style="margin-top:12px">Tipp: Spieler antippen, dann Ziel antippen – so passt du den Vorschlag selbst an.</div>`;
+  h+=M?`<div class="row between" style="margin-top:12px"><b>✎ Eigene Aufstellung</b><button class="btn sm2" onclick="A.luReset()">Vorschlag wiederherstellen</button></div><div class="sub">Deine eigene Aufstellung bleibt fest – neue Werte ändern sie nicht. „Vorschlag wiederherstellen“ rechnet neu.</div>`:`<div class="sub" style="margin-top:12px">Tipp: Spieler antippen, dann Ziel antippen – so passt du den Vorschlag selbst an.</div>`;
   if(sel)h+=`<div class="sub"><b>Jetzt Ziel antippen:</b> Feldspieler = Positionen tauschen, Wechselspieler = einsetzen. Nochmal antippen = abbrechen.</div>`;
   h+=`<div class="pitch">${['S','M','A'].map(pt=>{const l=line(pt);return l.length?`<div class="prowl">${l.map(card).join('')}</div>`:'';}).join('')}<div class="prowl">${card('TW')}</div></div>`;
   const filled=slots.filter(k=>cur[k]);const vals=filled.map(k=>fitOf(cur[k],k).v);
