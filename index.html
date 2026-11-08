@@ -244,6 +244,7 @@ const TESTS=[
 ];
 const TEST=Object.fromEntries(TESTS.map(t=>[t.k,t]));
 const GK_RATINGS=[{k:'tw_reak',n:'Reaktion'},{k:'tw_fang',n:'Fangen / Ballsicherheit'},{k:'tw_stell',n:'Stellungsspiel'},{k:'tw_raus',n:'Herauslaufen / 1 gegen 1'},{k:'tw_eroeff',n:'Abwurf / Spieleröffnung'},{k:'tw_komm',n:'Kommandos / Mut'}];
+const ATH_RATINGS=[{k:'schnell',n:'Schnelligkeit',app:['tempo']},{k:'dyn',n:'Dynamik / Antritt',app:['gewandt','kraft']},{k:'ausd',n:'Ausdauer',app:['ausdauer']}];
 const RATINGS=[{k:'spielv',n:'Spielverständnis'},{k:'frei',n:'Freilaufen / Anbieten'},{k:'zweik',n:'Zweikampfverhalten'},{k:'dribb',n:'Dribbling'},{k:'ueber',n:'Übersicht'},{k:'mut',n:'Mut'},{k:'komm',n:'Kommunikation'}];
 const AREAS=[{k:'tempo',n:'Tempo'},{k:'gewandt',n:'Gewandtheit'},{k:'kraft',n:'Sprungkraft'},{k:'ausdauer',n:'Ausdauer'},{k:'technik',n:'Technik'},{k:'spiel',n:'Spielverhalten',s:'Spiel'}];
 const TEST_GROUPS=[{k:'tempo',n:'Tempo'},{k:'gewandt',n:'Gewandtheit'},{k:'kraft',n:'Sprungkraft'},{k:'ausdauer',n:'Ausdauer'},{k:'technik',n:'Technik'},{k:'torwart',n:'Torwart'}];
@@ -251,7 +252,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='15';
+const APP_VERSION='16';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -442,6 +443,7 @@ function vKids(s){
   let h=`<div class="kidnav"><button class="btn" onclick="A.kid(-1)" aria-label="Vorheriges Kind">‹</button><select onchange="A.kidSel(this.value)">${ps.map((q,i)=>`<option value="${i}" ${i===S.kidIdx?'selected':''}>${esc(q.name)}${done(q)?' ✓':''}</option>`).join('')}</select><button class="btn" onclick="A.kid(1)" aria-label="Nächstes Kind">›</button></div>`;
   if((p.goals||[]).some(g=>g.status!=='erreicht'))h+=goalsHtml(p.id,true);
   h+=`<div class="card"><div class="lbl">Trainer-Einschätzung <small>1 = noch wenig, 5 = sehr ausgeprägt</small></div>${RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
+  h+=`<div class="card"><div class="lbl">Athletik <small>dein Eindruck, 1–5</small></div>${ATH_RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
   {const gkHas=GK_RATINGS.some(x=>isNum(r[x.k]));h+=`<details class="card" ${gkHas?'open':''}><summary>Torwart-Einschätzung <small class="sub">nur für Kinder, die ins Tor gehen</small></summary><div style="margin-top:8px">${GK_RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div></details>`;}
   if(game&&s.live){const lv=s.live;const b=gameBal(lv,p.id);h+=`<div class="card hint">Live: <b class="pos">+${(lv.plus||{})[p.id]||0}</b> / <b class="neg">−${(lv.minus||{})[p.id]||0}</b> · ${(lv.mins||{})[p.id]||0} Spielminuten${lv.goals?` · ⚽ ${b.tore} · Tore auf dem Feld ${b.gf}:${b.ga}`:''}</div>`;}
   if(ev)h=`<div class="sub" style="margin-bottom:8px">Deine Einschätzung zwischendurch. Nur Kinder bewerten, die du gut beobachten konntest – leer bleibt leer. ${ps.filter(done).length} von ${ps.length} vollständig.</div>`+h;
@@ -454,10 +456,10 @@ function vKids(s){
 }
 function csv(s){
   const ps=plist(true);
-  const lv=s.live;const gk=Object.values(s.ratings||{}).some(r=>r&&GK_RATINGS.some(x=>isNum(r[x.k])));
-  const head=['Name',...s.tests.map(k=>`${TEST[k].n} (${TEST[k].u})`),...(lv?['Plus','Minus','Spielminuten']:[]),...RATINGS.map(r=>r.n),...(gk?GK_RATINGS.map(r=>'TW: '+r.n):[]),'Spaß (1-5)','Notiz'];
+  const lv=s.live;const gk=Object.values(s.ratings||{}).some(r=>r&&GK_RATINGS.some(x=>isNum(r[x.k])));const ath=Object.values(s.ratings||{}).some(r=>r&&ATH_RATINGS.some(x=>isNum(r[x.k])));
+  const head=['Name',...s.tests.map(k=>`${TEST[k].n} (${TEST[k].u})`),...(lv?['Plus','Minus','Spielminuten']:[]),...RATINGS.map(r=>r.n),...(ath?ATH_RATINGS.map(r=>r.n+' (Trainer)'):[]),...(gk?GK_RATINGS.map(r=>'TW: '+r.n):[]),'Spaß (1-5)','Notiz'];
   const rows=[head];
-  ps.filter(p=>hasData(s,p.id)||p.active!==false).forEach(p=>rows.push([p.name,...s.tests.map(k=>fnum(s.results?.[p.id]?.[k])),...(lv?[(lv.plus||{})[p.id]||0,(lv.minus||{})[p.id]||0,(lv.mins||{})[p.id]||0]:[]),...RATINGS.map(r=>s.ratings?.[p.id]?.[r.k]??''),...(gk?GK_RATINGS.map(r=>s.ratings?.[p.id]?.[r.k]??''):[]),s.mood?.[p.id]??'',(s.notes?.[p.id]||'').replace(/\s+/g,' ')]));
+  ps.filter(p=>hasData(s,p.id)||p.active!==false).forEach(p=>rows.push([p.name,...s.tests.map(k=>fnum(s.results?.[p.id]?.[k])),...(lv?[(lv.plus||{})[p.id]||0,(lv.minus||{})[p.id]||0,(lv.mins||{})[p.id]||0]:[]),...RATINGS.map(r=>s.ratings?.[p.id]?.[r.k]??''),...(ath?ATH_RATINGS.map(r=>s.ratings?.[p.id]?.[r.k]??''):[]),...(gk?GK_RATINGS.map(r=>s.ratings?.[p.id]?.[r.k]??''):[]),s.mood?.[p.id]??'',(s.notes?.[p.id]||'').replace(/\s+/g,' ')]));
   return rows.map(r=>r.map(c=>{c=String(c);return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(';')).join('\n');
 }
 function vExport(s){
@@ -491,7 +493,7 @@ function vPlayer(){
     return `<div class="trow"><div><div class="t2">${esc(t.n)}</div><div class="sub">${pts.length}× gemessen${delta}</div></div>${spark(pts,t.lower)}<div class="val">${fnum(last)}<small> ${esc(t.u)}</small></div></div>`;
   }).join('');
   h+=`<div class="card"><div class="lbl">Entwicklung der Messwerte <small>Linie nach oben = besser</small></div>${rows||'<div class="sub">Noch keine Messwerte.</div>'}</div>`;
-  const rrows=RATINGS.map(r=>{const pts=ss.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);if(!pts.length)return'';return `<div class="trow"><div class="t2">${esc(r.n)}</div>${spark(pts,false,1,5)}<div class="val">${pts[pts.length-1]}<small>/5</small></div></div>`;}).join('');
+  const rrows=[...RATINGS,...ATH_RATINGS].map(r=>{const pts=ss.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);if(!pts.length)return'';return `<div class="trow"><div class="t2">${esc(r.n)}</div>${spark(pts,false,1,5)}<div class="val">${pts[pts.length-1]}<small>/5</small></div></div>`;}).join('');
   if(rrows)h+=`<div class="card"><div class="lbl">Trainer-Einschätzung</div>${rrows}</div>`;
   const grows=GK_RATINGS.map(r=>{const pts=ss.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);if(!pts.length)return'';return `<div class="trow"><div class="t2">${esc(r.n)}</div>${spark(pts,false,1,5)}<div class="val">${pts[pts.length-1]}<small>/5</small></div></div>`;}).join('');
   if(grows){const g=latestVal('a:torwart',pid,ss.slice().reverse());h+=`<div class="card"><div class="lbl">Torwart${isNum(g)?` <small>gesamt ${fnum(Math.round(g*10)/10)} / 5</small>`:''}</div>${grows}</div>`;}
@@ -507,7 +509,7 @@ function vPlayer(){
 }
 
 // ---------- Ranglisten ----------
-const CATS=[{g:'Tests',items:TESTS.map(t=>({id:'t:'+t.k,n:t.n}))},{g:'Bereiche (Stärkenprofil)',items:AREAS.map(a=>({id:'a:'+a.k,n:a.n}))},{g:'Trainer-Einschätzung',items:RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Spiele (Live)',items:[{id:'g:tore',n:'Tore'},{id:'g:bil',n:'Tor-Bilanz auf dem Feld'}]},{g:'Torwart',items:[{id:'a:torwart',n:'Torwart gesamt'},...GK_RATINGS.map(r=>({id:'r:'+r.k,n:'TW: '+r.n}))]}];
+const CATS=[{g:'Tests',items:TESTS.map(t=>({id:'t:'+t.k,n:t.n}))},{g:'Bereiche (Stärkenprofil)',items:AREAS.map(a=>({id:'a:'+a.k,n:a.n}))},{g:'Trainer-Einschätzung',items:RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Spiele (Live)',items:[{id:'g:tore',n:'Tore'},{id:'g:bil',n:'Tor-Bilanz auf dem Feld'}]},{g:'Athletik (Trainer)',items:ATH_RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Torwart',items:[{id:'a:torwart',n:'Torwart gesamt'},...GK_RATINGS.map(r=>({id:'r:'+r.k,n:'TW: '+r.n}))]}];
 function catVal(s,cat,pid){const[t,k]=cat.split(':');if(t==='g'){const lv=s.live;if(!lv||!lv.goals)return null;const played=((lv.mins||{})[pid]||0)>0||lv.goals.some(g=>(g.on||[]).includes(pid));if(!played)return null;const b=gameBal(lv,pid);return k==='tore'?b.tore:b.gf-b.ga;}if(t==='t')return s.results?.[pid]?.[k];if(t==='a')return areaScore(s,pid,k);return s.ratings?.[pid]?.[k];}
 function catMeta(cat){const[t,k]=cat.split(':');if(t==='g')return{u:k==='tore'?'Tore':'',lower:false};if(t==='t')return{u:TEST[k].u,lower:!!TEST[k].lower};if(t==='a')return{u:'',lower:false};return{u:'/5',lower:false};}
 function sessionsWith(cat){const ps=plist(true);return slist().filter(s=>ps.some(p=>isNum(catVal(s,cat,p.id))));}
@@ -561,8 +563,8 @@ const POS={
   S:{n:'Sturm',w:{'a:tempo':.2,'a:technik':.2,'a:gewandt':.1,'r:dribb':.15,'r:mut':.15,'r:frei':.2}}
 };
 const SIDE={L:'links',R:'rechts',Z:'zentral'};
-const catName=c=>{const[t,k]=c.split(':');return t==='a'?AREAS.find(a=>a.k===k).n:[...RATINGS,...GK_RATINGS].find(r=>r.k===k).n;};
-function profileOf(pid){const pr={};const keys=new Set();Object.values(POS).forEach(P=>Object.keys(P.w).forEach(c=>keys.add(c)));keys.forEach(c=>{pr[c]=latestVal(c,pid,sessionsWith(c));});return pr;}
+const catName=c=>{const[t,k]=c.split(':');return t==='a'?AREAS.find(a=>a.k===k).n:[...RATINGS,...ATH_RATINGS,...GK_RATINGS].find(r=>r.k===k).n;};
+function profileOf(pid){const pr={};const keys=new Set();Object.values(POS).forEach(P=>Object.keys(P.w).forEach(c=>keys.add(c)));const FB={'a:tempo':'r:schnell','a:ausdauer':'r:ausd','a:kraft':'r:dyn','a:gewandt':'r:dyn'};keys.forEach(c=>{let v=latestVal(c,pid,sessionsWith(c));if(!isNum(v)&&FB[c])v=latestVal(FB[c],pid,sessionsWith(FB[c]));pr[c]=v;});return pr;}
 function posFit(pr,pt){let s=0,w=0;for(const[c,wt]of Object.entries(POS[pt].w)){if(isNum(pr[c])){s+=pr[c]*wt;w+=wt;}}return{v:w?s/w:3,cov:w};}
 function slotFit(p,pr,slot){const[pt,sd]=slot.split('-');const f=posFit(pr,pt);let b=0;if(sd==='L'&&p.foot==='links')b=.15;if(sd==='R'&&p.foot==='rechts')b=.1;if(sd!=='Z'&&p.foot==='beide')b=.1;return{v:f.v+b,cov:f.cov};}
 function bestLineup(slots,players,mode){
@@ -667,17 +669,19 @@ function cmpCard(pid){
     const info=meta?(meta.n!=null?`${meta.n} Aktion${meta.n===1?'':'en'}${meta.src==='Spiele + Tests'?' + Tests':''}`:meta.src):'';
     return `<div class="crow ${flag?'flag':''} ${bold?'big':''}"><div class="cn">${name}${flag?' ⚠':''}<small>${info}${meta&&meta.n!=null&&meta.n<5?' · wenig Daten':''}</small></div><div class="cbars">${bar(t,'t')}${bar(a,'a')}</div><div class="cv"><span class="t">${isNum(t)?fnum(r1(t)):'–'}</span><span class="a">${isNum(a)?fnum(r1(a)):'–'}</span></div></div>`;
   };
-  const tr=RATINGS.map(r=>T(r.k)).filter(isNum);const tG=tr.length?avg(tr):null;
+  const tr=[...RATINGS,...ATH_RATINGS].map(r=>T(r.k)).filter(isNum);const tG=tr.length?avg(tr):null;
   const anyApp=Object.keys(AV).some(k=>!k.startsWith('_'));
   if(!tr.length&&!anyApp)return'';
   let h=`<div class="card"><div class="lbl">Trainer vs. App</div><div class="legend" style="justify-content:flex-start;margin:0 0 6px"><span><i class="lt"></i>Trainer</span><span><i class="la"></i>App (aus Spielen &amp; Testtagen)</span></div>`;
   h+=row('Gesamt',tG,AV._gesamt?AV._gesamt.v:null,null,true);
   h+=RATINGS.map(r=>row(r.n,T(r.k),AV[r.k]?.v,AV[r.k]||{n:0,src:''})).join('');
-  const only=[['technik','Technik'],['tempo','Tempo'],['gewandt','Gewandtheit'],['kraft','Sprungkraft'],['ausdauer','Ausdauer']].filter(([k])=>AV[k]);
+  const athApp=x=>{const vs=x.app.map(k=>AV[k]).filter(Boolean);return vs.length?{v:avg(vs.map(o=>o.v)),n:null,src:'Tests'}:null;};
+  if(ATH_RATINGS.some(x=>isNum(T(x.k))||athApp(x)))h+=`<div class="lbl2">Athletik</div>`+ATH_RATINGS.map(x=>{const a=athApp(x);return row(x.n,T(x.k),a?a.v:null,a);}).join('');
+  const only=[['technik','Technik']].filter(([k])=>AV[k]);
   if(only.length)h+=`<div class="lbl2">Nur App</div>`+only.map(([k,n])=>row(n,null,AV[k].v,AV[k])).join('');
   const gkT=GK_RATINGS.map(r=>T(r.k));
   if(gkT.some(isNum)||AV._tw){const gt=gkT.filter(isNum);h+=`<div class="lbl2">Torwart</div>`+row('Torwart gesamt',gt.length?avg(gt):null,AV._tw?AV._tw.v:null,null,true)+GK_RATINGS.map((r,i)=>row(r.n,gkT[i],AV[r.k]?.v,AV[r.k]||{n:0,src:''})).join('');}
-  h+=`<details style="margin-top:8px"><summary class="sub">So rechnet die App</summary><div class="wt">Jede kategorisierte Plus-/Minus-Aktion der letzten 8 Live-Spiele zählt für die passenden Bereiche (z. B. Toller Pass → Übersicht und Technik). Wert = 3 + 2 × (Plus − Minus) / (Plus + Minus + 4): Mit wenigen Aktionen bleibt er nahe 3, erst mit mehr Aktionen bewegt er sich Richtung 1 oder 5. Tempo, Gewandtheit, Sprungkraft, Ausdauer und Technik kommen zusätzlich aus den Testtagen (3 = Teamschnitt). ⚠ = Trainer und App liegen mindestens 1 Punkt auseinander (ab 5 Aktionen). „Gesamt“ der App enthält auch die Athletik, deins nur deine Einschätzung.</div></details></div>`;
+  h+=`<details style="margin-top:8px"><summary class="sub">So rechnet die App</summary><div class="wt">Jede kategorisierte Plus-/Minus-Aktion der letzten 8 Live-Spiele zählt für die passenden Bereiche (z. B. Toller Pass → Übersicht und Technik). Wert = 3 + 2 × (Plus − Minus) / (Plus + Minus + 4): Mit wenigen Aktionen bleibt er nahe 3, erst mit mehr Aktionen bewegt er sich Richtung 1 oder 5. Technik kommt zusätzlich aus den Testtagen; die Athletik (Schnelligkeit = Sprints, Dynamik = Slalom + Sprung, Ausdauer = Pendellauf) nur aus den Testtagen (3 = Teamschnitt). ⚠ = Trainer und App liegen mindestens 1 Punkt auseinander (ab 5 Aktionen). „Gesamt“ der App enthält auch die Athletik, deins nur deine Einschätzung.</div></details></div>`;
   return h;
 }
 function vActs(s){
@@ -739,14 +743,16 @@ function focusCard(){
   const top=fs.slice(0,3);
   return `<details class="card"><summary><b>🎯 Trainingsschwerpunkte:</b> ${top.map(f=>f.F.n).join(', ')}</summary><div class="sub" style="margin:6px 0">Die schwächsten Team-Bereiche aus deinen Einschätzungen und den Live-Aktionen der letzten 4 Spiele. Die Übungen sind Vorschläge – pass sie an euer Training an.</div>${top.map(f=>`<div class="focus"><div class="row between"><b>${f.F.n}</b><span class="pill">${fnum(r1(f.v))} / 5</span></div><div class="sub">${f.basis.join(' · ')}${f.kids.length?` · besonders fördern: ${f.kids.map(x=>esc(short(x.p.id))).join(', ')}`:''}</div>${f.F.ex.map(e=>`<div class="ex"><b>${esc(e[0])}</b><div>${esc(e[1])}</div><div class="sub">Worauf achten: ${esc(e[2])}</div></div>`).join('')}</div>`).join('')}</details>`;
 }
-const STRENGTH_TXT={spielv:'Du verstehst das Spiel richtig gut und weißt oft schon vorher, wohin der Ball muss.',frei:'Du bietest dich super an und läufst dich clever frei.',zweik:'Im Zweikampf bist du stark und gibst nicht auf.',ueber:'Du hast den Überblick und siehst deine Mitspieler.',mut:'Du bist mutig – im Zweikampf, im Dribbling und wenn es drauf ankommt.',dribb:'Du dribbelst richtig stark und hast den Ball eng am Fuß.',komm:'Du redest mit deinen Mitspielern und hilfst dem Team.',technik:'Du hast eine tolle Ballbehandlung.',tempo:'Du bist richtig schnell!',gewandt:'Du bist super wendig und flink auf den Beinen.',kraft:'Du hast eine starke Sprungkraft.',ausdauer:'Du hast eine Riesen-Ausdauer und läufst bis zum Schluss.',torwart:'Im Tor kann sich das Team auf dich verlassen.'};
-const STRENGTH_NAME={spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',ueber:'Überblick',mut:'Mut',dribb:'Dribbling',komm:'Teamgeist & Reden',technik:'Technik',tempo:'Schnelligkeit',gewandt:'Wendigkeit',kraft:'Sprungkraft',ausdauer:'Ausdauer',torwart:'Torwart'};
+const STRENGTH_TXT={spielv:'Du verstehst das Spiel richtig gut und weißt oft schon vorher, wohin der Ball muss.',frei:'Du bietest dich super an und läufst dich clever frei.',zweik:'Im Zweikampf bist du stark und gibst nicht auf.',ueber:'Du hast den Überblick und siehst deine Mitspieler.',mut:'Du bist mutig – im Zweikampf, im Dribbling und wenn es drauf ankommt.',dribb:'Du dribbelst richtig stark und hast den Ball eng am Fuß.',komm:'Du redest mit deinen Mitspielern und hilfst dem Team.',technik:'Du hast eine tolle Ballbehandlung.',tempo:'Du bist richtig schnell!',gewandt:'Du bist super wendig, flink und hast einen starken Antritt.',kraft:'Du hast eine starke Sprungkraft.',ausdauer:'Du hast eine Riesen-Ausdauer und läufst bis zum Schluss.',torwart:'Im Tor kann sich das Team auf dich verlassen.'};
+const STRENGTH_NAME={spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',ueber:'Überblick',mut:'Mut',dribb:'Dribbling',komm:'Teamgeist & Reden',technik:'Technik',tempo:'Schnelligkeit',gewandt:'Dynamik',kraft:'Sprungkraft',ausdauer:'Ausdauer',torwart:'Torwart'};
 function vStrength(){
   const pid=S.playerId,p=S.players[pid];if(!p)return `<div class="empty">Spieler nicht gefunden.</div>`;
   const AV=appVals(pid);const T=k=>latestVal('r:'+k,pid,sessionsWith('r:'+k));
   const cand=[];
   RATINGS.forEach(r=>{const vs=[T(r.k),AV[r.k]?.v].filter(isNum);if(vs.length)cand.push({k:r.k,v:avg(vs)});});
-  ['technik','tempo','gewandt','kraft','ausdauer'].forEach(k=>{if(AV[k])cand.push({k,v:AV[k].v});});
+  if(AV.technik)cand.push({k:'technik',v:AV.technik.v});
+  [['tempo','schnell'],['gewandt','dyn'],['ausdauer','ausd']].forEach(([k,rk])=>{const vs=[AV[k]?.v,T(rk)].filter(isNum);if(vs.length)cand.push({k,v:avg(vs)});});
+  if(AV.kraft&&!isNum(T('dyn')))cand.push({k:'kraft',v:AV.kraft.v});
   {const gt=GK_RATINGS.map(r=>T(r.k)).filter(isNum);const vs=[gt.length?avg(gt):null,AV._tw?.v].filter(isNum);if(vs.length)cand.push({k:'torwart',v:avg(vs)});}
   const top=cand.sort((a,b)=>b.v-a.v).slice(0,3);
   const ss=slist().reverse();const prog=[];
