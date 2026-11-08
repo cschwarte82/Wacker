@@ -83,7 +83,7 @@ textarea{resize:vertical;margin-bottom:8px}
 .mbg{position:fixed;inset:0;background:#0007;z-index:20}
 .mbox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,94vw);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;padding:18px;z-index:21}
 .mbox .sub{margin:4px 0}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--gd);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:30;max-width:90vw}
+#toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-20px);background:var(--gd);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:30;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .radar{width:100%;max-width:380px;display:block;margin:0 auto}
 .radar .grid{fill:none;stroke:#e3e8df;stroke-width:1}
@@ -172,6 +172,23 @@ button{touch-action:manipulation}
 .slot.empty{background:#ffffffaa;border:2px dashed #fff}
 .slot.sel,.bench span.sel{border-color:var(--lime);box-shadow:0 0 0 3px #d7f25a99}
 .bench span.tap{cursor:pointer;border:2px solid transparent}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:25;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -4px 24px #0004;padding:12px 12px calc(12px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .18s;max-width:640px;margin:0 auto}
+#sheet.open{transform:none}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.sgrid button{min-height:46px;border-radius:10px;border:0;font:600 13px/1.2 var(--ft);color:#fff;padding:6px;cursor:pointer}
+.sgrid.p button{background:#1d7a3e}.sgrid.m button{background:#b4442c}
+.sbarw{height:4px;background:#eef1ea;border-radius:2px;margin-top:10px;overflow:hidden}
+.sbar{height:100%;width:100%;background:var(--lime)}
+.chip.onp{background:#1d7a3e;border-color:#1d7a3e;color:#fff}.chip.onm{background:#b4442c;border-color:#b4442c;color:#fff}
+.arow.open{border-color:#f0d68a;background:#fffbef}
+.crow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-top:1px solid #f0f2ee}
+.crow.big .cn{font-size:15px}.crow.flag{background:#fff7e6;border-radius:6px}
+.cn{width:122px;font-size:13px;font-weight:600;flex:none}.cn small{display:block;font-weight:400;color:var(--mut);font-size:11px}
+.cbars{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+.cb{height:7px;background:#eef1ea;border-radius:4px;overflow:hidden}.cb i{display:block;height:100%}
+.cb i.t{background:var(--gd)}.cb i.a{background:#8fbf3a}
+.cv{display:flex;flex-direction:column;font:700 15px/1.1 var(--fc);text-align:right;min-width:28px}.cv .a{color:#5f8a1f}
+.legend i.lt{border-top:5px solid var(--gd)}.legend i.la{border-top:5px solid #8fbf3a}
 .lbl2{font-weight:600;font-size:13px;color:var(--mut);margin-top:10px}
 </style>
 </head>
@@ -183,6 +200,7 @@ button{touch-action:manipulation}
 <main id="app"></main>
 <div id="modal"></div>
 <div id="toast"></div>
+<div id="sheet"></div>
 <input type="file" id="restoreInput" accept=".json,application/json,text/plain" style="display:none" onchange="A.restorePicked(this)">
 <script>
 "use strict";
@@ -212,7 +230,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='8';
+const APP_VERSION='9';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -378,8 +396,8 @@ function vSession(){
   const tests=s.tests||[]; if(!tests.includes(S.curTest))S.curTest=tests[0];
   const game=s.type==='game'; if(game&&S.sessTab==='tests')S.sessTab='kids';
   let h=`<button class="back" onclick="A.go('sessions')">‹ Termine</button><div class="row between"><div><h2>${game?'⚽ ':''}${esc(s.title)}</h2><div class="sub">${fdate(s.date)}${game?' · Spiel'+(s.result?' · '+esc(s.result):''):''}</div></div><button class="btn" onclick="A.editSession()">Bearbeiten</button></div>`;
-  h+=`<div class="seg">${(game?[['kids','Bewertung'],['export','Export']]:[['tests','Messungen'],['kids','Pro Kind'],['export','Export']]).map(([k,n])=>`<button class="${S.sessTab===k?'on':''}" onclick="A.sessTab('${k}')">${n}</button>`).join('')}</div>`;
-  if(S.sessTab==='tests')h+=vTests(s); else if(S.sessTab==='kids')h+=vKids(s); else h+=vExport(s);
+  h+=`<div class="seg">${(game?[['kids','Bewertung'],...(s.live&&s.live.actions&&s.live.actions.length?[['acts','Aktionen'+(s.live.actions.some(a=>!a.c)?' •':'')]]:[]),['export','Export']]:[['tests','Messungen'],['kids','Pro Kind'],['export','Export']]).map(([k,n])=>`<button class="${S.sessTab===k?'on':''}" onclick="A.sessTab('${k}')">${n}</button>`).join('')}</div>`;
+  if(S.sessTab==='tests')h+=vTests(s); else if(S.sessTab==='kids')h+=vKids(s); else if(S.sessTab==='acts'&&s.live&&s.live.actions)h+=vActs(s); else h+=vExport(s);
   return h;
 }
 function vTests(s){
@@ -452,6 +470,7 @@ function vPlayer(){
   if(grows){const g=latestVal('a:torwart',pid,ss.slice().reverse());h+=`<div class="card"><div class="lbl">Torwart${isNum(g)?` <small>gesamt ${fnum(Math.round(g*10)/10)} / 5</small>`:''}</div>${grows}</div>`;}
   const ms=ss.filter(s=>isNum(s.mood?.[pid]));
   if(ms.length)h+=`<div class="card"><div class="lbl">Spaß am Fußball <small>Selbstauskunft</small></div><div class="moodhist">${ms.map(s=>`<span>${MOODS[s.mood[pid]-1]||''}<small>${fdate(s.date).slice(0,5)}</small></span>`).join('')}</div></div>`;
+  h+=cmpCard(pid);
   const lg=ss.filter(s=>s.live&&((s.live.plus||{})[pid]||(s.live.minus||{})[pid]||(s.live.mins||{})[pid]));
   if(lg.length)h+=`<div class="card"><div class="lbl">Live-Bilanz</div>${lg.map(s=>`<div class="trow"><div><div class="t2">${esc(s.title)}</div><div class="sub">${fdate(s.date)} · ${(s.live.mins||{})[pid]||0} Min.</div></div><div class="val"><span class="pos">+${(s.live.plus||{})[pid]||0}</span> <span class="neg">−${(s.live.minus||{})[pid]||0}</span></div></div>`).join('')}</div>`;
   const notes=ss.filter(s=>s.notes?.[pid]).map(s=>`<div class="note"><small>${fdate(s.date)}</small>${esc(s.notes[pid])}</div>`).join('');
@@ -584,6 +603,70 @@ function vLineup(){
   return h;
 }
 
+// ---------- Aktions-Kategorien & App-Werte ----------
+const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbling',m:'Ballverlust im Dribbling'},{k:'schuss',p:'Guter Abschluss',m:'Chance vergeben'},{k:'lauf',p:'Guter Laufweg',m:'Falsch gelaufen / versteckt'},{k:'zweik',p:'Zweikampf gewonnen',m:'Zweikampf verloren'},{k:'entsch',p:'Kluge Entscheidung',m:'Falsche Entscheidung'}];
+const ACT_G=[{k:'parade',p:'Starke Parade',m:'Haltbarer Gegentreffer'},{k:'fang',p:'Sicher gefangen',m:'Abprallen lassen'},{k:'raus',p:'Gut herausgelaufen',m:'Falsch herausgelaufen'},{k:'stell',p:'Gut positioniert',m:'Falsch positioniert'},{k:'eroeff',p:'Abwurf/Abstoß angekommen',m:'Abwurf/Abstoß zum Gegner'}];
+const ACT_MAP={pass:{ueber:1,technik:1},dribb:{mut:1,technik:1},schuss:{technik:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
+const GK_TEST_MAP={tw_fangen:'tw_fang',tw_reaktion:'tw_reak',tw_abwurf:'tw_eroeff'};
+const r1=x=>Math.round(x*10)/10;
+function appVals(pid){
+  const games=slist().filter(s=>s.live&&Array.isArray(s.live.actions)).slice(0,8);
+  const agg={};
+  games.forEach(s=>s.live.actions.forEach(a=>{if(a.p!==pid||!a.c)return;const m=ACT_MAP[a.c];if(!m)return;for(const[k,w]of Object.entries(m)){const g=agg[k]||(agg[k]={p:0,m:0,n:0});if(a.t==='+')g.p+=w;else g.m+=w;g.n++;}}));
+  const out={};
+  for(const[k,g]of Object.entries(agg))out[k]={v:3+2*(g.p-g.m)/(g.p+g.m+4),n:g.n,src:'Spiele'};
+  const tests=s=>s.type!=='game';
+  ['tempo','gewandt','kraft','ausdauer','technik'].forEach(ak=>{
+    const t=latestVal('a:'+ak,pid,sessionsWith('a:'+ak).filter(tests));if(!isNum(t))return;
+    if(out[ak]){out[ak]={v:(out[ak].v+t)/2,n:out[ak].n,src:'Spiele + Tests'};}else out[ak]={v:t,n:null,src:'Tests'};
+  });
+  for(const[tk,rk]of Object.entries(GK_TEST_MAP)){
+    const raw=latestVal('t:'+tk,pid,sessionsWith('t:'+tk));if(!isNum(raw))continue;const t=1+Math.min(10,raw)/10*4;
+    if(out[rk])out[rk]={v:(out[rk].v+t)/2,n:out[rk].n,src:'Spiele + Tests'};else out[rk]={v:t,n:null,src:'Tests'};
+  }
+  const fk=['spielv','frei','zweik','ueber','mut','technik','tempo','gewandt','kraft','ausdauer'].filter(k=>out[k]);
+  out._gesamt=fk.length?{v:avg(fk.map(k=>out[k].v)),n:fk.length}:null;
+  const gk=GK_RATINGS.map(r=>r.k).filter(k=>out[k]);
+  out._tw=gk.length?{v:avg(gk.map(k=>out[k].v)),n:gk.length}:null;
+  return out;
+}
+function cmpCard(pid){
+  const AV=appVals(pid);const T=k=>latestVal('r:'+k,pid,sessionsWith('r:'+k));
+  const row=(name,t,a,meta,bold)=>{
+    const bar=(v,c)=>`<div class="cb">${isNum(v)?`<i class="${c}" style="width:${Math.max(4,(v-1)/4*100).toFixed(0)}%"></i>`:''}</div>`;
+    const flag=isNum(t)&&isNum(a)&&Math.abs(t-a)>=1&&(!meta||meta.n==null||meta.n>=5);
+    if(meta&&meta.n===0)meta=null;
+    const info=meta?(meta.n!=null?`${meta.n} Aktion${meta.n===1?'':'en'}${meta.src==='Spiele + Tests'?' + Tests':''}`:meta.src):'';
+    return `<div class="crow ${flag?'flag':''} ${bold?'big':''}"><div class="cn">${name}${flag?' ⚠':''}<small>${info}${meta&&meta.n!=null&&meta.n<5?' · wenig Daten':''}</small></div><div class="cbars">${bar(t,'t')}${bar(a,'a')}</div><div class="cv"><span class="t">${isNum(t)?fnum(r1(t)):'–'}</span><span class="a">${isNum(a)?fnum(r1(a)):'–'}</span></div></div>`;
+  };
+  const tr=RATINGS.map(r=>T(r.k)).filter(isNum);const tG=tr.length?avg(tr):null;
+  const anyApp=Object.keys(AV).some(k=>!k.startsWith('_'));
+  if(!tr.length&&!anyApp)return'';
+  let h=`<div class="card"><div class="lbl">Trainer vs. App</div><div class="legend" style="justify-content:flex-start;margin:0 0 6px"><span><i class="lt"></i>Trainer</span><span><i class="la"></i>App (aus Spielen &amp; Testtagen)</span></div>`;
+  h+=row('Gesamt',tG,AV._gesamt?AV._gesamt.v:null,null,true);
+  h+=RATINGS.map(r=>row(r.n,T(r.k),AV[r.k]?.v,AV[r.k]||{n:0,src:''})).join('');
+  const only=[['technik','Technik'],['tempo','Tempo'],['gewandt','Gewandtheit'],['kraft','Sprungkraft'],['ausdauer','Ausdauer']].filter(([k])=>AV[k]);
+  if(only.length)h+=`<div class="lbl2">Nur App</div>`+only.map(([k,n])=>row(n,null,AV[k].v,AV[k])).join('');
+  const gkT=GK_RATINGS.map(r=>T(r.k));
+  if(gkT.some(isNum)||AV._tw){const gt=gkT.filter(isNum);h+=`<div class="lbl2">Torwart</div>`+row('Torwart gesamt',gt.length?avg(gt):null,AV._tw?AV._tw.v:null,null,true)+GK_RATINGS.map((r,i)=>row(r.n,gkT[i],AV[r.k]?.v,AV[r.k]||{n:0,src:''})).join('');}
+  h+=`<details style="margin-top:8px"><summary class="sub">So rechnet die App</summary><div class="wt">Jede kategorisierte Plus-/Minus-Aktion der letzten 8 Live-Spiele zählt für die passenden Bereiche (z. B. Toller Pass → Übersicht und Technik). Wert = 3 + 2 × (Plus − Minus) / (Plus + Minus + 4): Mit wenigen Aktionen bleibt er nahe 3, erst mit mehr Aktionen bewegt er sich Richtung 1 oder 5. Tempo, Gewandtheit, Sprungkraft, Ausdauer und Technik kommen zusätzlich aus den Testtagen (3 = Teamschnitt). ⚠ = Trainer und App liegen mindestens 1 Punkt auseinander (ab 5 Aktionen). „Gesamt“ der App enthält auch die Athletik, deins nur deine Einschätzung.</div></details></div>`;
+  return h;
+}
+function vActs(s){
+  const acts=s.live.actions||[];const open=acts.filter(a=>!a.c).length;
+  let h=`<div class="sub" style="margin-bottom:8px">${open?`<b>${open} Aktion${open===1?'':'en'} ohne Kategorie.</b> Tippe die passende an.`:'Alle Aktionen sind zugeordnet.'} Nochmal antippen hebt die Zuordnung auf.</div>`;
+  h+=acts.map((a,i)=>{const cats=a.gk?ACT_G:ACT_F;return `<div class="card arow ${a.c?'':'open'}"><div class="row between"><b>${isNum(a.at)?a.at+"' ":''}${esc(short(a.p))}${a.gk?' (TW)':''}</b><span class="${a.t==='+'?'pos':'neg'}" style="font-weight:700;font-size:20px">${a.t==='+'?'+':'−'}</span></div><div class="chips">${cats.map(c=>`<button class="chip ${a.c===c.k?(a.t==='+'?'onp':'onm'):''}" onclick="A.actCat(${i},'${c.k}')">${esc(a.t==='+'?c.p:c.m)}</button>`).join('')}</div></div>`;}).join('');
+  return h||'<div class="empty">Keine Aktionen erfasst.</div>';
+}
+let sheetT=null;
+function showSheet(e){
+  const el=$('#sheet');const cats=e.gk?ACT_G:ACT_F;const plus=e.t==='+';
+  el.innerHTML=`<div class="row between" style="margin-bottom:8px"><b>${esc(short(e.p))} <span class="${plus?'pos':'neg'}">${plus?'+':'−'}</span> · Was war's?</b><button class="btn sm2" onclick="A.sheetHide()">Später</button></div><div class="sgrid ${plus?'p':'m'}">${cats.map(c=>`<button onclick="A.sheetPick('${e.id}','${c.k}')">${esc(plus?c.p:c.m)}</button>`).join('')}</div><div class="sbarw"><div class="sbar" id="sbar"></div></div>`;
+  el.classList.add('open');
+  requestAnimationFrame(()=>{const b=$('#sbar');if(b){b.style.transition='none';b.style.width='100%';requestAnimationFrame(()=>{b.style.transition='width 5s linear';b.style.width='0%';});}});
+  clearTimeout(sheetT);sheetT=setTimeout(()=>A.sheetHide(),5000);
+}
+
 // ---------- Live ----------
 function short(pid){const p=S.players[pid];if(!p)return'?';const parts=(p.name||'').trim().split(/\s+/);const first=parts[0]||'?';const dup=Object.entries(S.players).some(([id,q])=>id!==pid&&q.active!==false&&(q.name||'').trim().split(/\s+/)[0]===first);return dup&&parts[1]?first+' '+parts[1][0]+'.':first;}
 function liveField(L){return Object.values(L.pos).filter(Boolean);}
@@ -664,9 +747,13 @@ const A={
     else{const slot=sel.kind==='slot'?sel.key:key,bp=sel.kind==='bench'?sel.key:key,out=L.pos[slot];L.pos[slot]=bp;L.bench=L.bench.filter(x=>x!==bp);if(out)L.bench.push(out);L.log.push({t:'sub',slot,inP:bp,outP:out||null});toast(`${short(bp)} rein${out?' für '+short(out):''}`);}
     S.liveSel=null;liveSave();render(true);
   },
-  liveAct(pid,d){const L=S.live;if(!L)return;const o=d>0?L.plus:L.minus;o[pid]=(o[pid]||0)+1;L.log.push({t:d>0?'+':'-',p:pid});try{navigator.vibrate&&navigator.vibrate(15);}catch(e){}liveSave();render(true);},
+  liveAct(pid,d){const L=S.live;if(!L)return;const o=d>0?L.plus:L.minus;o[pid]=(o[pid]||0)+1;const e={t:d>0?'+':'-',p:pid,id:uid('a'),c:null,at:Math.floor(liveSecs(L)/60),gk:L.pos.TW===pid};L.log.push(e);try{navigator.vibrate&&navigator.vibrate(15);}catch(x){}liveSave();render(true);showSheet(e);},
+  sheetPick(id,c){const L=S.live;if(L){const e=L.log.find(x=>x.id===id);if(e){e.c=c;liveSave();const cats=e.gk?ACT_G:ACT_F;const cc=cats.find(x=>x.k===c);toast((e.t==='+'?cc.p:cc.m)+' · '+short(e.p));}}A.sheetHide();},
+  sheetHide(){clearTimeout(sheetT);const el=$('#sheet');if(el)el.classList.remove('open');},
+  actCat(i,c){const s=clone(S.sessions[S.sessionId]);const a=s.live&&s.live.actions&&s.live.actions[i];if(!a)return;a.c=a.c===c?null:c;saveDoc('sessions',S.sessionId,s);render(true);},
   liveUndo(){
     const L=S.live;if(!L)return;const e=L.log.pop();if(!e)return;
+    A.sheetHide();
     if(e.t==='+'||e.t==='-'){const o=e.t==='+'?L.plus:L.minus;o[e.p]=Math.max(0,(o[e.p]||0)-1);toast(`${e.t==='+'?'Plus':'Minus'} für ${short(e.p)} zurückgenommen`);}
     else if(e.t==='swap'){accrue(L);const a=L.pos[e.a];L.pos[e.a]=L.pos[e.b];L.pos[e.b]=a;toast('Tausch zurückgenommen');}
     else if(e.t==='sub'){accrue(L);L.pos[e.slot]=e.outP;L.bench=L.bench.filter(x=>x!==e.outP);L.bench.push(e.inP);toast('Wechsel zurückgenommen');}
@@ -681,7 +768,8 @@ const A={
     const L=S.live;if(!L)return;accrue(L);L.clock.running=false;
     const mins={};Object.entries(L.mins).forEach(([p,s])=>{if(s>=1)mins[p]=Math.round(s/60);});
     const id=uid('s');const title=($('#m_title').value||'').trim()||'Spiel';
-    const doc={type:'game',date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{plus:L.plus,minus:L.minus,mins,n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60)}};
+    const doc={type:'game',date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{plus:L.plus,minus:L.minus,mins,n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,gk:!!e.gk}))}};
+    A.sheetHide();
     S.live=null;S.liveSel=null;saveDoc('sessions',id,doc);closeModal();A.openSession(id);toast('Spiel gespeichert – jetzt kurz bewerten');
   },
   liveAskDiscard(){showModal(`<h3>Live-Spiel verwerfen?</h3><p>Plus/Minus und Spielminuten dieses Spiels werden nicht gespeichert.</p><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn danger" onclick="A.liveDiscard()">Verwerfen</button></div>`);},
