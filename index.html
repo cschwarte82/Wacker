@@ -252,7 +252,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='16';
+const APP_VERSION='17';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -443,7 +443,7 @@ function vKids(s){
   let h=`<div class="kidnav"><button class="btn" onclick="A.kid(-1)" aria-label="Vorheriges Kind">‹</button><select onchange="A.kidSel(this.value)">${ps.map((q,i)=>`<option value="${i}" ${i===S.kidIdx?'selected':''}>${esc(q.name)}${done(q)?' ✓':''}</option>`).join('')}</select><button class="btn" onclick="A.kid(1)" aria-label="Nächstes Kind">›</button></div>`;
   if((p.goals||[]).some(g=>g.status!=='erreicht'))h+=goalsHtml(p.id,true);
   h+=`<div class="card"><div class="lbl">Trainer-Einschätzung <small>1 = noch wenig, 5 = sehr ausgeprägt</small></div>${RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
-  h+=`<div class="card"><div class="lbl">Athletik <small>dein Eindruck, 1–5</small></div>${ATH_RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
+  if(!game)h+=`<div class="card"><div class="lbl">Athletik <small>dein Eindruck, 1–5</small></div>${ATH_RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
   {const gkHas=GK_RATINGS.some(x=>isNum(r[x.k]));h+=`<details class="card" ${gkHas?'open':''}><summary>Torwart-Einschätzung <small class="sub">nur für Kinder, die ins Tor gehen</small></summary><div style="margin-top:8px">${GK_RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div></details>`;}
   if(game&&s.live){const lv=s.live;const b=gameBal(lv,p.id);h+=`<div class="card hint">Live: <b class="pos">+${(lv.plus||{})[p.id]||0}</b> / <b class="neg">−${(lv.minus||{})[p.id]||0}</b> · ${(lv.mins||{})[p.id]||0} Spielminuten${lv.goals?` · ⚽ ${b.tore} · Tore auf dem Feld ${b.gf}:${b.ga}`:''}</div>`;}
   if(ev)h=`<div class="sub" style="margin-bottom:8px">Deine Einschätzung zwischendurch. Nur Kinder bewerten, die du gut beobachten konntest – leer bleibt leer. ${ps.filter(done).length} von ${ps.length} vollständig.</div>`+h;
