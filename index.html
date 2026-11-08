@@ -244,14 +244,14 @@ const TESTS=[
 ];
 const TEST=Object.fromEntries(TESTS.map(t=>[t.k,t]));
 const GK_RATINGS=[{k:'tw_reak',n:'Reaktion'},{k:'tw_fang',n:'Fangen / Ballsicherheit'},{k:'tw_stell',n:'Stellungsspiel'},{k:'tw_raus',n:'Herauslaufen / 1 gegen 1'},{k:'tw_eroeff',n:'Abwurf / Spieleröffnung'},{k:'tw_komm',n:'Kommandos / Mut'}];
-const RATINGS=[{k:'spielv',n:'Spielverständnis'},{k:'frei',n:'Freilaufen / Anbieten'},{k:'zweik',n:'Zweikampfverhalten'},{k:'ueber',n:'Übersicht'},{k:'mut',n:'Mut / Durchsetzung'},{k:'komm',n:'Kommunikation'}];
+const RATINGS=[{k:'spielv',n:'Spielverständnis'},{k:'frei',n:'Freilaufen / Anbieten'},{k:'zweik',n:'Zweikampfverhalten'},{k:'dribb',n:'Dribbling'},{k:'ueber',n:'Übersicht'},{k:'mut',n:'Mut / Durchsetzung'},{k:'komm',n:'Kommunikation'}];
 const AREAS=[{k:'tempo',n:'Tempo'},{k:'gewandt',n:'Gewandtheit'},{k:'kraft',n:'Sprungkraft'},{k:'ausdauer',n:'Ausdauer'},{k:'technik',n:'Technik'},{k:'spiel',n:'Spielverhalten',s:'Spiel'}];
 const TEST_GROUPS=[{k:'tempo',n:'Tempo'},{k:'gewandt',n:'Gewandtheit'},{k:'kraft',n:'Sprungkraft'},{k:'ausdauer',n:'Ausdauer'},{k:'technik',n:'Technik'},{k:'torwart',n:'Torwart'}];
 const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='13';
+const APP_VERSION='14';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -558,7 +558,7 @@ const FORMS={4:{'2-2':['A-L','A-R','S-L','S-R'],'1-2-1':['A-Z','M-L','M-R','S-Z'
 const POS={
   A:{n:'Abwehr',w:{'r:zweik':.3,'r:spielv':.2,'r:komm':.15,'a:tempo':.2,'a:kraft':.15}},
   M:{n:'Mittelfeld',w:{'a:ausdauer':.25,'a:technik':.25,'r:ueber':.2,'r:spielv':.15,'r:frei':.15}},
-  S:{n:'Sturm',w:{'a:tempo':.25,'a:technik':.25,'a:gewandt':.1,'r:mut':.2,'r:frei':.2}}
+  S:{n:'Sturm',w:{'a:tempo':.2,'a:technik':.2,'a:gewandt':.1,'r:dribb':.15,'r:mut':.15,'r:frei':.2}}
 };
 const SIDE={L:'links',R:'rechts',Z:'zentral'};
 const catName=c=>{const[t,k]=c.split(':');return t==='a'?AREAS.find(a=>a.k===k).n:[...RATINGS,...GK_RATINGS].find(r=>r.k===k).n;};
@@ -634,7 +634,7 @@ function vLineup(){
 // ---------- Aktions-Kategorien & App-Werte ----------
 const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbling',m:'Ballverlust im Dribbling'},{k:'schuss',p:'Guter Abschluss',m:'Chance vergeben'},{k:'lauf',p:'Guter Laufweg',m:'Falsch gelaufen / versteckt'},{k:'zweik',p:'Zweikampf gewonnen',m:'Zweikampf verloren'},{k:'entsch',p:'Kluge Entscheidung',m:'Falsche Entscheidung'}];
 const ACT_G=[{k:'parade',p:'Starke Parade',m:'Haltbarer Gegentreffer'},{k:'fang',p:'Sicher gefangen',m:'Abprallen lassen'},{k:'raus',p:'Gut herausgelaufen',m:'Falsch herausgelaufen'},{k:'stell',p:'Gut positioniert',m:'Falsch positioniert'},{k:'eroeff',p:'Abwurf/Abstoß angekommen',m:'Abwurf/Abstoß zum Gegner'}];
-const ACT_MAP={pass:{ueber:1,technik:1},dribb:{mut:1,technik:1},schuss:{technik:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
+const ACT_MAP={pass:{ueber:1,technik:1},dribb:{dribb:1,mut:.5,technik:1},schuss:{technik:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
 const GK_TEST_MAP={tw_fangen:'tw_fang',tw_reaktion:'tw_reak',tw_abwurf:'tw_eroeff'};
 const r1=x=>Math.round(x*10)/10;
 function appVals(pid){
@@ -652,7 +652,7 @@ function appVals(pid){
     const raw=latestVal('t:'+tk,pid,sessionsWith('t:'+tk));if(!isNum(raw))continue;const t=1+Math.min(10,raw)/10*4;
     if(out[rk])out[rk]={v:(out[rk].v+t)/2,n:out[rk].n,src:'Spiele + Tests'};else out[rk]={v:t,n:null,src:'Tests'};
   }
-  const fk=['spielv','frei','zweik','ueber','mut','technik','tempo','gewandt','kraft','ausdauer'].filter(k=>out[k]);
+  const fk=['spielv','frei','zweik','dribb','ueber','mut','technik','tempo','gewandt','kraft','ausdauer'].filter(k=>out[k]);
   out._gesamt=fk.length?{v:avg(fk.map(k=>out[k].v)),n:fk.length}:null;
   const gk=GK_RATINGS.map(r=>r.k).filter(k=>out[k]);
   out._tw=gk.length?{v:avg(gk.map(k=>out[k].v)),n:gk.length}:null;
@@ -708,7 +708,7 @@ function goalsHtml(pid,compact){
 }
 const FOCUS={
   pass:{n:'Passspiel',r:['ueber'],ex:[['Passdreieck mit Nachlaufen','3 Hütchen im Dreieck (8 m), 3–4 Kinder. Passen und dem Ball hinterherlaufen; nach 2 Minuten Richtung wechseln, dann nur mit dem schwachen Fuß.','Standbein neben den Ball, mit der Innenseite spielen.'],['4 gegen 2 im Quadrat','12 × 12 m. Vier Kinder halten den Ball gegen zwei Jäger, wer den Fehlpass spielt, wird Jäger.','Vor dem Pass schauen, Kopf hoch.']]},
-  dribb:{n:'Dribbling & Mut',r:['mut'],ex:[['Hütchenwald','Viele Hütchen in 20 × 20 m, jedes Kind mit Ball. Auf Zuruf: Richtungswechsel, Sohle, Übersteiger.','Kleine Kontakte, Ball eng am Fuß.'],['1 gegen 1 auf zwei Minitore','10 × 15 m, je ein Minitor pro Seite, du spielst den Ball ein.','Auf den Gegner zudribbeln, nach der Finte Tempo machen.']]},
+  dribb:{n:'Dribbling & Mut',r:['dribb','mut'],ex:[['Hütchenwald','Viele Hütchen in 20 × 20 m, jedes Kind mit Ball. Auf Zuruf: Richtungswechsel, Sohle, Übersteiger.','Kleine Kontakte, Ball eng am Fuß.'],['1 gegen 1 auf zwei Minitore','10 × 15 m, je ein Minitor pro Seite, du spielst den Ball ein.','Auf den Gegner zudribbeln, nach der Finte Tempo machen.']]},
   schuss:{n:'Torabschluss',r:[],ex:[['Dribbling und Abschluss','Zwei Gruppen, Slalom durch 4 Hütchen, dann Schuss aus 10 m. Punkte für die Ecken.','Vor dem Schuss zum Tor schauen, mit dem Spann.'],['2 gegen 1 aufs Tor','Zwei Angreifer gegen einen Verteidiger plus Torwart.','Abschluss suchen, nicht zu lange dribbeln.']]},
   lauf:{n:'Freilaufen & Anbieten',r:['frei'],ex:[['Funiño 3 gegen 3','25 × 20 m, zwei Minitore pro Grundlinie.','In die freie Seite laufen, Abstand zum Mitspieler halten.'],['Pass und geh','Viereck aus 4 Hütchen; nach dem Pass sofort zum nächsten freien Hütchen sprinten.','Direkt nach dem Pass loslaufen.']]},
   zweik:{n:'Zweikampf',r:['zweik'],ex:[['Zweikampf-Start','Zwei Kinder 5 m vom Ball entfernt, auf Signal zum Ball, dann 1 gegen 1 auf Minitore.','Körper zwischen Gegner und Ball bringen.'],['König der Insel','Alle dribbeln im Kreis und versuchen, anderen den Ball rauszuspielen, ohne den eigenen zu verlieren.','Seitlich stellen, nicht anspringen.']]},
@@ -738,8 +738,8 @@ function focusCard(){
   const top=fs.slice(0,3);
   return `<details class="card"><summary><b>🎯 Trainingsschwerpunkte:</b> ${top.map(f=>f.F.n).join(', ')}</summary><div class="sub" style="margin:6px 0">Die schwächsten Team-Bereiche aus deinen Einschätzungen und den Live-Aktionen der letzten 4 Spiele. Die Übungen sind Vorschläge – pass sie an euer Training an.</div>${top.map(f=>`<div class="focus"><div class="row between"><b>${f.F.n}</b><span class="pill">${fnum(r1(f.v))} / 5</span></div><div class="sub">${f.basis.join(' · ')}${f.kids.length?` · besonders fördern: ${f.kids.map(x=>esc(short(x.p.id))).join(', ')}`:''}</div>${f.F.ex.map(e=>`<div class="ex"><b>${esc(e[0])}</b><div>${esc(e[1])}</div><div class="sub">Worauf achten: ${esc(e[2])}</div></div>`).join('')}</div>`).join('')}</details>`;
 }
-const STRENGTH_TXT={spielv:'Du verstehst das Spiel richtig gut und weißt oft schon vorher, wohin der Ball muss.',frei:'Du bietest dich super an und läufst dich clever frei.',zweik:'Im Zweikampf bist du stark und gibst nicht auf.',ueber:'Du hast den Überblick und siehst deine Mitspieler.',mut:'Du bist mutig und traust dich ins Dribbling.',komm:'Du redest mit deinen Mitspielern und hilfst dem Team.',technik:'Du hast eine tolle Ballbehandlung.',tempo:'Du bist richtig schnell!',gewandt:'Du bist super wendig und flink auf den Beinen.',kraft:'Du hast eine starke Sprungkraft.',ausdauer:'Du hast eine Riesen-Ausdauer und läufst bis zum Schluss.',torwart:'Im Tor kann sich das Team auf dich verlassen.'};
-const STRENGTH_NAME={spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',ueber:'Überblick',mut:'Mut',komm:'Teamgeist & Reden',technik:'Technik',tempo:'Schnelligkeit',gewandt:'Wendigkeit',kraft:'Sprungkraft',ausdauer:'Ausdauer',torwart:'Torwart'};
+const STRENGTH_TXT={spielv:'Du verstehst das Spiel richtig gut und weißt oft schon vorher, wohin der Ball muss.',frei:'Du bietest dich super an und läufst dich clever frei.',zweik:'Im Zweikampf bist du stark und gibst nicht auf.',ueber:'Du hast den Überblick und siehst deine Mitspieler.',mut:'Du bist mutig und traust dich ins Dribbling.',dribb:'Du dribbelst richtig stark und hast den Ball eng am Fuß.',komm:'Du redest mit deinen Mitspielern und hilfst dem Team.',technik:'Du hast eine tolle Ballbehandlung.',tempo:'Du bist richtig schnell!',gewandt:'Du bist super wendig und flink auf den Beinen.',kraft:'Du hast eine starke Sprungkraft.',ausdauer:'Du hast eine Riesen-Ausdauer und läufst bis zum Schluss.',torwart:'Im Tor kann sich das Team auf dich verlassen.'};
+const STRENGTH_NAME={spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',ueber:'Überblick',mut:'Mut',dribb:'Dribbling',komm:'Teamgeist & Reden',technik:'Technik',tempo:'Schnelligkeit',gewandt:'Wendigkeit',kraft:'Sprungkraft',ausdauer:'Ausdauer',torwart:'Torwart'};
 function vStrength(){
   const pid=S.playerId,p=S.players[pid];if(!p)return `<div class="empty">Spieler nicht gefunden.</div>`;
   const AV=appVals(pid);const T=k=>latestVal('r:'+k,pid,sessionsWith('r:'+k));
