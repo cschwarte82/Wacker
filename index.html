@@ -212,6 +212,9 @@ button{touch-action:manipulation}
 .newrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0 4px}.newrow .btn{padding:8px 4px;font-size:13px;line-height:1.2;hyphens:manual}
 .row.between>div:first-child{min-width:0}.row.between>.btn{flex:none}
 h2{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
+.cardrow{display:flex;gap:6px;margin:0 0 6px}.cardrow button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:10px;min-height:38px;font:600 13px var(--ft);color:var(--ink);cursor:pointer}
+.yc,.rc,.yrc{display:inline-block;width:9px;height:13px;border-radius:2px;vertical-align:-1px;box-shadow:0 0 0 1px #0002}.yc{background:#f5c518}.rc{background:#d42c2c}.yrc{background:linear-gradient(135deg,#f5c518 50%,#d42c2c 50%)}
+.sgrid.cg button{background:#3b4a40}
 .lbl2{font-weight:600;font-size:13px;color:var(--mut);margin-top:10px}
 </style>
 </head>
@@ -254,7 +257,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='21';
+const APP_VERSION='22';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -278,7 +281,7 @@ const slist=()=>Object.entries(S.sessions).map(([id,s])=>({...s,id})).sort((a,b)
 function hasData(s,pid){
   const r=s.results?.[pid]; if(r&&Object.values(r).some(isNum))return true;
   const q=s.ratings?.[pid]; if(q&&Object.values(q).some(isNum))return true;
-  const lv=s.live;if(lv&&((lv.plus||{})[pid]||(lv.minus||{})[pid]||(lv.mins||{})[pid]))return true;
+  const lv=s.live;if(lv&&((lv.plus||{})[pid]||(lv.minus||{})[pid]||(lv.mins||{})[pid]||(lv.goals||[]).some(g=>g.p===pid||(g.on||[]).includes(pid))||(lv.cards||[]).some(c=>c.p===pid)))return true;
   return isNum(s.mood?.[pid])||!!s.notes?.[pid];
 }
 
@@ -423,8 +426,8 @@ function vSession(){
   const game=s.type==='game',ev=s.type==='eval'; if((game||ev)&&S.sessTab==='tests')S.sessTab='kids';
   const oldEval=Object.keys(s.ratings||{}).length||Object.keys(s.mood||{}).length||Object.keys(s.notes||{}).length;if(!game&&!ev&&S.sessTab==='kids'&&!oldEval)S.sessTab='tests';
   let h=`<button class="back" onclick="A.go('sessions')">‹ Bewertung</button><div class="row between"><div><h2>${game?'⚽ ':ev?'📝 ':'⏱ '}${esc(s.title)}</h2><div class="sub">${fdate(s.date)}${game?' · Spiel'+(s.result?' · '+esc(s.result):''):ev?' · Trainereinschätzung':' · Testtag'}</div></div><button class="btn" onclick="A.editSession()">Bearbeiten</button></div>`;
-  h+=`<div class="seg">${(ev?[['kids','Einschätzung'],['export','Export']]:game?[['kids','Bewertung'],...(s.live&&s.live.actions&&s.live.actions.length?[['acts','Aktionen'+(s.live.actions.some(a=>!a.c)?' •':'')]]:[]),['export','Export']]:[['tests','Messungen'],...((Object.keys(s.ratings||{}).length||Object.keys(s.mood||{}).length||Object.keys(s.notes||{}).length)?[['kids','Alte Einschätzung']]:[]),['export','Export']]).map(([k,n])=>`<button class="${S.sessTab===k?'on':''}" onclick="A.sessTab('${k}')">${n}</button>`).join('')}</div>`;
-  if(S.sessTab==='tests')h+=vTests(s); else if(S.sessTab==='kids')h+=vKids(s); else if(S.sessTab==='acts'&&s.live&&s.live.actions)h+=vActs(s); else h+=vExport(s);
+  h+=`<div class="seg">${(ev?[['kids','Einschätzung'],['export','Export']]:game?[['kids','Bewertung'],...(s.live&&((s.live.actions||[]).length||(s.live.goals||[]).some(g=>g.t==='goal'))?[['acts','Aktionen'+(((s.live.actions||[]).some(a=>!a.c)||(s.live.goals||[]).some(g=>g.t==='goal'&&!g.p&&!g.og))?' •':'')]]:[]),['export','Export']]:[['tests','Messungen'],...((Object.keys(s.ratings||{}).length||Object.keys(s.mood||{}).length||Object.keys(s.notes||{}).length)?[['kids','Alte Einschätzung']]:[]),['export','Export']]).map(([k,n])=>`<button class="${S.sessTab===k?'on':''}" onclick="A.sessTab('${k}')">${n}</button>`).join('')}</div>`;
+  if(S.sessTab==='tests')h+=vTests(s); else if(S.sessTab==='kids')h+=vKids(s); else if(S.sessTab==='acts'&&s.live)h+=vActs(s); else h+=vExport(s);
   return h;
 }
 function vTests(s){
@@ -448,7 +451,7 @@ function vKids(s){
   h+=`<div class="card"><div class="lbl">Trainer-Einschätzung <small>1 = noch wenig, 5 = sehr ausgeprägt</small></div>${RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
   if(ev)h+=`<div class="card"><div class="lbl">Athletik <small>dein Eindruck, 1–5</small></div>${ATH_RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
   {const gkHas=GK_RATINGS.some(x=>isNum(r[x.k]));h+=`<details class="card" ${gkHas?'open':''}><summary>Torwart-Einschätzung <small class="sub">nur für Kinder, die ins Tor gehen</small></summary><div style="margin-top:8px">${GK_RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div></details>`;}
-  if(game&&s.live){const lv=s.live;const b=gameBal(lv,p.id);h+=`<div class="card hint">Live: <b class="pos">+${(lv.plus||{})[p.id]||0}</b> / <b class="neg">−${(lv.minus||{})[p.id]||0}</b> · ${(lv.mins||{})[p.id]||0} Spielminuten${lv.goals?` · ⚽ ${b.tore} · Tore auf dem Feld ${b.gf}:${b.ga}`:''}</div>`;}
+  if(game&&s.live){const lv=s.live;const b=gameBal(lv,p.id);h+=`<div class="card hint">Live: <b class="pos">+${(lv.plus||{})[p.id]||0}</b> / <b class="neg">−${(lv.minus||{})[p.id]||0}</b> · ${(lv.mins||{})[p.id]||0} Spielminuten${lv.goals?` · ⚽ ${b.tore} · Tore auf dem Feld ${b.gf}:${b.ga}`:''}${(lv.cards||[]).filter(c=>c.p===p.id).map(c=>` <span class="${c.c==='y'?'yc':c.c==='yr'?'yrc':'rc'}"></span>`).join('')}</div>`;}
   if(ev)h=`<div class="sub" style="margin-bottom:8px">Deine Einschätzung zwischendurch. Nur Kinder bewerten, die du gut beobachten konntest – leer bleibt leer. ${ps.filter(done).length} von ${ps.length} vollständig.</div>`+h;
   if(game)h=`<div class="sub" style="margin-bottom:8px">Nur Kinder bewerten, die gespielt haben – wer leer bleibt, zählt als nicht dabei. ${ps.filter(done).length} von ${ps.length} vollständig.</div>`+h;
   if(!game&&!ev)h+=`<div class="card"><div class="lbl">Frag das Kind: Wie viel Spaß macht dir Fußball gerade?</div><div class="moods">${MOODS.map((m,i)=>`<button class="${mood===i+1?'on':''}" onclick="A.mood('${p.id}',${i+1})">${m}</button>`).join('')}</div></div>`;
@@ -506,7 +509,7 @@ function vPlayer(){
   h+=cmpCard(pid);
   const lg=ss.filter(s=>s.live&&((s.live.plus||{})[pid]||(s.live.minus||{})[pid]||(s.live.mins||{})[pid]||(s.live.goals||[]).some(g=>(g.on||[]).includes(pid))));
   if(lg.length){const tot=lg.reduce((a,s)=>{const b=gameBal(s.live,pid);a.t+=b.tore;a.f+=b.gf;a.a+=b.ga;a.m+=(s.live.mins||{})[pid]||0;return a;},{t:0,f:0,a:0,m:0});
-    h+=`<div class="card"><div class="lbl">Live-Bilanz <small>${lg.length} Spiel${lg.length===1?'':'e'} · ${tot.m} Min. · ⚽ ${tot.t} · Tore auf dem Feld ${tot.f}:${tot.a}</small></div>${lg.slice().reverse().map(s=>{const b=gameBal(s.live,pid);return `<div class="trow"><div><div class="t2">${esc(s.title)}${s.result?' · '+esc(s.result):''}</div><div class="sub">${fdate(s.date)} · ${(s.live.mins||{})[pid]||0} Min.${s.live.goals?` · ⚽ ${b.tore} · auf dem Feld ${b.gf}:${b.ga}`:''}</div></div><div class="val"><span class="pos">+${(s.live.plus||{})[pid]||0}</span> <span class="neg">−${(s.live.minus||{})[pid]||0}</span></div></div>`;}).join('')}</div>`;}
+    h+=`<div class="card"><div class="lbl">Live-Bilanz <small>${lg.length} Spiel${lg.length===1?'':'e'} · ${tot.m} Min. · ⚽ ${tot.t} · Tore auf dem Feld ${tot.f}:${tot.a}</small></div>${lg.slice().reverse().map(s=>{const b=gameBal(s.live,pid);return `<div class="trow"><div><div class="t2">${esc(s.title)}${s.result?' · '+esc(s.result):''}</div><div class="sub">${fdate(s.date)} · ${(s.live.mins||{})[pid]||0} Min.${s.live.goals?` · ⚽ ${b.tore} · auf dem Feld ${b.gf}:${b.ga}`:''}${(s.live.cards||[]).filter(c=>c.p===pid).map(c=>` <span class="${c.c==='y'?'yc':c.c==='yr'?'yrc':'rc'}"></span>`).join('')}</div></div><div class="val"><span class="pos">+${(s.live.plus||{})[pid]||0}</span> <span class="neg">−${(s.live.minus||{})[pid]||0}</span></div></div>`;}).join('')}</div>`;}
   const notes=ss.filter(s=>s.notes?.[pid]).map(s=>`<div class="note"><small>${fdate(s.date)}</small>${esc(s.notes[pid])}</div>`).join('');
   if(notes)h+=`<div class="card"><div class="lbl">Notizen</div>${notes}</div>`;
   return h;
@@ -693,11 +696,19 @@ function cmpCard(pid){
 }
 function vActs(s){
   const acts=s.live.actions||[];const open=acts.filter(a=>!a.c).length;
-  let h=`<div class="sub" style="margin-bottom:8px">${open?`<b>${open} Aktion${open===1?'':'en'} ohne Kategorie.</b> Tippe die passende an.`:'Alle Aktionen sind zugeordnet.'} Nochmal antippen hebt die Zuordnung auf.</div>`;
+  const goals=(s.live.goals||[]).map((g,i)=>({g,i})).filter(x=>x.g.t==='goal');
+  let gh='';
+  if(goals.length)gh=`<div class="lbl2">Torschützen</div>`+goals.map(({g,i})=>`<div class="card arow ${!g.p&&!g.og?'open':''}"><b>${isNum(g.at)?g.at+"' ":''}⚽ Tor${g.p?' · '+esc(short(g.p)):g.og?' · Eigentor Gegner':' · Torschütze?'}</b><div class="chips">${(g.on||[]).map(pid=>`<button class="chip ${g.p===pid?'onp':''}" onclick="A.goalSet(${i},'${pid}')">${esc(short(pid))}</button>`).join('')}<button class="chip ${g.og?'onp':''}" onclick="A.goalSet(${i},'og')">Eigentor Gegner</button></div></div>`).join('')+`<div class="lbl2">Aktionen</div>`;
+  if(!acts.length)return gh;
+  let h=gh+`<div class="sub" style="margin-bottom:8px">${open?`<b>${open} Aktion${open===1?'':'en'} ohne Kategorie.</b> Tippe die passende an.`:'Alle Aktionen sind zugeordnet.'} Nochmal antippen hebt die Zuordnung auf.</div>`;
   h+=acts.map((a,i)=>{const cats=a.gk?ACT_G:ACT_F;return `<div class="card arow ${a.c?'':'open'}"><div class="row between"><b>${isNum(a.at)?a.at+"' ":''}${esc(short(a.p))}${a.gk?' (TW)':''}</b><span class="${a.t==='+'?'pos':'neg'}" style="font-weight:700;font-size:20px">${a.t==='+'?'+':'−'}</span></div><div class="chips">${cats.map(c=>`<button class="chip ${a.c===c.k?(a.t==='+'?'onp':'onm'):''}" onclick="A.actCat(${i},'${c.k}')">${esc(a.t==='+'?c.p:c.m)}</button>`).join('')}</div></div>`;}).join('');
   return h||'<div class="empty">Keine Aktionen erfasst.</div>';
 }
 let sheetT=null;
+function sheetOpen(html,ms){const el=$('#sheet');clearTimeout(sheetT);el.innerHTML=html+(ms?`<div class="sbarw"><div class="sbar" id="sbar"></div></div>`:'');el.classList.add('open');
+  if(ms){requestAnimationFrame(()=>{const b=$('#sbar');if(b){b.style.transition='none';b.style.width='100%';requestAnimationFrame(()=>{b.style.transition=`width ${ms/1000}s linear`;b.style.width='0%';});}});sheetT=setTimeout(()=>A.sheetHide(),ms);}}
+function cardBadge(L,pid){const cs=(L.cards||[]).filter(c=>c.p===pid);if(!cs.length)return'';const last=cs[cs.length-1].c;return ` <span class="${last==='y'?'yc':last==='yr'?'yrc':'rc'}"></span>`;}
+const CARD_N={y:'Gelbe Karte',yr:'Gelb-Rote Karte',r:'Rote Karte'};
 function showSheet(e){
   const el=$('#sheet');const cats=e.gk?ACT_G:ACT_F;const plus=e.t==='+';
   el.innerHTML=`<div class="row between" style="margin-bottom:8px"><b>${esc(short(e.p))} <span class="${plus?'pos':'neg'}">${plus?'+':'−'}</span> · Was war's?</b><button class="btn sm2" onclick="A.sheetHide()">Später</button></div><div class="sgrid ${plus?'p':'m'}">${cats.map(c=>`<button onclick="A.sheetPick('${e.id}','${c.k}')">${esc(plus?c.p:c.m)}</button>`).join('')}</div><div class="sbarw"><div class="sbar" id="sbar"></div></div>`;
@@ -810,19 +821,21 @@ function vLive(){
   L.goals=L.goals||[];
   const sel=S.liveSel,isSel=(k,key)=>sel&&sel.kind===k&&sel.key===key;
   const pm=pid=>`<div class="pm"><button class="lm" onclick="event.stopPropagation();A.liveAct('${pid}',-1)" aria-label="Minus">−</button><span class="cnt"><b class="pos">${L.plus[pid]||0}</b><b class="neg">${L.minus[pid]||0}</b></span><button class="lp" onclick="event.stopPropagation();A.liveAct('${pid}',1)" aria-label="Plus">+</button></div>`;
-  const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid)):'frei'}</b><small>${slotLabel(k)}${pid?` · <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(liveSecs(L,pid)/60)}'</span>`:''}</small>${pid?pm(pid):''}</div>`;};
+  const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid))+cardBadge(L,pid):'frei'}</b><small>${slotLabel(k)}${pid?` · <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(liveSecs(L,pid)/60)}'</span>`:''}</small>${pid?pm(pid):''}</div>`;};
   const order=['L','Z','R'];const line=pt=>FORMS[L.n][L.form].filter(k=>k[0]===pt).sort((a,b)=>order.indexOf(a[2])-order.indexOf(b[2]));
   const tp=Object.values(L.plus).reduce((a,b)=>a+b,0),tm=Object.values(L.minus).reduce((a,b)=>a+b,0);
   let h=`<div class="lhead"><button id="lclock" class="lclock ${L.clock.running?'run':''}" onclick="A.liveClock()">${fclock(liveSecs(L))}</button><div class="lctl"><button class="btn ${L.clock.running?'':'pri'}" onclick="A.liveClock()">${L.clock.running?'Pause':(L.clock.elapsed?'Weiter':'Anpfiff')}</button><button class="btn" onclick="A.liveUndo()" ${L.log.length?'':'disabled'}>↶ Zurück</button></div></div>`;
   {const sc=score(L);h+=`<div class="score"><button class="btn goalb" onclick="A.goalAsk()">⚽ Tor</button><div class="sc">${sc.gf} : ${sc.ga}</div><button class="btn concb" onclick="A.concede()">Gegentor</button></div>`;}
+  h+=`<div class="cardrow"><button onclick="A.cardAsk('y')"><span class="yc"></span>Gelb</button><button onclick="A.cardAsk('yr')"><span class="yrc"></span>Gelb-Rot</button><button onclick="A.cardAsk('r')"><span class="rc"></span>Rot</button></div>`;
   h+=`<div class="row between"><div class="chips scroll" style="margin:4px 0">${[4,5,6].map(n=>`<button class="chip ${L.n===n?'on':''}" onclick="A.liveN(${n})">${n}+1</button>`).join('')}${Object.keys(FORMS[L.n]).map(f=>`<button class="chip ${L.form===f?'on':''}" onclick="A.liveForm('${f}')">${f}</button>`).join('')}</div><div class="pill">Team <b class="pos">+${tp}</b> <b class="neg">−${tm}</b></div></div>`;
   h+=`<div class="sub">${sel?'Jetzt Ziel antippen: Feldspieler = Positionen tauschen, Bankspieler = Wechsel. Nochmal antippen = abbrechen.':'Spieler antippen, um Positionen zu tauschen oder auszuwechseln.'}</div>`;
   h+=`<div class="pitch live">${['S','M','A'].map(pt=>{const l=line(pt);return l.length?`<div class="prowl">${l.map(card).join('')}</div>`:'';}).join('')}<div class="prowl">${card('TW')}</div></div>`;
   h+=`<div class="lbl2">Bank</div>`;
   const bsort=L.bench.slice().sort((a,b)=>liveSecs(L,a)-liveSecs(L,b));
-  h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}</b><small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(liveSecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
+  h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}${cardBadge(L,pid)}</b><small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(liveSecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
   h+=`<div class="ampel"><span>Spielzeit-Ziel je Kind:</span>${[33,50,66].map(n=>`<button class="chip ${((S.cfg&&S.cfg.minShare)||50)===n?'on':''}" onclick="A.cfgSet('minShare',${n})">${n} %</button>`).join('')}</div><div class="sub"><span class="dot ok"></span>im Ziel <span class="dot warn"></span>knapp <span class="dot low"></span>zu wenig (ab Minute 3). Die Bank ist nach Spielzeit sortiert, wer am wenigsten gespielt hat, steht vorn.</div>`;
-  const inGame=new Set([...liveField(L),...L.bench]);const others=plist().filter(p=>!inGame.has(p.id));
+  if((L.sentOff||[]).length)h+=`<div class="sub" style="margin-top:4px"><b>Platzverweis:</b> ${(L.cards||[]).filter(c=>c.c!=='y').map(c=>`${esc(short(c.p))} (${c.c==='yr'?'Gelb-Rot':'Rot'}, ${c.at}')`).join(', ')}</div>`;
+  const inGame=new Set([...liveField(L),...L.bench,...(L.sentOff||[])]);const others=plist().filter(p=>!inGame.has(p.id));
   if(others.length)h+=`<details class="card"><summary>Weitere Spieler zur Bank (${others.length})</summary><div class="chips">${others.map(p=>`<button class="chip" onclick="A.liveAddBench('${p.id}')">+ ${esc(short(p.id))}</button>`).join('')}</div></details>`;
   h+=`<div class="row gap" style="margin-top:14px"><button class="btn pri grow" onclick="A.liveEndModal()">Spiel beenden &amp; speichern</button><button class="btn danger" onclick="A.liveAskDiscard()">Verwerfen</button></div><div class="sub" style="margin-top:6px">Die Uhr läuft auch weiter, wenn du die App kurz schließt. Spielminuten zählen nur, solange die Uhr läuft.</div>`;
   return h;
@@ -873,6 +886,7 @@ const A={
   liveAct(pid,d){const L=S.live;if(!L)return;const o=d>0?L.plus:L.minus;o[pid]=(o[pid]||0)+1;const e={t:d>0?'+':'-',p:pid,id:uid('a'),c:null,at:Math.floor(liveSecs(L)/60),gk:L.pos.TW===pid};L.log.push(e);try{navigator.vibrate&&navigator.vibrate(15);}catch(x){}liveSave();render(true);showSheet(e);},
   sheetPick(id,c){const L=S.live;if(L){const e=L.log.find(x=>x.id===id);if(e){e.c=c;liveSave();const cats=e.gk?ACT_G:ACT_F;const cc=cats.find(x=>x.k===c);toast((e.t==='+'?cc.p:cc.m)+' · '+short(e.p));}}A.sheetHide();},
   sheetHide(){clearTimeout(sheetT);const el=$('#sheet');if(el)el.classList.remove('open');},
+  goalSet(i,pid){const s=clone(S.sessions[S.sessionId]);const g=s.live&&s.live.goals&&s.live.goals[i];if(!g)return;if(pid==='og'){g.og=!g.og;g.p=null;}else{g.p=g.p===pid?null:pid;g.og=false;}saveDoc('sessions',S.sessionId,s);render(true);},
   actCat(i,c){const s=clone(S.sessions[S.sessionId]);const a=s.live&&s.live.actions&&s.live.actions[i];if(!a)return;a.c=a.c===c?null:c;saveDoc('sessions',S.sessionId,s);render(true);},
   goalAdd(pid){S.goalPid=pid;showModal(`<h3>Neues Entwicklungsziel</h3><label>Ziel<input id="m_goal" placeholder="z. B. linken Fuß einsetzen" autocomplete="off"></label><div class="sub">Vorschläge:</div><div class="chips">${GOAL_SUG.map(g=>`<button class="chip" onclick="document.getElementById('m_goal').value=this.textContent">${g}</button>`).join('')}</div><div class="sub" style="margin:4px 0 12px">Konkret und beobachtbar formulieren – dann kannst du am Platz gut abhaken.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.goalSave()">Speichern</button></div>`);},
   goalSave(){const t=$('#m_goal').value.trim();if(!t){toast('Bitte ein Ziel eingeben.');return;}const pid=S.goalPid;const p=clone(S.players[pid]);p.goals=p.goals||[];p.goals.push({id:uid('z'),text:t,status:'offen',created:Date.now(),upd:Date.now()});saveDoc('players',pid,p);closeModal();render(true);},
@@ -882,10 +896,23 @@ const A={
   printCard(){try{window.print();}catch(e){toast('Drucken geht hier nicht – bitte Screenshot machen.');}},
   cfgSet(k,v){S.cfg=S.cfg||{};S.cfg[k]=v;saveLocal();render(true);},
   goalAsk(){
-    const L=S.live;if(!L)return;const ps=Object.entries(L.pos).filter(([k,v])=>v).map(([k,v])=>v);
-    clearTimeout(sheetT);const el=$('#sheet');
-    el.innerHTML=`<div class="row between" style="margin-bottom:8px"><b>⚽ Tor! Wer hat getroffen?</b><button class="btn sm2" onclick="A.sheetHide()">Abbrechen</button></div><div class="sgrid p">${ps.map(pid=>`<button onclick="A.goalPick('${pid}')">${esc(short(pid))}</button>`).join('')}<button onclick="A.goalPick('')" style="background:#5f6f64">Weiß nicht / Eigentor</button></div>`;
-    el.classList.add('open');
+    const L=S.live;if(!L)return;accrue(L);L.goals=L.goals||[];
+    const e={t:'goal',p:null,at:Math.floor(liveSecs(L)/60),on:liveField(L),id:uid('g')};L.goals.push(e);L.log.push({t:'goal',id:e.id});liveSave();render(true);
+    const sc=score(L);const rank=k=>k==='TW'?9:({S:0,M:1,A:2}[k[0]]*3+({L:0,Z:1,R:2}[k[2]]||0));const ps=Object.keys(L.pos).filter(k=>L.pos[k]).sort((a,b)=>rank(a)-rank(b)).map(k=>L.pos[k]);
+    sheetOpen(`<div class="row between" style="margin-bottom:8px"><b>⚽ Tor! ${sc.gf}:${sc.ga} · Wer hat getroffen?</b><button class="btn sm2" onclick="A.sheetHide()">Später</button></div><div class="sgrid p">${ps.map(pid=>`<button onclick="A.goalScorer('${e.id}','${pid}')">${esc(short(pid))}</button>`).join('')}<button onclick="A.goalScorer('${e.id}','og')" style="background:#5f6f64">Eigentor Gegner</button></div>`,7000);
+  },
+  goalScorer(gid,pid){const L=S.live;const g=L&&(L.goals||[]).find(x=>x.id===gid);if(g){g.p=pid==='og'?null:pid;g.og=pid==='og';liveSave();render(true);toast(pid==='og'?'Eigentor des Gegners':`⚽ ${short(pid)}`);}A.sheetHide();},
+  cardAsk(c){
+    const L=S.live;if(!L)return;const ps=[...Object.values(L.pos).filter(Boolean),...L.bench];
+    sheetOpen(`<div class="row between" style="margin-bottom:8px"><b><span class="${c==='y'?'yc':c==='yr'?'yrc':'rc'}"></span> ${CARD_N[c]} für …</b><button class="btn sm2" onclick="A.sheetHide()">Abbrechen</button></div><div class="sgrid cg">${ps.map(pid=>`<button onclick="A.cardGive('${c}','${pid}')">${esc(short(pid))}</button>`).join('')}</div>`,0);
+  },
+  cardGive(c,pid){
+    const L=S.live;if(!L)return;accrue(L);L.cards=L.cards||[];L.sentOff=L.sentOff||[];
+    let cc=c;if(c==='y'&&L.cards.some(x=>x.p===pid&&x.c==='y'))cc='yr';
+    const e={t:'card',c:cc,p:pid,at:Math.floor(liveSecs(L)/60),id:uid('k'),slot:null};
+    if(cc!=='y'){const slot=Object.keys(L.pos).find(k=>L.pos[k]===pid);if(slot){L.pos[slot]=null;e.slot=slot;}L.bench=L.bench.filter(x=>x!==pid);L.sentOff.push(pid);}
+    L.cards.push(e);L.log.push({t:'card',id:e.id});A.sheetHide();liveSave();render(true);
+    toast(`${CARD_N[cc]} · ${short(pid)}${cc==='yr'&&c==='y'?' (2. Gelbe)':''}${cc!=='y'?' – Platz ist frei':''}`);
   },
   goalPick(pid){const L=S.live;if(!L)return;accrue(L);L.goals=L.goals||[];const e={t:'goal',p:pid||null,at:Math.floor(liveSecs(L)/60),on:liveField(L),id:uid('g')};L.goals.push(e);L.log.push({t:'goal',id:e.id});A.sheetHide();liveSave();render(true);const sc=score(L);toast(`⚽ ${pid?short(pid):'Tor'} · ${sc.gf}:${sc.ga}`);},
   concede(){const L=S.live;if(!L)return;accrue(L);L.goals=L.goals||[];const e={t:'conc',at:Math.floor(liveSecs(L)/60),on:liveField(L),id:uid('g')};L.goals.push(e);L.log.push({t:'conc',id:e.id});liveSave();render(true);const sc=score(L);toast(`Gegentor · ${sc.gf}:${sc.ga}`);},
@@ -893,6 +920,7 @@ const A={
     const L=S.live;if(!L)return;const e=L.log.pop();if(!e)return;
     A.sheetHide();
     if(e.t==='+'||e.t==='-'){const o=e.t==='+'?L.plus:L.minus;o[e.p]=Math.max(0,(o[e.p]||0)-1);toast(`${e.t==='+'?'Plus':'Minus'} für ${short(e.p)} zurückgenommen`);}
+    else if(e.t==='card'){const c=(L.cards||[]).find(x=>x.id===e.id);L.cards=(L.cards||[]).filter(x=>x.id!==e.id);if(c&&c.c!=='y'){L.sentOff=(L.sentOff||[]).filter(x=>x!==c.p);if(c.slot&&!L.pos[c.slot])L.pos[c.slot]=c.p;else if(!liveField(L).includes(c.p))L.bench.push(c.p);}toast('Karte zurückgenommen');}
     else if(e.t==='goal'||e.t==='conc'){L.goals=(L.goals||[]).filter(g=>g.id!==e.id);toast(e.t==='goal'?'Tor zurückgenommen':'Gegentor zurückgenommen');}
     else if(e.t==='swap'){accrue(L);const a=L.pos[e.a];L.pos[e.a]=L.pos[e.b];L.pos[e.b]=a;toast('Tausch zurückgenommen');}
     else if(e.t==='sub'){accrue(L);L.pos[e.slot]=e.outP;L.bench=L.bench.filter(x=>x!==e.outP);L.bench.push(e.inP);toast('Wechsel zurückgenommen');}
@@ -907,7 +935,7 @@ const A={
     const L=S.live;if(!L)return;accrue(L);L.clock.running=false;
     const mins={};Object.entries(L.mins).forEach(([p,s])=>{if(s>=1)mins[p]=Math.round(s/60);});
     const id=uid('s');const title=($('#m_title').value||'').trim()||'Spiel';
-    const doc={type:'game',date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{plus:L.plus,minus:L.minus,mins,n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({t:g.t,p:g.p||null,at:g.at,on:g.on||[]})),actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,gk:!!e.gk}))}};
+    const doc={type:'game',date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{plus:L.plus,minus:L.minus,mins,n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({t:g.t,p:g.p||null,og:!!g.og,at:g.at,on:g.on||[]})),cards:(L.cards||[]).map(c=>({c:c.c,p:c.p,at:c.at})),actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,gk:!!e.gk}))}};
     A.sheetHide();
     S.live=null;S.liveSel=null;saveDoc('sessions',id,doc);closeModal();A.openSession(id);toast('Spiel gespeichert – jetzt kurz bewerten');
   },
