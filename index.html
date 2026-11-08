@@ -276,7 +276,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='35';
+const APP_VERSION='36';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -551,7 +551,7 @@ function topOverview(){
   const ps=plist();
   const items=AREAS.map(a=>{const cat='a:'+a.k,ss=sessionsWith(cat);const rows=ps.map(p=>({p,v:srcVal(cat,p.id,ss)})).filter(r=>isNum(r.v)).sort((x,y)=>y.v-x.v).slice(0,3);return{a,cat,rows};}).filter(x=>x.rows.length);
   if(!items.length)return'';
-  return `<div class="card"><div class="lbl">Aktuell vorne je Bereich <small>letzter Wert je Kind</small></div>${items.map(x=>`<button class="ov" onclick="A.rk('cat','${x.cat}')"><span class="ovn">${esc(x.a.n)}</span><span class="ovp">${x.rows.map((r,i)=>`<b>${i+1}.</b> ${esc(r.p.name)}`).join(' &nbsp;')}</span></button>`).join('')}</div>`;
+  return `<div class="card"><div class="lbl">Aktuell vorne je Bereich <small>nach „Werte aus“ und Zeitraum</small></div>${items.map(x=>`<button class="ov" onclick="A.rk('cat','${x.cat}')"><span class="ovn">${esc(x.a.n)}</span><span class="ovp">${x.rows.map((r,i)=>`<b>${i+1}.</b> ${esc(r.p.name)}`).join(' &nbsp;')}</span></button>`).join('')}</div>`;
 }
 function vRank(){
   const R=S.rk;
@@ -685,7 +685,7 @@ function bestLineup(slots,players,mode){
 function vLineup(){
   const L=S.lu;const all=plist();
   if(!FORMS[L.n][L.form])L.form=Object.keys(FORMS[L.n])[0];
-  let h=`<h2>Aufstellung</h2><div class="sub">Vorschlag auf Basis der letzten Werte je Kind. Die Entscheidung bleibt deine.</div>`;
+  let h=`<h2>Aufstellung</h2><div class="sub">Vorschlag auf Basis der gewählten Werte und des Zeitraums. Die Entscheidung bleibt deine.</div>`;
   h+=`<div class="seg">${[4,5,6].map(n=>`<button class="${L.n===n?'on':''}" onclick="A.lu('n',${n})">${n} + 1</button>`).join('')}</div>`;
   h+=`<div class="chips">${Object.keys(FORMS[L.n]).map(f=>`<button class="chip ${L.form===f?'on':''}" onclick="A.lu('form','${f}')">${f}</button>`).join('')}</div>`;
   h+=`<div class="seg">${[['stark','Stärkste'],['ausgewogen','Ausgewogen']].map(([k,n])=>`<button class="${L.mode===k?'on':''}" onclick="A.lu('mode','${k}')">${n}</button>`).join('')}</div>`;
@@ -896,6 +896,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:36,items:['Kleinigkeiten aus dem Komplett-Test: Ein Spiel ohne Gegnernamen heißt jetzt „Spiel“ statt „Spiel gegen“, Hinweistexte in Aufstellung und Ranglisten passen zu „Werte aus“ und Zeitraum.']},
  {v:35,items:['Aufstellung aufgeräumt: „Mix“ steht bei „Werte aus“ und „Zeitraum“ jeweils rechts untereinander, die Wochen-Auswahl für die Form in einer Zeile.','<b>Mix ist zurück:</b> „Werte aus“ bietet wieder Trainer, App und <b>Mix</b> (Standard). „Trainer“ = nur deine Einschätzungen (ohne Tests) plus Live-Aktionen als Zusatzbewertungen, „App“ = Live-Aktionen und Tests, Mix = Mittelwert aus beiden.']},
  {v:34,items:['<b>Live zählt mit:</b> Jede Plus-Aktion im Spiel zählt wie eine zusätzliche 5, jede Minus-Aktion wie eine 1, und das direkt auf deine Einschätzung und die Testwerte. 4 Aktionen wiegen so viel wie eine Bewertung, Live macht höchstens die Hälfte eines Werts aus.','„Werte aus“ heißt jetzt Trainer, <b>Trainer + Live</b> (Standard) und Nur App.']},
  {v:33,items:['<b>Potenzial &amp; Form:</b> Potenzial = alle Werte der Saison, Form = die letzten 4, 6 oder 8 Wochen. Aufstellung und Ranglisten rechnen standardmäßig mit dem Mittelwert (Mix), umschaltbar. Im Spielerprofil stehen beide nebeneinander.','Gewichtung angepasst: Im Mittelfeld zählt Passspiel mehr, im Sturm zählt der <b>Abschluss</b> mit (10 %).','Neue Kategorie <b>Abschluss / Torschuss</b> in der Trainereinschätzung. Bisherige Bewertungen bleiben, du kannst Abschluss einfach nachtragen. Die App rechnet ihn zusätzlich aus „Guter Abschluss“ und Toren.']},
@@ -1321,7 +1322,7 @@ const A={
     syncOn(L);Object.keys(L.on||{}).forEach(p=>{const a=L.on[p];const b=Math.round(L.clock.elapsed);if(b>a)(L.per[p]=L.per[p]||[]).push([a,b]);});L.on={};
     const mins={};Object.entries(L.mins).forEach(([p,s])=>{if(s>=1)mins[p]=Math.round(s/60);});
     const periods={};Object.entries(L.per||{}).forEach(([p,ps])=>{const v=ps.filter(([a,b])=>b-a>=10);if(v.length)periods[p]=v;});
-    const id=uid('s');const title=($('#m_title').value||'').trim()||'Spiel';
+    const id=uid('s');let title=($('#m_title').value||'').trim()||'Spiel';if(/^Spiel gegen$/i.test(title))title='Spiel';
     const doc={type:'game',date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{plus:L.plus,minus:L.minus,mins,periods,fmt:liveFmt(L),n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({id:g.id,t:g.t,p:g.p||null,og:!!g.og,at:g.at,ml:g.ml,sec:g.sec,on:g.on||[],ts:g.ts||0})),cards:(L.cards||[]).map(c=>({c:c.c,p:c.p,at:c.at,ml:c.ml,sec:c.sec,ts:c.ts||0})),subs:L.log.filter(e=>e.t==='sub').map(e=>({at:isNum(e.at)?e.at:0,ml:e.ml,sec:e.sec,in:e.inP,out:e.outP||null,ts:e.ts||0})),partStarts:L.partStarts||[0],actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,ml:e.ml,gk:!!e.gk,...(e.goal?{goal:e.goal}:{})}))}};
     A.sheetHide();
     S.live=null;S.liveSel=null;saveDoc('sessions',id,doc);closeModal();A.openSession(id);A.backupAsk();
@@ -1404,7 +1405,7 @@ const A={
   editSession(){const s=S.sessions[S.sessionId];if(!s)return;sessionModal({id:S.sessionId,type:s.type,result:s.result,date:s.date,title:s.title,tests:(s.tests||[]).slice()});},
   togDraft(k,el){const t=S.draft.tests;const i=t.indexOf(k);if(i>=0)t.splice(i,1);else t.push(k);el.classList.toggle('on');},
   saveSession(){
-    const d=S.draft;const date=$('#m_date').value||today();const title=$('#m_title').value.trim()||'Testtag';
+    const d=S.draft;const date=$('#m_date').value||today();let title=$('#m_title').value.trim()||'Testtag';if(/^Spiel gegen$/i.test(title))title='Spiel';
     const game=d.type==='game'||d.type==='eval';
     const tests=game?[]:TESTS.map(t=>t.k).filter(k=>d.tests.includes(k));
     if(!game&&!tests.length){toast('Bitte mindestens einen Test wählen.');return;}
