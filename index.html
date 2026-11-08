@@ -267,7 +267,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='25';
+const APP_VERSION='26';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -807,6 +807,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:26,items:['Fehlerbehebungen im Live-Spiel: Kein Spieler kann mehr doppelt (Feld und Bank) auftauchen, auch nach mehrfachem „Zurück“.','„↶ Zurück“ nimmt jetzt auch ein versehentliches „Halbzeit beenden“ oder den Abpfiff zurück.','Anleitung in den Einstellungen aktualisiert.']},
  {v:25,items:['Spielminuten wie im Fußball: Nachspielzeit als <b>„15+1“</b>, der nächste Abschnitt beginnt immer bei der richtigen Minute (z. B. <b>16′</b>).']},
  {v:24,items:['<b>Spielzeit-Einteilung</b> vor dem Spiel: durchgehend, 2 Halbzeiten oder 4 Viertel, Minuten frei wählbar. Halbzeit/Viertel beenden, Nachspielzeit-Anzeige.','<b>Wieder einwechseln</b> klappt beliebig oft – alle Einsätze werden mit Minuten notiert und die Spielzeit addiert.']},
  {v:23,items:['Bei Toren, Karten und Wechseln wird die <b>Spielminute</b> notiert. Neuer <b>Spielverlauf</b> im Live-Spiel und im gespeicherten Spiel.','Neuer Bereich <b>Einstellungen</b> (⚙︎ oben rechts): Spielerprofile als PDF, aktuelle Anleitung, Datensicherung.','„Was ist neu“ erscheint nach jedem Update einmal automatisch.']},
@@ -825,7 +826,7 @@ function whatsNew(all){
 }
 const GUIDE=[
  ['Erste Schritte',`<ol class="st"><li><b>Mannschaft benennen:</b> oben auf den Mannschaftsnamen (z. B. „U10 ▾“) tippen. Dort legst du auch weitere Mannschaften an.</li><li><b>Kader anlegen:</b> Reiter <b>Kader</b> → „+ Spieler“. Vornamen reichen.</li><li><b>Daten sammeln:</b> Testtag, Trainereinschätzung oder direkt ein Live-Spiel.</li><li><b>Sichern:</b> Einstellungen oder Kader → „Sicherung speichern“ → z. B. iCloud Drive.</li></ol>`],
- ['Live-Erfassung im Spiel',`<ol class="st"><li><b>Aufstellung</b> vorbereiten (Spielform, Formation, Torwart, wer ist da) und per Antippen anpassen → „▶ Live mit dieser Aufstellung“.</li><li><b>Anpfiff</b> startet die Uhr, „Pause“ hält sie an. Sie läuft weiter, auch wenn das Handy gesperrt ist.</li><li><b>Plus/Minus</b> unter jedem Spieler. Danach 5 Sekunden Zeit für eine Kategorie (z. B. „Toller Pass“) – oder „Später“.</li><li><b>Tor</b> zählt sofort, danach 7 Sekunden den Torschützen antippen. <b>Gegentor</b> mit einem Tipp. Die App merkt sich, wer auf dem Feld stand.</li><li><b>Karten:</b> Gelb, Gelb-Rot oder Rot, dann den Spieler wählen. Die zweite Gelbe wird automatisch Gelb-Rot. Platzverweise verlassen das Feld.</li><li><b>Wechseln:</b> Spieler antippen (leuchtet), dann Bankspieler = Wechsel oder Feldspieler = Positionstausch.</li><li><b>Spielzeit-Ampel:</b> grün im Ziel, orange knapp, rot zu wenig. Die Bank ist nach Spielzeit sortiert.</li><li><b>↶ Zurück</b> nimmt die letzte Aktion zurück – auch Tore, Karten und Wechsel.</li><li><b>Spiel beenden &amp; speichern:</b> Ergebnis ist eingetragen. Danach bewerten und unter „Aktionen“ offene Kategorien und Torschützen zuordnen.</li></ol>`],
+ ['Live-Erfassung im Spiel',`<ol class="st"><li><b>Aufstellung</b> vorbereiten (Spielform, Formation, Torwart, wer ist da) und per Antippen anpassen. Darunter die <b>Spielzeit-Einteilung</b> wählen: durchgehend, 2 Halbzeiten oder 4 Viertel, Minuten pro Abschnitt. Dann „▶ Live mit dieser Aufstellung“.</li><li><b>Anpfiff</b> startet die Uhr, „Pause“ hält sie an. Sie läuft weiter, auch wenn das Handy gesperrt ist.</li><li><b>Halbzeit/Viertel:</b> Ist die Zeit um, wird die Uhr rot und zeigt die Nachspielzeit. „Halbzeit beenden“ stoppt die Uhr, danach „2. Halbzeit anpfeifen“. Am Ende „Abpfiff“.</li><li><b>Spielminuten</b> wie im Fußball: Nachspielzeit als „15+1“, das 2. Viertel beginnt bei 16′.</li><li><b>Plus/Minus</b> unter jedem Spieler. Danach 5 Sekunden Zeit für eine Kategorie (z. B. „Toller Pass“) – oder „Später“.</li><li><b>Tor</b> zählt sofort, danach 7 Sekunden den Torschützen antippen. <b>Gegentor</b> mit einem Tipp.</li><li><b>Karten:</b> Gelb, Gelb-Rot oder Rot, dann den Spieler wählen. Die zweite Gelbe wird automatisch Gelb-Rot. Platzverweise verlassen das Feld.</li><li><b>Wechseln:</b> Spieler antippen (leuchtet), dann Bankspieler = Wechsel oder Feldspieler = Positionstausch. Ausgewechselte Kinder können beliebig oft zurück – alle Einsätze werden addiert.</li><li><b>Spielzeit-Ampel:</b> grün im Ziel, orange knapp, rot zu wenig. Die Bank ist nach Spielzeit sortiert. Unter „Spielzeiten“ siehst du jeden Einsatz.</li><li><b>↶ Zurück</b> nimmt die letzte Aktion zurück – auch Tore, Karten, Wechsel und das Ende eines Abschnitts.</li><li><b>Spiel beenden &amp; speichern:</b> Ergebnis ist eingetragen. Danach bewerten, unter „Aktionen“ offene Kategorien und Torschützen zuordnen, unter „Verlauf“ den Spielverlauf ansehen.</li></ol>`],
  ['Bewertung',`<ul class="dot"><li><b>⏱ Testtag:</b> nur messen. Tests auswählen, Anleitung beachten, Zeiten mit der Stoppuhr übernehmen (der bessere Versuch bleibt).</li><li><b>📝 Trainereinschätzung:</b> 1–5 für Spielverständnis, Passspiel, Dribbling, Mut, Athletik u. v. m., optional Torwart. Dazu Ziele und Notiz.</li><li><b>⚽ Spiel:</b> entsteht aus dem Live-Spiel oder über „+ Spiel“. Danach die Kinder bewerten.</li><li>Es zählt der Schnitt der letzten 3 Bewertungen je Kind.</li></ul>`],
  ['Aufstellung',`<ul class="dot"><li>„Stärkste“ = höchste Gesamtstärke, „Ausgewogen“ = keine Schwachstelle.</li><li>Torwart fest wählen oder „Automatisch“.</li><li>Spieler antippen, dann Ziel antippen = eigene Aufstellung. Sie bleibt gespeichert.</li></ul>`],
  ['Profil, Ranglisten &amp; Stärkenkarte',`<ul class="dot"><li><b>Profil:</b> Stärkenprofil, Entwicklung der Messwerte, Trainer vs. App, Live-Bilanz, Ziele.</li><li><b>Trainer vs. App:</b> deine Einschätzung neben dem Wert aus Tests und Spielen. ⚠ = deutliche Abweichung.</li><li><b>Ranglisten:</b> nur für dich. Zum Zeigen eignet sich die Fortschritts-Rangliste.</li><li><b>Stärkenkarte:</b> kindgerecht, ohne Ranglisten und Minuspunkte – per Screenshot teilen.</li></ul>`],
@@ -925,7 +926,14 @@ function gameMin(L){return minLbl(liveFmt(L),L.partStarts,liveSecs(L));}
 const mlOf=e=>e.ml||(isNum(e.at)?e.at+"'":'');
 function liveFmt(L){return L.fmt||{parts:1,len:40};}
 function partInfo(L){const F=liveFmt(L);const part=L.part||1;const ps=L.partStart||0;const inPart=Math.max(0,liveSecs(L)-ps);return{F,part,inPart,over:inPart-F.len*60,last:part>=F.parts,done:!!L.finished};}
-function liveSave(){if(S.live)syncOn(S.live);META.lastChange=Date.now();saveLocal();}
+function normalize(L){
+  const off=new Set(L.sentOff||[]);const seen=new Set();
+  Object.keys(L.pos).forEach(k=>{const p=L.pos[k];if(!p)return;if(off.has(p)||seen.has(p))L.pos[k]=null;else seen.add(p);});
+  L.bench=L.bench.filter((p,i,a)=>!seen.has(p)&&!off.has(p)&&a.indexOf(p)===i&&S.players[p]);
+  const known=new Set([...Object.keys(L.mins||{}),...Object.keys(L.per||{}),...Object.keys(L.on||{})]);
+  known.forEach(p=>{if(S.players[p]&&!seen.has(p)&&!off.has(p)&&!L.bench.includes(p))L.bench.push(p);});
+}
+function liveSave(){if(S.live){normalize(S.live);syncOn(S.live);}META.lastChange=Date.now();saveLocal();}
 function newLive(n,form,pos,bench){const F=(S.cfg&&S.cfg.fmt)||{parts:2,len:25};return{n,form,pos,bench,plus:{},minus:{},mins:{},log:[],clock:{running:false,elapsed:0,lastTick:0},started:Date.now(),fmt:{parts:F.parts,len:F.len},part:1,partStart:0,partStarts:[0]};}
 function slotLabel(k){if(k==='TW')return'Torwart';const[pt,sd]=k.split('-');return(pt==='M'?'Mitte':POS[pt].n)+(sd==='Z'?'':' '+sd);}
 function remapPos(M,n,form){const old=M.pos,slots=FORMS[n][form],np={};slots.forEach(k=>np[k]=old[k]||null);const used=new Set(Object.values(np).filter(Boolean));const rest=Object.entries(old).filter(([k,v])=>k!=='TW'&&v&&!used.has(v)).map(([k,v])=>v);slots.forEach(k=>{if(!np[k]&&rest.length)np[k]=rest.shift();});np.TW=old.TW||null;M.pos=np;M.n=n;M.form=form;}
@@ -1034,7 +1042,7 @@ const A={
     S.liveSel=null;liveSave();render(true);
   },
   liveAct(pid,d){const L=S.live;if(!L)return;const o=d>0?L.plus:L.minus;o[pid]=(o[pid]||0)+1;const e={t:d>0?'+':'-',p:pid,id:uid('a'),c:null,...gameMin(L),gk:L.pos.TW===pid};L.log.push(e);try{navigator.vibrate&&navigator.vibrate(15);}catch(x){}liveSave();render(true);showSheet(e);},
-  sheetPick(id,c){const L=S.live;if(L){const e=L.log.find(x=>x.id===id);if(e){e.c=c;liveSave();const cats=e.gk?ACT_G:ACT_F;const cc=cats.find(x=>x.k===c);toast((e.t==='+'?cc.p:cc.m)+' · '+short(e.p));}}A.sheetHide();},
+  sheetPick(id,c){const L=S.live;if(L){const e=L.log.find(x=>x.id===id);if(e){const cats=e.gk?ACT_G:ACT_F;const cc=cats.find(x=>x.k===c);if(cc){e.c=c;liveSave();toast((e.t==='+'?cc.p:cc.m)+' · '+short(e.p));}}}A.sheetHide();},
   sheetHide(){clearTimeout(sheetT);const el=$('#sheet');if(el)el.classList.remove('open');},
   goalSet(i,pid){const s=clone(S.sessions[S.sessionId]);const g=s.live&&s.live.goals&&s.live.goals[i];if(!g)return;if(pid==='og'){g.og=!g.og;g.p=null;}else{g.p=g.p===pid?null:pid;g.og=false;}saveDoc('sessions',S.sessionId,s);render(true);},
   actCat(i,c){const s=clone(S.sessions[S.sessionId]);const a=s.live&&s.live.actions&&s.live.actions[i];if(!a)return;a.c=a.c===c?null:c;saveDoc('sessions',S.sessionId,s);render(true);},
@@ -1085,6 +1093,7 @@ const A={
     const L=S.live;if(!L)return;const e=L.log.pop();if(!e)return;
     A.sheetHide();
     if(e.t==='+'||e.t==='-'){const o=e.t==='+'?L.plus:L.minus;o[e.p]=Math.max(0,(o[e.p]||0)-1);toast(`${e.t==='+'?'Plus':'Minus'} für ${short(e.p)} zurückgenommen`);}
+    else if(e.t==='part'){if(e.fin)L.finished=false;else{L.part=e.prevPart;L.partStart=e.prevStart;(L.partStarts||[0]).length>1&&L.partStarts.pop();}toast(e.fin?'Abpfiff zurückgenommen':'Abschnittsende zurückgenommen');}
     else if(e.t==='card'){const c=(L.cards||[]).find(x=>x.id===e.id);L.cards=(L.cards||[]).filter(x=>x.id!==e.id);if(c&&c.c!=='y'){L.sentOff=(L.sentOff||[]).filter(x=>x!==c.p);if(c.slot&&!L.pos[c.slot])L.pos[c.slot]=c.p;else if(!liveField(L).includes(c.p))L.bench.push(c.p);}toast('Karte zurückgenommen');}
     else if(e.t==='goal'||e.t==='conc'){L.goals=(L.goals||[]).filter(g=>g.id!==e.id);toast(e.t==='goal'?'Tor zurückgenommen':'Gegentor zurückgenommen');}
     else if(e.t==='swap'){accrue(L);const a=L.pos[e.a];L.pos[e.a]=L.pos[e.b];L.pos[e.b]=a;toast('Tausch zurückgenommen');}
@@ -1097,6 +1106,7 @@ const A={
   liveAddBench(pid){const L=S.live;if(!L.bench.includes(pid))L.bench.push(pid);liveSave();render(true);},
   liveEndModal(){showModal(`<h3>Spiel beenden</h3><label>Gegner / Titel<input id="m_title" value="Spiel gegen " autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" placeholder="z. B. 3:2" value="${(S.live&&S.live.goals&&S.live.goals.length)?score(S.live).gf+':'+score(S.live).ga:''}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Plus/Minus und Spielminuten werden als Spiel unter „Bewertung“ gespeichert. Danach kannst du die Kinder direkt bewerten.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.liveEnd()">Speichern</button></div>`);},
   partEnd(){const L=S.live;if(!L)return;accrue(L);L.clock.running=false;const PI=partInfo(L);
+    L.log.push({t:'part',fin:PI.last,prevPart:L.part||1,prevStart:L.partStart||0});
     if(PI.last){L.finished=true;liveSave();render(true);toast('Abpfiff! Jetzt „Spiel beenden & speichern“.');return;}
     L.part=(L.part||1)+1;L.partStart=Math.round(L.clock.elapsed);L.clock.elapsed=L.partStart;L.partStarts=(L.partStarts||[0]).concat(L.partStart);liveSave();render(true);toast(`${PI.part}. ${PART_N(PI.F.parts)} beendet`);},
   liveFmt(k,v){const L=S.live;if(!L)return;L.fmt=L.fmt||{parts:2,len:25};if(k==='parts')L.fmt.parts=v;else L.fmt.len=Math.max(5,Math.min(60,L.fmt.len+v));S.cfg=S.cfg||{};S.cfg.fmt={...L.fmt};liveSave();render(true);},
