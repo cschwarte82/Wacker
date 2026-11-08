@@ -212,6 +212,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
+const APP_VERSION='6';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -280,7 +281,7 @@ function importData(txt){
 }
 function backupCard(){
   const lb=META.lastBackup?new Date(META.lastBackup).toLocaleDateString('de-DE'):'noch nie';
-  return `<div class="card"><div class="lbl">Datensicherung</div><div class="sub" style="margin-bottom:10px">Die Daten liegen in der App auf diesem Gerät. Gesichert werden alle Mannschaften. Letzte Sicherung: <b>${lb}</b>. Beim Speichern auf dem iPhone „In Dateien sichern“ → iCloud Drive wählen.</div><div class="row gap" style="flex-wrap:wrap"><button class="btn pri" onclick="A.backup()">Sicherung speichern</button><button class="btn" onclick="A.restoreFile()">Sicherung einlesen</button><button class="btn" onclick="A.pasteModal()">Text einfügen</button></div><div class="sub" style="margin-top:8px">Beim Einlesen wird nur ergänzt, nichts gelöscht. „Text einfügen“ ist für die kopierte Datensicherung aus der alten Version.</div></div>`;
+  return `<div class="card"><div class="lbl">Datensicherung</div><div class="sub" style="margin-bottom:10px">Die Daten liegen in der App auf diesem Gerät. Gesichert werden alle Mannschaften. Letzte Sicherung: <b>${lb}</b>. Beim Speichern auf dem iPhone „In Dateien sichern“ → iCloud Drive wählen.</div><div class="row gap" style="flex-wrap:wrap"><button class="btn pri" onclick="A.backup()">Sicherung speichern</button><button class="btn" onclick="A.restoreFile()">Sicherung einlesen</button><button class="btn" onclick="A.pasteModal()">Text einfügen</button></div><div class="sub" style="margin-top:8px">Beim Einlesen wird nur ergänzt, nichts gelöscht. „Text einfügen“ ist für die kopierte Datensicherung aus der alten Version.</div></div><div class="sub" style="text-align:center;margin:6px 0 20px">App-Version ${APP_VERSION}</div>`;
 }
 
 // ---------- Auswertung ----------
@@ -808,7 +809,11 @@ window.A=A;
 (function init(){
   loadLocal();S.mode='local';S.ready=true;render(true);
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});}catch(e){}
-  if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+    const hadCtrl=!!navigator.serviceWorker.controller;let reloaded=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtrl||reloaded)return;reloaded=true;saveLocal();location.reload();});
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{try{r.update();}catch(e){}}).catch(()=>{});
+  }
 })();
 </script>
 </body>
