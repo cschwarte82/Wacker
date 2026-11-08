@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 30, 08.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 31, 08.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -34,17 +34,17 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 2. `APP_VERSION` erhöhen und Cache-Namen in `sw.js` (`u10-profil-vXX`) angleichen
 3. Eintrag in `CHANGELOG` (Was-ist-neu-Fenster) ergänzen
 4. Kurzanleitung `GUIDE` in `index.html` anpassen, falls Bedienung betroffen
-5. Handbuch (`materialien/handbuch.html`) aktualisieren, PDF neu erzeugen und als `TrainerRadar-Anleitung.pdf` ablegen
+5. Handbuch (`materialien/handbuch.html`) **und Flyer** (`materialien/werbeflyer.html`) prüfen und anpassen (ausdrücklicher Wunsch des Trainers), Screenshots mit `materialien/shots_live.js`, PDFs neu erzeugen; Handbuch als `TrainerRadar-Anleitung.pdf` ablegen
 6. Testen (Syntax-Check, Ablauf-Tests mit jsdom, Screenshots mit headless Chrome in iPhone-Größe 375 px), dann committen und pushen
 7. Achtung CSS: keine generischen Klassennamen doppelt vergeben (Fehler in V27: `.dot` kollidierte mit `ul.dot`)
 
 ## Funktionen (Reiter)
 - **Bewertung:** „+ Spiel“, „+ Testtag“ (nur messen, 14 Tests mit Anleitung + Stoppuhr), „+ Trainereinschätzung“; Trainingsschwerpunkte-Karte; im Spiel Reiter Bewertung, Verlauf, Aktionen, Export
 - **Aufstellung:** Werte aus Trainer/App/Mix wählbar, 4+1/5+1/6+1, Formationen, „Stärkste“/„Ausgewogen“, Torwart fest oder automatisch, per Antippen anpassbar (bleibt gespeichert), Spielzeit-Einteilung, „▶ Live mit dieser Aufstellung“
-- **Live:** kompakter Kopf (Uhr, Spielstand, Pause in einer Zeile; ↶ neben „Halbzeit beenden“), Tor/Gegentor/Karte in einer Zeile, Formation + Spielzeit-Ziel + Tor=Plus unter „Optionen“ (eingeklappt), Plus/Minus-Knöpfe bewusst groß (Wunsch des Trainers); Uhr mit Halbzeiten/Vierteln und Nachspielzeit, Plus/Minus mit Kategorie (5 s), Tor zählt sofort + Torschütze (7 s), Torschütze bekommt automatisch Plus „Guter Abschluss“ (`cfg.goalPlus`, Standard an; Aktion trägt `goal`-Verweis und folgt Torschützen-Änderung/Zurück), Gegentor, Gelb/Gelb-Rot/Rot, Wechsel und Positionstausch per Antippen, wieder einwechseln mit addierten Einsätzen, Spielzeit-Ampel (33/50/66 %), Spielverlauf, ↶ Zurück für alle Aktionen
+- **Live:** Wechselvorschlag (💡, ab Minute 3, bis zu 2: wenig gespielt rein ⇄ lange gespielt raus, passende Position; `subSuggest`), kompakter Kopf (Uhr, Spielstand, Pause in einer Zeile; ↶ neben „Halbzeit beenden“), Tor/Gegentor/Karte in einer Zeile, Formation + Spielzeit-Ziel + Tor=Plus unter „Optionen“ (eingeklappt), Plus/Minus-Knöpfe bewusst groß (Wunsch des Trainers); Uhr mit Halbzeiten/Vierteln und Nachspielzeit, Plus/Minus mit Kategorie (5 s), Tor zählt sofort + Torschütze (7 s), Torschütze bekommt automatisch Plus „Guter Abschluss“ (`cfg.goalPlus`, Standard an; Aktion trägt `goal`-Verweis und folgt Torschützen-Änderung/Zurück), Gegentor, Gelb/Gelb-Rot/Rot, Wechsel und Positionstausch per Antippen, wieder einwechseln mit addierten Einsätzen, Spielzeit-Ampel (33/50/66 %), Spielverlauf, ↶ Zurück für alle Aktionen
 - **Ranglisten:** bei Einschätzungs-Kategorien (inkl. Spielverhalten, Torwart, Technik) Werte aus Trainer/App/Mix wählbar; Bestwerte/Fortschritt je Test, Bereich, Einschätzung, Torwart, Tore, Tor-Bilanz auf dem Feld; „Aktuell vorne je Bereich“
 - **Kader:** Spieler (Fuß, Spielweise `stil`: offensiv/ausgewogen/defensiv, Positionstreue `treue`: hoch/mittel/gering), Profil (Stärkenprofil-Radar, Messwerte, Trainer vs. App, Live-Bilanz, Entwicklungsziele), Stärkenkarte fürs Kind, Datensicherung
-- **Einstellungen (⚙︎):** Spielerprofile als PDF, Anleitung (PDF + Kurzfassung), Was ist neu, Saison-Archiv (abschließen, ansehen, als Datei, zurückholen, vom Gerät löschen, Speicheranzeige), Datensicherung, Versionsnummer
+- **Einstellungen (⚙︎):** Spielerprofile als PDF, Saisonbericht pro Kind als PDF (aktuelle oder archivierte Saison, fürs Elterngespräch, ohne Ranglisten; `buildSeasonPdf`), Anleitung (PDF + Kurzfassung), Was ist neu, Saison-Archiv (abschließen, ansehen, als Datei, zurückholen, vom Gerät löschen, Speicheranzeige), Datensicherung, Versionsnummer
 - **Mehrere Mannschaften** über das Feld „U10 ▾“ im Kopf
 
 ## Bewertungslogik
@@ -66,7 +66,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 
 ## Offene Ideen (noch nicht umgesetzt)
 - Automatischer Hinweis kurz vor Spielende, wer unter dem Spielzeit-Ziel liegt
-- Wechselvorschlag im Spiel, Trainings-Anwesenheit, Saisonbericht pro Kind (PDF), Sicherung direkt nach Spielende, Gegner-Notizen (Ideen vom 08.11.2026)
+- Trainings-Anwesenheit, Gegner-Notizen (Ideen vom 08.11.2026; Wechselvorschlag, Saisonbericht und Sicherung nach Spielende sind seit V31 umgesetzt)
 - Echte Synchronisierung mit dem Co-Trainer (bräuchte Server, Datenschutz klären)
 - Saisonauswertung durch Claude aus der Sicherungsdatei
 
