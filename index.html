@@ -197,7 +197,7 @@ button{touch-action:manipulation}
 .lmin.ok{color:var(--good);font-weight:700}.lmin.warn{color:#c2410c;font-weight:700}.lmin.low{color:#fff;background:var(--bad);border-radius:4px;padding:0 3px;font-weight:700}
 .ampel{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin-top:6px}
 .ampel .chip{padding:5px 10px}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 3px 0 6px;vertical-align:middle}.dot.ok{background:var(--good)}.dot.warn{background:#c2410c}.dot.low{background:var(--bad)}
+.adot{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 3px 0 6px;vertical-align:middle}.adot.ok{background:var(--good)}.adot.warn{background:#c2410c}.adot.low{background:var(--bad)}
 .goal{padding:8px 0;border-top:1px solid #f0f2ee}.goal .gt{font-weight:600;font-size:14px}.goal.done .gt{color:var(--good)}
 .gx{background:none;border:0;font-size:20px;color:var(--mut);cursor:pointer;padding:0 6px}
 .gst{display:flex;gap:4px;margin-top:6px}.gst button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 2px;font:600 12px var(--ft);color:var(--mut);cursor:pointer}
@@ -267,7 +267,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='27';
+const APP_VERSION='28';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -807,6 +807,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:28,items:['Darstellungsfehler behoben: Listen in „Was ist neu“ und in der Anleitung überlappten auf dem iPhone.','Die komplette <b>Anleitung als PDF</b> gibt es jetzt unter Einstellungen – immer auf dem Stand der aktuellen Version.']},
  {v:26,items:['Spielverlauf wird immer exakt nach Spielzeit sortiert.','Fehlerbehebungen im Live-Spiel: Kein Spieler kann mehr doppelt (Feld und Bank) auftauchen, auch nach mehrfachem „Zurück“.','„↶ Zurück“ nimmt jetzt auch ein versehentliches „Halbzeit beenden“ oder den Abpfiff zurück.','Anleitung in den Einstellungen aktualisiert.']},
  {v:25,items:['Spielminuten wie im Fußball: Nachspielzeit als <b>„15+1“</b>, der nächste Abschnitt beginnt immer bei der richtigen Minute (z. B. <b>16′</b>).']},
  {v:24,items:['<b>Spielzeit-Einteilung</b> vor dem Spiel: durchgehend, 2 Halbzeiten oder 4 Viertel, Minuten frei wählbar. Halbzeit/Viertel beenden, Nachspielzeit-Anzeige.','<b>Wieder einwechseln</b> klappt beliebig oft – alle Einsätze werden mit Minuten notiert und die Spielzeit addiert.']},
@@ -845,7 +846,7 @@ function vSettings(){
     h+=`<button class="btn pri" style="width:100%;margin-top:8px" ${n?'':'disabled'} onclick="A.pdfMake()">PDF erstellen${n?` (${n} Spieler)`:''}</button><div class="sub" style="margin-top:6px">Enthält persönliche Daten der Kinder – nur im Trainerteam teilen.</div>`;
   }
   h+=`</div>`;
-  h+=`<div class="card"><div class="lbl">📖 Anleitung</div>${GUIDE.map(([t,c],i)=>`<details class="gd" ${i===1?'open':''}><summary>${t}</summary><div class="gdc">${c}</div></details>`).join('')}</div>`;
+  h+=`<div class="card"><div class="lbl">📖 Anleitung</div><a class="btn pri" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px" href="TrainerRadar-Anleitung.pdf?v=${APP_VERSION}" target="_blank" rel="noopener">📄 Anleitung als PDF öffnen</a><div class="sub" style="margin-bottom:4px">Das PDF wird mit jedem Update aktualisiert. Kurzfassung zum Aufklappen:</div>${GUIDE.map(([t,c],i)=>`<details class="gd" ${i===1?'open':''}><summary>${t}</summary><div class="gdc">${c}</div></details>`).join('')}</div>`;
   h+=`<div class="card"><div class="row between"><div class="lbl" style="margin:0">🎉 Was ist neu</div><button class="btn sm2" onclick="A.whatsNewAll()">Alle Änderungen</button></div></div>`;
   h+=backupCard();
   return h;
@@ -989,7 +990,7 @@ function vLive(){
   h+=`<div class="lbl2">Bank</div>`;
   const bsort=L.bench.slice().sort((a,b)=>liveSecs(L,a)-liveSecs(L,b));
   h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}${cardBadge(L,pid)}</b><small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(liveSecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
-  h+=`<div class="ampel"><span>Spielzeit-Ziel je Kind:</span>${[33,50,66].map(n=>`<button class="chip ${((S.cfg&&S.cfg.minShare)||50)===n?'on':''}" onclick="A.cfgSet('minShare',${n})">${n} %</button>`).join('')}</div><div class="sub"><span class="dot ok"></span>im Ziel <span class="dot warn"></span>knapp <span class="dot low"></span>zu wenig (ab Minute 3). Die Bank ist nach Spielzeit sortiert, wer am wenigsten gespielt hat, steht vorn.</div>`;
+  h+=`<div class="ampel"><span>Spielzeit-Ziel je Kind:</span>${[33,50,66].map(n=>`<button class="chip ${((S.cfg&&S.cfg.minShare)||50)===n?'on':''}" onclick="A.cfgSet('minShare',${n})">${n} %</button>`).join('')}</div><div class="sub"><span class="adot ok"></span>im Ziel <span class="adot warn"></span>knapp <span class="adot low"></span>zu wenig (ab Minute 3). Die Bank ist nach Spielzeit sortiert, wer am wenigsten gespielt hat, steht vorn.</div>`;
   if((L.sentOff||[]).length)h+=`<div class="sub" style="margin-top:4px"><b>Platzverweis:</b> ${(L.cards||[]).filter(c=>c.c!=='y').map(c=>`${esc(short(c.p))} (${c.c==='yr'?'Gelb-Rot':'Rot'}, ${mlOf(c)})`).join(', ')}</div>`;
   const inGame=new Set([...liveField(L),...L.bench,...(L.sentOff||[])]);const others=plist().filter(p=>!inGame.has(p.id));
   if(others.length)h+=`<details class="card"><summary>Weitere Spieler zur Bank (${others.length})</summary><div class="chips">${others.map(p=>`<button class="chip" onclick="A.liveAddBench('${p.id}')">+ ${esc(short(p.id))}</button>`).join('')}</div></details>`;
