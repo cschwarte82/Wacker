@@ -209,6 +209,7 @@ button{touch-action:manipulation}
 .sksec{margin-top:14px}.skl{font-weight:700;color:var(--gd);margin-bottom:4px}.ski{background:#fff;border-radius:10px;padding:8px 10px;margin:5px 0;font-size:14.5px;box-shadow:0 1px 2px #0001}.ski b{display:block;color:var(--g)}
 .skf{margin-top:16px;text-align:center;font:700 18px var(--fc);color:var(--g)}
 @media print{header,.noprint,#toast,#sheet,.banner{display:none!important}main{padding:0}.skarte{border-width:2px}}
+.newrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0 4px}.newrow .btn{padding:8px 4px;font-size:13px;line-height:1.2;hyphens:manual}
 .lbl2{font-weight:600;font-size:13px;color:var(--mut);margin-top:10px}
 </style>
 </head>
@@ -250,7 +251,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='11';
+const APP_VERSION='12';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -315,7 +316,7 @@ function importData(txt){
     for(const[id,t]of Object.entries(d.teams)){if(!t||typeof t!=='object')continue;if(!TEAMS[id]){TEAMS[id]={name:t.name||'Mannschaft',players:{},sessions:{},created:t.created||Date.now()};nt++;}merge(TEAMS[id],t);}
   }else merge(TEAMS[CUR],d);
   loadTeam();META.lastChange=Date.now();saveLocal();render(true);
-  toast(`${nt?nt+(nt===1?' Mannschaft, ':' Mannschaften, '):''}${np} Spieler und ${ns} Termine übernommen`);return true;
+  toast(`${nt?nt+(nt===1?' Mannschaft, ':' Mannschaften, '):''}${np} Spieler und ${ns} Bewertungen übernommen`);return true;
 }
 function backupCard(){
   const lb=META.lastBackup?new Date(META.lastBackup).toLocaleDateString('de-DE'):'noch nie';
@@ -377,7 +378,7 @@ function render(force){
   if(!force&&ae&&ae.closest&&ae.closest('#app')&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)){S.pending=true;return;}
   S.pending=false;
   const tab=(S.view==='players'||S.view==='player'||S.view==='skarte')?'players':S.view==='rank'?'rank':S.view==='lineup'?'lineup':S.view==='live'?'live':'sessions';
-  $('#tabs').innerHTML=[['sessions','Termine'],['lineup','Aufstellung'],['live','Live'+(S.live&&S.live.clock.running?' ●':'')],['rank','Ranglisten'],['players','Kader']].map(([k,n])=>`<button class="${tab===k?'on':''}" onclick="A.go('${k}')">${n}</button>`).join('');
+  $('#tabs').innerHTML=[['sessions','Bewertung'],['lineup','Aufstellung'],['live','Live'+(S.live&&S.live.clock.running?' ●':'')],['rank','Ranglisten'],['players','Kader']].map(([k,n])=>`<button class="${tab===k?'on':''}" onclick="A.go('${k}')">${n}</button>`).join('');
   setSaving();
   const tb=$('#teamb');if(tb)tb.textContent=(TEAMS[CUR]?.name||'Mannschaft')+' ▾';
   let h='';
@@ -399,26 +400,26 @@ document.addEventListener('focusout',()=>setTimeout(()=>{if(S.pending)render();}
 
 function vSessions(){
   const ss=slist(),ps=plist();
-  let h=`<div class="row between"><h2>Termine</h2><div class="row gap"><button class="btn" onclick="A.newGame()">+ Spiel</button><button class="btn pri" onclick="A.newSession()">+ Testtag</button></div></div>`;
+  let h=`<h2>Bewertung</h2><div class="newrow"><button class="btn" onclick="A.newGame()">⚽ + Spiel</button><button class="btn" onclick="A.newSession()">⏱ + Testtag</button><button class="btn" onclick="A.newEval()">📝 + Trainer&shy;einschätzung</button></div>`;
   if(!ps.length)h+=`<div class="card hint">Lege zuerst deinen Kader an – unter <b>Kader</b>. Daten aus der alten Version holst du dort unter „Datensicherung“.</div>`;
   if(ss.length)h+=focusCard();
-  if(!ss.length)h+=`<div class="empty">Noch kein Termin angelegt.<br><small>Ein Testtag pro Monat mit 3–5 Tests reicht. Nach Spielen kurz unter „+ Spiel“ bewerten.</small></div>`;
+  if(!ss.length)h+=`<div class="empty">Noch keine Bewertung angelegt.<br><small>Ein Testtag pro Monat mit 3–5 Tests reicht. Nach Spielen kurz unter „+ Spiel“ bewerten. Deine Einschätzung zwischendurch, z. B. nach einem Training, unter „+ Trainereinschätzung“.</small></div>`;
   ss.forEach(s=>{
-    if(s.type==='game'){const n=ps.filter(p=>{const r=s.ratings?.[p.id];return r&&Object.values(r).some(isNum);}).length;h+=`<button class="card item" onclick="A.openSession('${s.id}')"><div class="row between"><div><div class="t">⚽ ${esc(s.title||'Spiel')}${s.result?' · '+esc(s.result):''}</div><div class="sub">${fdate(s.date)} · Spiel</div></div><div class="pill">${n}/${ps.length} bewertet</div></div></button>`;return;}
+    if(s.type==='game'||s.type==='eval'){const ev=s.type==='eval';const n=ps.filter(p=>{const r=s.ratings?.[p.id];return r&&Object.values(r).some(isNum);}).length;h+=`<button class="card item" onclick="A.openSession('${s.id}')"><div class="row between"><div><div class="t">${ev?'📝':'⚽'} ${esc(s.title||(ev?'Trainereinschätzung':'Spiel'))}${s.result?' · '+esc(s.result):''}</div><div class="sub">${fdate(s.date)} · ${ev?'Trainereinschätzung':'Spiel'}</div></div><div class="pill">${n}/${ps.length} bewertet</div></div></button>`;return;}
     const tests=s.tests||[];let filled=0;const total=tests.length*ps.length;
     ps.forEach(p=>tests.forEach(k=>{if(isNum(s.results?.[p.id]?.[k]))filled++;}));
-    h+=`<button class="card item" onclick="A.openSession('${s.id}')"><div class="row between"><div><div class="t">${esc(s.title||'Testtag')}</div><div class="sub">${fdate(s.date)}</div></div><div class="pill">${filled}/${total} Werte</div></div><div class="chips sm">${tests.map(k=>`<span class="chip">${esc(TEST[k]?.n||k)}</span>`).join('')}</div></button>`;
+    h+=`<button class="card item" onclick="A.openSession('${s.id}')"><div class="row between"><div><div class="t">⏱ ${esc(s.title||'Testtag')}</div><div class="sub">${fdate(s.date)} · Testtag</div></div><div class="pill">${filled}/${total} Werte</div></div><div class="chips sm">${tests.map(k=>`<span class="chip">${esc(TEST[k]?.n||k)}</span>`).join('')}</div></button>`;
   });
   return h;
 }
 
 function vSession(){
   const s=S.sessions[S.sessionId];
-  if(!s)return `<button class="back" onclick="A.go('sessions')">‹ Testtage</button><div class="empty">Termin nicht gefunden.</div>`;
+  if(!s)return `<button class="back" onclick="A.go('sessions')">‹ Bewertung</button><div class="empty">Nicht gefunden.</div>`;
   const tests=s.tests||[]; if(!tests.includes(S.curTest))S.curTest=tests[0];
-  const game=s.type==='game'; if(game&&S.sessTab==='tests')S.sessTab='kids';
-  let h=`<button class="back" onclick="A.go('sessions')">‹ Termine</button><div class="row between"><div><h2>${game?'⚽ ':''}${esc(s.title)}</h2><div class="sub">${fdate(s.date)}${game?' · Spiel'+(s.result?' · '+esc(s.result):''):''}</div></div><button class="btn" onclick="A.editSession()">Bearbeiten</button></div>`;
-  h+=`<div class="seg">${(game?[['kids','Bewertung'],...(s.live&&s.live.actions&&s.live.actions.length?[['acts','Aktionen'+(s.live.actions.some(a=>!a.c)?' •':'')]]:[]),['export','Export']]:[['tests','Messungen'],['kids','Pro Kind'],['export','Export']]).map(([k,n])=>`<button class="${S.sessTab===k?'on':''}" onclick="A.sessTab('${k}')">${n}</button>`).join('')}</div>`;
+  const game=s.type==='game',ev=s.type==='eval'; if((game||ev)&&S.sessTab==='tests')S.sessTab='kids';
+  let h=`<button class="back" onclick="A.go('sessions')">‹ Bewertung</button><div class="row between"><div><h2>${game?'⚽ ':ev?'📝 ':'⏱ '}${esc(s.title)}</h2><div class="sub">${fdate(s.date)}${game?' · Spiel'+(s.result?' · '+esc(s.result):''):ev?' · Trainereinschätzung':' · Testtag'}</div></div><button class="btn" onclick="A.editSession()">Bearbeiten</button></div>`;
+  h+=`<div class="seg">${(ev?[['kids','Einschätzung'],['export','Export']]:game?[['kids','Bewertung'],...(s.live&&s.live.actions&&s.live.actions.length?[['acts','Aktionen'+(s.live.actions.some(a=>!a.c)?' •':'')]]:[]),['export','Export']]:[['tests','Messungen'],['kids','Pro Kind'],['export','Export']]).map(([k,n])=>`<button class="${S.sessTab===k?'on':''}" onclick="A.sessTab('${k}')">${n}</button>`).join('')}</div>`;
   if(S.sessTab==='tests')h+=vTests(s); else if(S.sessTab==='kids')h+=vKids(s); else if(S.sessTab==='acts'&&s.live&&s.live.actions)h+=vActs(s); else h+=vExport(s);
   return h;
 }
@@ -437,14 +438,15 @@ function vKids(s){
   if(S.kidIdx>=ps.length)S.kidIdx=0;
   const p=ps[S.kidIdx]; const r=s.ratings?.[p.id]||{}; const mood=s.mood?.[p.id]; const note=s.notes?.[p.id]||'';
   const done=q=>{const rr=s.ratings?.[q.id];return rr&&RATINGS.every(x=>isNum(rr[x.k]));};
-  const game=s.type==='game';
+  const game=s.type==='game',ev=s.type==='eval';
   let h=`<div class="kidnav"><button class="btn" onclick="A.kid(-1)" aria-label="Vorheriges Kind">‹</button><select onchange="A.kidSel(this.value)">${ps.map((q,i)=>`<option value="${i}" ${i===S.kidIdx?'selected':''}>${esc(q.name)}${done(q)?' ✓':''}</option>`).join('')}</select><button class="btn" onclick="A.kid(1)" aria-label="Nächstes Kind">›</button></div>`;
   if((p.goals||[]).some(g=>g.status!=='erreicht'))h+=goalsHtml(p.id,true);
   h+=`<div class="card"><div class="lbl">Trainer-Einschätzung <small>1 = noch wenig, 5 = sehr ausgeprägt</small></div>${RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
   {const gkHas=GK_RATINGS.some(x=>isNum(r[x.k]));h+=`<details class="card" ${gkHas?'open':''}><summary>Torwart-Einschätzung <small class="sub">nur für Kinder, die ins Tor gehen</small></summary><div style="margin-top:8px">${GK_RATINGS.map(x=>`<div class="rrow"><span>${x.n}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${r[x.k]===n?'on':''}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div></details>`;}
   if(game&&s.live){const lv=s.live;const b=gameBal(lv,p.id);h+=`<div class="card hint">Live: <b class="pos">+${(lv.plus||{})[p.id]||0}</b> / <b class="neg">−${(lv.minus||{})[p.id]||0}</b> · ${(lv.mins||{})[p.id]||0} Spielminuten${lv.goals?` · ⚽ ${b.tore} · Tore auf dem Feld ${b.gf}:${b.ga}`:''}</div>`;}
+  if(ev)h=`<div class="sub" style="margin-bottom:8px">Deine Einschätzung zwischendurch. Nur Kinder bewerten, die du gut beobachten konntest – leer bleibt leer. ${ps.filter(done).length} von ${ps.length} vollständig.</div>`+h;
   if(game)h=`<div class="sub" style="margin-bottom:8px">Nur Kinder bewerten, die gespielt haben – wer leer bleibt, zählt als nicht dabei. ${ps.filter(done).length} von ${ps.length} vollständig.</div>`+h;
-  if(!game)h+=`<div class="card"><div class="lbl">Frag das Kind: Wie viel Spaß macht dir Fußball gerade?</div><div class="moods">${MOODS.map((m,i)=>`<button class="${mood===i+1?'on':''}" onclick="A.mood('${p.id}',${i+1})">${m}</button>`).join('')}</div></div>`;
+  if(!game&&!ev)h+=`<div class="card"><div class="lbl">Frag das Kind: Wie viel Spaß macht dir Fußball gerade?</div><div class="moods">${MOODS.map((m,i)=>`<button class="${mood===i+1?'on':''}" onclick="A.mood('${p.id}',${i+1})">${m}</button>`).join('')}</div></div>`;
   h+=`<div class="card"><div class="lbl">Notiz</div><textarea rows="3" oninput="A.note('${p.id}',this)" placeholder="${game?'z. B. starke Balleroberungen, im 2. Durchgang müde':'z. B. traut sich im 1 gegen 1 mehr zu, linker Fuß wird besser'}">${esc(note)}</textarea></div>`;
   const vals=(s.tests||[]).map(k=>{const v=s.results?.[p.id]?.[k];return isNum(v)?`<span class="chip">${esc(TEST[k].n)}: <b>${fnum(v)}</b> ${esc(TEST[k].u)}</span>`:'';}).join('');
   if(vals)h+=`<div class="lbl2">Messwerte heute</div><div class="chips sm">${vals}</div>`;
@@ -466,7 +468,7 @@ function vPlayers(){
   const ps=plist(true),ss=slist();
   let h=`<div class="row between"><h2>Kader</h2><button class="btn pri" onclick="A.playerModal()">+ Spieler</button></div>`;
   if(!ps.length)h+=`<div class="empty">Noch keine Spieler.<br><small>Vornamen oder Kürzel reichen – Nachnamen braucht die App nicht.</small></div>`;
-  h+=ps.map(p=>{const n=ss.filter(s=>hasData(s,p.id)).length;return `<button class="card item ${p.active===false?'off':''}" onclick="A.openPlayer('${p.id}')"><div class="row between"><div><div class="t">${esc(p.name)}</div><div class="sub">${p.foot?'Fuß: '+esc(p.foot):''}${p.active===false?' · inaktiv':''}</div></div><div class="pill">${n} Termin${n===1?'':'e'}</div></div></button>`;}).join('');
+  h+=ps.map(p=>{const n=ss.filter(s=>hasData(s,p.id)).length;return `<button class="card item ${p.active===false?'off':''}" onclick="A.openPlayer('${p.id}')"><div class="row between"><div><div class="t">${esc(p.name)}</div><div class="sub">${p.foot?'Fuß: '+esc(p.foot):''}${p.active===false?' · inaktiv':''}</div></div><div class="pill">${n} Bewertung${n===1?'':'en'}</div></div></button>`;}).join('');
   h+=backupCard();
   return h;
 }
@@ -529,9 +531,9 @@ function vRank(){
   let rows,note='',unit=meta.u;
   if(R.mode==='best'){
     const s=ss.find(x=>x.id===R.sess);
-    h+=`<select class="sel" onchange="A.rk('sess',this.value)"><option value="cur" ${s?'':'selected'}>Aktuell</option>${ss.map(x=>`<option value="${x.id}" ${s&&x.id===s.id?'selected':''}>${fdate(x.date)} – ${x.type==='game'?'⚽ ':''}${esc(x.title)}</option>`).join('')}</select>`;
+    h+=`<select class="sel" onchange="A.rk('sess',this.value)"><option value="cur" ${s?'':'selected'}>Aktuell</option>${ss.map(x=>`<option value="${x.id}" ${s&&x.id===s.id?'selected':''}>${fdate(x.date)} – ${x.type==='game'?'⚽ ':x.type==='eval'?'📝 ':''}${esc(x.title)}</option>`).join('')}</select>`;
     rows=ps.map(p=>({p,v:s?catVal(s,R.cat,p.id):(type==='g'?(()=>{let t=null;ss.forEach(x=>{const v=catVal(x,R.cat,p.id);if(isNum(v))t=(t||0)+v;});return t;})():latestVal(R.cat,p.id,ss))}));
-    if(!s)note=type==='g'?(R.cat==='g:tore'?'Summe aller Spiele mit Live-Erfassung.':'Tore minus Gegentore, während das Kind auf dem Feld stand – Summe aller Live-Spiele.'):(type==='t'?'Pro Kind zählt die jeweils letzte Messung – so fehlt niemand, der beim letzten Testtag krank war.':'Einschätzungen: Schnitt der letzten 3 Bewertungen je Kind (Testtage und Spiele).');
+    if(!s)note=type==='g'?(R.cat==='g:tore'?'Summe aller Spiele mit Live-Erfassung.':'Tore minus Gegentore, während das Kind auf dem Feld stand – Summe aller Live-Spiele.'):(type==='t'?'Pro Kind zählt die jeweils letzte Messung – so fehlt niemand, der beim letzten Testtag krank war.':'Einschätzungen: Schnitt der letzten 3 Bewertungen je Kind (Testtage, Spiele und Einschätzungen).');
     if(type==='a')note+=(note?' ':'')+'Wert 3 = Teamschnitt am jeweiligen Testtag.';
   }else{
     const asc=ss.slice().reverse();
@@ -625,7 +627,7 @@ function vLineup(){
   if(bench.length)h+=`<div class="card"><div class="lbl">Wechselspieler <small>beste Position · antippen zum Einsetzen</small></div><div class="bench">${bench.map(p=>{const b=['A','M','S'].map(pt=>({pt,v:posFit(getPr(p.id),pt).v})).sort((x,y)=>y.v-x.v)[0];return `<span class="tap ${isSel('bench',p.id)?'sel':''}" onclick="A.luTap('bench','${p.id}')"><b>${esc(p.name)}</b> · ${POS[b.pt].n} ${fnum(Math.round(b.v*10)/10)}</span>`;}).join('')}</div></div>`;
   const est=filled.filter(k=>fitOf(cur[k],k).cov<.5).map(k=>esc(S.players[cur[k]].name));
   if(est.length)h+=`<div class="banner">Gestrichelt = wenig Daten, Wert teilweise geschätzt: ${est.join(', ')}. Fehlende Bereiche zählen als Teamschnitt (3).</div>`;
-  h+=`<details class="card"><summary>So rechnet die App</summary>${Object.values(POS).map(P=>`<div class="wt"><b>${P.n}:</b> ${Object.entries(P.w).map(([c,w])=>`${catName(c)} ${Math.round(w*100)} %`).join(', ')}</div>`).join('')}<div class="wt">Bonus: starker Fuß passend zur Seite (+0,1 bis +0,15). Messwerte zählen relativ zum Team (3 = Schnitt), deine Einschätzung direkt (1–5). Je Bereich gilt der letzte Messwert des Kindes, bei deiner Einschätzung der Schnitt der letzten 3 Bewertungen (Testtage und Spiele).</div></details>`;
+  h+=`<details class="card"><summary>So rechnet die App</summary>${Object.values(POS).map(P=>`<div class="wt"><b>${P.n}:</b> ${Object.entries(P.w).map(([c,w])=>`${catName(c)} ${Math.round(w*100)} %`).join(', ')}</div>`).join('')}<div class="wt">Bonus: starker Fuß passend zur Seite (+0,1 bis +0,15). Messwerte zählen relativ zum Team (3 = Schnitt), deine Einschätzung direkt (1–5). Je Bereich gilt der letzte Messwert des Kindes, bei deiner Einschätzung der Schnitt der letzten 3 Bewertungen (Testtage, Spiele und Einschätzungen).</div></details>`;
   return h;
 }
 
@@ -829,6 +831,7 @@ function closeModal(){const m=$('#modal');m.classList.remove('open');m.innerHTML
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2400);}
 function sessionModal(s){
   S.draft=s;
+  if(s.type==='eval')return showModal(`<h3>${s.id?'Einschätzung bearbeiten':'Neue Trainereinschätzung'}</h3><label>Datum<input type="date" id="m_date" value="${esc(s.date)}"></label><label>Titel<input id="m_title" value="${esc(s.title)}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Für deine Einschätzung zwischendurch, z. B. nach einem Training. Sie fließt wie die Bewertungen nach Spielen in Profil, Ranglisten und Aufstellung ein.</div><div class="row end gap">${s.id?`<button class="btn danger" onclick="A.askDelSession('${s.id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.saveSession()">Speichern</button></div>`);
   if(s.type==='game')return showModal(`<h3>${s.id?'Spiel bearbeiten':'Neues Spiel'}</h3><label>Datum<input type="date" id="m_date" value="${esc(s.date)}"></label><label>Gegner / Titel<input id="m_title" value="${esc(s.title)}" autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" value="${esc(s.result||'')}" placeholder="z. B. 3:2" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Danach bewertest du jedes Kind, das gespielt hat, in den 6 Bereichen. Das fließt in Profil, Ranglisten und Aufstellung ein.</div><div class="row end gap">${s.id?`<button class="btn danger" onclick="A.askDelSession('${s.id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.saveSession()">Speichern</button></div>`);
   showModal(`<h3>${s.id?'Testtag bearbeiten':'Neuer Testtag'}</h3><label>Datum<input type="date" id="m_date" value="${esc(s.date)}"></label><label>Titel<input id="m_title" value="${esc(s.title)}" autocomplete="off"></label><div class="lbl">Tests auswählen</div>${TEST_GROUPS.map(a=>`<div class="sub">${a.n}</div><div class="chips">${TESTS.filter(t=>t.area===a.k).map(t=>`<button class="chip ${s.tests.includes(t.k)?'on':''}" onclick="A.togDraft('${t.k}',this)">${esc(t.n)}</button>`).join('')}</div>`).join('')}<div class="sub" style="margin:10px 0 14px">Trainer-Einschätzung und Spaß-Abfrage sind immer dabei (Reiter „Pro Kind“).</div><div class="row end gap">${s.id?`<button class="btn danger" onclick="A.askDelSession('${s.id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.saveSession()">Speichern</button></div>`);
 }
@@ -885,7 +888,7 @@ const A={
   liveForm(f){const L=S.live;accrue(L);remap(L,L.n,f);syncLu(L.n,L.form);S.liveSel=null;liveSave();render(true);},
   liveN(n){const L=S.live;if(L.n===n)return;accrue(L);remap(L,n,Object.keys(FORMS[n])[0]);syncLu(L.n,L.form);S.liveSel=null;liveSave();render(true);},
   liveAddBench(pid){const L=S.live;if(!L.bench.includes(pid))L.bench.push(pid);liveSave();render(true);},
-  liveEndModal(){showModal(`<h3>Spiel beenden</h3><label>Gegner / Titel<input id="m_title" value="Spiel gegen " autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" placeholder="z. B. 3:2" value="${(S.live&&S.live.goals&&S.live.goals.length)?score(S.live).gf+':'+score(S.live).ga:''}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Plus/Minus und Spielminuten werden als Spiel unter „Termine“ gespeichert. Danach kannst du die Kinder direkt bewerten.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.liveEnd()">Speichern</button></div>`);},
+  liveEndModal(){showModal(`<h3>Spiel beenden</h3><label>Gegner / Titel<input id="m_title" value="Spiel gegen " autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" placeholder="z. B. 3:2" value="${(S.live&&S.live.goals&&S.live.goals.length)?score(S.live).gf+':'+score(S.live).ga:''}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Plus/Minus und Spielminuten werden als Spiel unter „Bewertung“ gespeichert. Danach kannst du die Kinder direkt bewerten.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.liveEnd()">Speichern</button></div>`);},
   liveEnd(){
     const L=S.live;if(!L)return;accrue(L);L.clock.running=false;
     const mins={};Object.entries(L.mins).forEach(([p,s])=>{if(s>=1)mins[p]=Math.round(s/60);});
@@ -898,7 +901,7 @@ const A={
   liveDiscard(){S.live=null;S.liveSel=null;liveSave();closeModal();render(true);},
   teamModal(){
     syncTeam();const ids=Object.keys(TEAMS).sort((a,b)=>(TEAMS[a].name||'').localeCompare(TEAMS[b].name||'','de',{numeric:true}));
-    showModal(`<h3>Mannschaften</h3>${ids.map(id=>{const t=TEAMS[id];const np=Object.values(t.players||{}).filter(p=>p.active!==false).length;return `<div class="prow"><button class="tsel" onclick="A.switchTeam('${id}')">${id===CUR?'✓ ':''}${esc(t.name)} <small>· ${np} Spieler</small></button><button class="btn sm2" onclick="A.teamEdit('${id}')">Bearbeiten</button></div>`;}).join('')}<div class="lbl2" style="margin:16px 0 8px">Neue Mannschaft</div><label>Name<input id="m_tname" placeholder="z. B. U11 Saison 2027/28" autocomplete="off"></label><label>Kader übernehmen von<select id="m_tcopy"><option value="">– leer starten –</option>${ids.map(id=>`<option value="${id}">${esc(TEAMS[id].name)}</option>`).join('')}</select></label><div class="sub" style="margin:-4px 0 12px">Übernommen werden nur die aktiven Spieler, keine Termine. So startet die neue Saison mit eigenem Verlauf.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Schließen</button><button class="btn pri" onclick="A.teamAdd()">Anlegen</button></div>`);
+    showModal(`<h3>Mannschaften</h3>${ids.map(id=>{const t=TEAMS[id];const np=Object.values(t.players||{}).filter(p=>p.active!==false).length;return `<div class="prow"><button class="tsel" onclick="A.switchTeam('${id}')">${id===CUR?'✓ ':''}${esc(t.name)} <small>· ${np} Spieler</small></button><button class="btn sm2" onclick="A.teamEdit('${id}')">Bearbeiten</button></div>`;}).join('')}<div class="lbl2" style="margin:16px 0 8px">Neue Mannschaft</div><label>Name<input id="m_tname" placeholder="z. B. U11 Saison 2027/28" autocomplete="off"></label><label>Kader übernehmen von<select id="m_tcopy"><option value="">– leer starten –</option>${ids.map(id=>`<option value="${id}">${esc(TEAMS[id].name)}</option>`).join('')}</select></label><div class="sub" style="margin:-4px 0 12px">Übernommen werden nur die aktiven Spieler, keine Bewertungen. So startet die neue Saison mit eigenem Verlauf.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Schließen</button><button class="btn pri" onclick="A.teamAdd()">Anlegen</button></div>`);
   },
   switchTeam(id){if(!TEAMS[id])return;saveLocal();CUR=id;loadTeam();S.view='sessions';S.sessionId=null;S.playerId=null;S.kidIdx=0;S.rk={cat:null,mode:'best',sess:null};saveLocal();closeModal();render(true);scrollTo(0,0);},
   teamAdd(){
@@ -944,25 +947,27 @@ const A={
   rk(f,v){S.rk[f]=v;if(f==='cat')S.rk.sess=null;render(true);},
   go(v){S.view=v;render(true);scrollTo(0,0);},
   newSession(){const last=slist()[0];const d=new Date();sessionModal({id:null,date:today(),title:'Testtag '+MONTHS[d.getMonth()],tests:(last&&last.tests?last.tests.slice():DEFAULT_TESTS.slice())});},
+  newEval(){const d=new Date();sessionModal({id:null,type:'eval',date:today(),title:'Trainereinschätzung '+MONTHS[d.getMonth()],tests:[]});},
   newGame(){sessionModal({id:null,type:'game',date:today(),title:'Spiel gegen ',result:'',tests:[]});},
   editSession(){const s=S.sessions[S.sessionId];if(!s)return;sessionModal({id:S.sessionId,type:s.type,result:s.result,date:s.date,title:s.title,tests:(s.tests||[]).slice()});},
   togDraft(k,el){const t=S.draft.tests;const i=t.indexOf(k);if(i>=0)t.splice(i,1);else t.push(k);el.classList.toggle('on');},
   saveSession(){
     const d=S.draft;const date=$('#m_date').value||today();const title=$('#m_title').value.trim()||'Testtag';
-    const game=d.type==='game';
+    const game=d.type==='game'||d.type==='eval';
     const tests=game?[]:TESTS.map(t=>t.k).filter(k=>d.tests.includes(k));
     if(!game&&!tests.length){toast('Bitte mindestens einen Test wählen.');return;}
     let id=d.id,doc;
     if(id)doc=clone(S.sessions[id]); else{id=uid('s');doc={results:{},ratings:{},mood:{},notes:{},created:Date.now()};}
     Object.assign(doc,{date,title,tests});
-    if(game){doc.type='game';doc.result=($('#m_result').value||'').trim();}
+    if(d.type==='game'){doc.type='game';doc.result=($('#m_result').value||'').trim();}
+    if(d.type==='eval')doc.type='eval';
     saveDoc('sessions',id,doc);closeModal();
     S.view='session';S.sessionId=id;if(!d.id){S.sessTab=game?'kids':'tests';S.curTest=tests[0];S.kidIdx=0;}
     render(true);
   },
-  askDelSession(id){showModal(`<h3>Termin löschen?</h3><p>Alle Messwerte, Einschätzungen und Notizen dieses Termins gehen verloren.</p><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn danger" onclick="A.delSession('${id}')">Endgültig löschen</button></div>`);},
-  async delSession(id){closeModal();S.view='sessions';await removeDoc('sessions',id);render(true);toast('Termin gelöscht');},
-  openSession(id){S.view='session';S.sessionId=id;S.sessTab=S.sessions[id]?.type==='game'?'kids':'tests';S.curTest=null;S.kidIdx=0;render(true);scrollTo(0,0);},
+  askDelSession(id){showModal(`<h3>Wirklich löschen?</h3><p>Alle Messwerte, Einschätzungen und Notizen dieses Eintrags gehen verloren.</p><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn danger" onclick="A.delSession('${id}')">Endgültig löschen</button></div>`);},
+  async delSession(id){closeModal();S.view='sessions';await removeDoc('sessions',id);render(true);toast('Gelöscht');},
+  openSession(id){S.view='session';S.sessionId=id;S.sessTab=['game','eval'].includes(S.sessions[id]?.type)?'kids':'tests';S.curTest=null;S.kidIdx=0;render(true);scrollTo(0,0);},
   sessTab(k){S.sessTab=k;render(true);},
   curTest(k){S.curTest=k;A.swReset();render(true);},
   setVal(pid,el){
