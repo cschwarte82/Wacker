@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><title>TrainerRadar – Benutzerhandbuch</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.ph{background:var(--gd);color:#fff;padding:9mm 14mm 7mm;display:flex;justify-content:space-between;align-items:flex-end}
+.ph h2{font:800 21pt/1.1 'Inter Display'}
+.ph .k{font:600 9pt Inter;color:var(--lime);text-transform:uppercase;letter-spacing:.8px;margin-bottom:1.5mm}
+.ph img{width:12mm;height:12mm;border-radius:3mm}
+.inner{padding:8mm 14mm}
+.cols{display:flex;gap:7mm}
+.col{flex:1;min-width:0}
+.box{background:var(--bg);border-radius:4mm;padding:4.5mm 5mm;margin-bottom:4.5mm}
+.box h3{font:700 12.5pt 'Inter Display';color:var(--gd);margin-bottom:2.2mm}
+.box.white{background:#fff;border:.4mm solid var(--line)}
+.box.lime{background:#f4fbd6;border:.4mm solid #dbe9a8}
+.box.note{border-left:1.5mm solid var(--gd);border-radius:0 4mm 4mm 0}
+ol.st{list-style:none;counter-reset:s;padding:0;margin:0}
+ol.st li{counter-increment:s;position:relative;padding:0 0 2.6mm 8.5mm;font-size:9.7pt;line-height:1.45}
+ol.st li::before{content:counter(s);position:absolute;left:0;top:0;width:5.8mm;height:5.8mm;border-radius:50%;background:var(--gd);color:#fff;font:700 8.3pt/5.8mm Inter;text-align:center}
+.step{display:flex;gap:3.6mm;margin-bottom:3.4mm}
+.num{flex:none;width:7.5mm;height:7.5mm;border-radius:50%;background:var(--lime);color:var(--gd);font:800 10.5pt/7.5mm 'Inter Display';text-align:center}
+.step .tt{display:block;font-size:10.6pt;color:var(--gd);margin-bottom:.5mm;font-weight:700}
+.step .tx{font-size:9.3pt;line-height:1.42}
+.foot{position:absolute;left:14mm;right:14mm;bottom:8mm;display:flex;justify-content:space-between;font-size:8.2pt;color:var(--mut);border-top:.3mm solid var(--line);padding-top:2.5mm}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+.card{background:var(--bg);border-radius:4mm;padding:4mm 4.6mm}
+.card h3{font:700 11.5pt 'Inter Display';color:var(--gd);margin-bottom:1.3mm}
+.card p{font-size:9.1pt;margin:0;line-height:1.45}
+.toc{display:grid;grid-template-columns:1fr 1fr;gap:1.5mm 6mm;font-size:9.5pt}
+.toc div{display:flex;justify-content:space-between;border-bottom:.3mm dotted #c9d2c4;padding:1mm 0}
+table.mt{width:100%;border-collapse:collapse;font-size:9.2pt}
+table.mt td{padding:1.4mm 2mm;border-bottom:.3mm solid var(--line)}
+table.mt td:first-child{font-weight:700;color:var(--gd);white-space:nowrap}
+</style></head>
+<body>
+
+<!-- 1 INSTALLATION -->
+<section class="page">
+  <div class="ph"><div><div class="k">Benutzerhandbuch · Installation &amp; Start</div><h2>TrainerRadar einrichten</h2></div><img src="../icon-192.png" alt=""></div>
+  <div class="inner">
+    <div class="box white" style="margin-bottom:5mm">
+      <h3>Inhalt</h3>
+      <div class="toc"><div><span>Installation &amp; erste Schritte</span><span>1</span></div><div><span>Live-Erfassung: vor dem Anpfiff</span><span>2</span></div><div><span>Live-Erfassung: während des Spiels</span><span>3</span></div><div><span>Bewertung &amp; Auswertung</span><span>4</span></div><div><span>Einstellungen, Sicherung, Tipps</span><span>5</span></div><div><span>Die aktuellste Anleitung: ⚙︎ → Anleitung</span><span>App</span></div></div>
+    </div>
+    <div class="cols">
+      <div class="col">
+        <div class="box">
+          <h3>iPhone (Safari)</h3>
+          <ol class="st"><li>QR-Code scannen oder <b>cschwarte82.github.io/wacker</b> in <b>Safari</b> öffnen.</li><li>Unten auf das <b>Teilen-Symbol</b> tippen.</li><li><b>„Zum Home-Bildschirm“</b> → <b>„Hinzufügen“</b>.</li></ol>
+        </div>
+        <div class="box">
+          <h3>Android (Chrome)</h3>
+          <ol class="st"><li>Link in <b>Chrome</b> öffnen.</li><li>Oben rechts auf <b>⋮</b> tippen.</li><li><b>„App installieren“</b> oder <b>„Zum Startbildschirm hinzufügen“</b>.</li></ol>
+        </div>
+        <div class="box lime">
+          <h3>Updates &amp; „Was ist neu“</h3>
+          <p style="margin:0">Neue Versionen lädt die App automatisch. Nach einem Update zeigt sie einmal, was neu ist. Die Version steht unter <span class="k2">⚙︎ Einstellungen</span> ganz unten.</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="box white">
+          <h3>Erste Schritte</h3>
+          <ol class="st"><li><b>Mannschaft benennen:</b> oben auf <span class="k2">U10 ▾</span> tippen. Dort legst du auch weitere Mannschaften an – auf Wunsch mit übernommenem Kader.</li><li><b>Kader anlegen:</b> <span class="k2">Kader</span> → <span class="k2">+ Spieler</span>. Vornamen und starker Fuß reichen.</li><li><b>Loslegen:</b> eine <span class="k2">Trainereinschätzung</span> anlegen oder direkt über <span class="k2">Aufstellung</span> live gehen.</li><li><b>Sichern:</b> <span class="k2">⚙︎</span> → <span class="k2">Sicherung speichern</span> → z. B. iCloud Drive.</li></ol>
+        </div>
+        <div class="box">
+          <h3>Mit dem Co-Trainer arbeiten</h3>
+          <p>Jeder hat seine Daten auf dem eigenen Handy. Gleicher Kader in drei Schritten:</p>
+          <ol class="st"><li><span class="k2">Sicherung speichern</span>, Datei per AirDrop oder Messenger schicken.</li><li>Beim Co-Trainer: <span class="k2">Sicherung einlesen</span>.</li><li>Später gegenseitig einlesen: Fehlende Bewertungen werden <b>ergänzt</b>, gelöscht wird nichts.</li></ol>
+        </div>
+      </div>
+    </div>
+    <div class="box note">
+      <h3>Datenschutz</h3>
+      <ul class="dot"><li>Alle Daten bleiben <b>nur auf deinem Gerät</b> – kein Konto, keine Cloud, kein Server. Im Internet liegt nur das Programm.</li><li>Vornamen oder Kürzel verwenden, Handy mit Code sperren, Sicherungen und Profil-PDFs nicht öffentlich teilen.</li><li>Empfehlung: Eltern kurz informieren, dass du zur Förderung Trainingsdaten notierst.</li></ul>
+    </div>
+  </div>
+  <div class="foot"><span>TrainerRadar · Benutzerhandbuch</span><span>Seite 1 von 5</span></div>
+</section>
+
+<!-- 2 LIVE VOR DEM ANPFIFF -->
+<section class="page">
+  <div class="ph"><div><div class="k">Live-Erfassung · Teil 1</div><h2>Vor dem Anpfiff</h2></div><img src="../icon-192.png" alt=""></div>
+  <div class="inner">
+    <div class="cols" style="gap:8mm">
+      <div class="col" style="flex:1.4">
+        <div class="step"><div class="num">1</div><div class="tx"><span class="tt">Spielform und Formation</span>Reiter <span class="k2">Aufstellung</span>: <b>4+1, 5+1 oder 6+1</b> und eine Formation (z. B. 3-2-1) wählen. Die Einstellung bleibt pro Mannschaft gespeichert.</div></div>
+        <div class="step"><div class="num">2</div><div class="tx"><span class="tt">Wer ist dabei – wer geht ins Tor?</span>Anwesende Kinder antippen. Torwart fest wählen oder <b>„Automatisch: bester Torwart“</b>.</div></div>
+        <div class="step"><div class="num">3</div><div class="tx"><span class="tt">Vorschlag prüfen und anpassen</span><b>„Stärkste“</b> = höchste Gesamtstärke, <b>„Ausgewogen“</b> = keine Schwachstelle. Spieler antippen, dann Ziel antippen: tauschen oder Wechselspieler einsetzen. Deine Aufstellung bleibt gespeichert.</div></div>
+        <div class="step"><div class="num">4</div><div class="tx"><span class="tt">Spielzeit-Einteilung</span><b>Durchgehend, 2 Halbzeiten oder 4 Viertel</b> und die Minuten pro Abschnitt (in 5er-Schritten). Vor dem Anpfiff kannst du das auch im Live-Reiter noch ändern.</div></div>
+        <div class="step"><div class="num">5</div><div class="tx"><span class="tt">Live gehen</span><span class="k2">▶ Live mit dieser Aufstellung</span> übernimmt Formation, Torwart, Bank und Spielzeit in den Reiter <span class="k2">Live</span>.</div></div>
+        <div class="box lime" style="margin-top:4mm">
+          <h3>So zählen die Spielminuten</h3>
+          <table class="mt">
+            <tr><td>1'</td><td>die erste Spielminute (wie im Fußball)</td></tr>
+            <tr><td>15+1'</td><td>Nachspielzeit am Ende des 1. Viertels (4 × 15)</td></tr>
+            <tr><td>16'</td><td>direkt nach Beginn des 2. Viertels – Nachspielzeit verschiebt nichts</td></tr>
+            <tr><td>26'</td><td>Beginn der 2. Halbzeit bei 2 × 25</td></tr>
+          </table>
+        </div>
+        <div class="box white">
+          <h3>Checkliste vor dem Spiel</h3>
+          <ul class="dot"><li>Handy geladen, App einmal geöffnet (läuft danach auch offline).</li><li><b>Automatische Bildschirmsperre</b> verlängern (iPhone: Einstellungen → Anzeige &amp; Helligkeit → Automatische Sperre), damit du nicht ständig entsperren musst.</li><li>Anwesende Kinder und Torwart unter „Aufstellung“ prüfen.</li><li>Absprechen, ob der Co-Trainer Plus/Minus mitzählt.</li></ul>
+        </div>
+      </div>
+      <div class="col" style="flex:.6">
+        <div class="shot"><img src="c_fmt.png" alt=""></div>
+        <div class="cap">Spielzeit-Einteilung unter „Aufstellung“</div>
+        <div class="shot"><img src="c_lineup_pitch.png" alt=""></div>
+        <div class="cap">Aufstellungsvorschlag mit Stärkewerten</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TrainerRadar · Benutzerhandbuch</span><span>Seite 2 von 5</span></div>
+</section>
+
+<!-- 3 LIVE WÄHREND -->
+<section class="page">
+  <div class="ph"><div><div class="k">Live-Erfassung · Teil 2</div><h2>Während des Spiels</h2></div><img src="../icon-192.png" alt=""></div>
+  <div class="inner" style="padding-top:7mm">
+    <div class="cols" style="gap:7mm">
+      <div class="col" style="flex:1.45">
+        <div class="step"><div class="num">1</div><div class="tx"><span class="tt">Anpfiff, Pause, Halbzeit</span><span class="k2">Anpfiff</span> startet die Uhr. Ist ein Abschnitt um, wird sie <b>rot</b> und zeigt die Nachspielzeit. <span class="k2">Halbzeit beenden</span> stoppt sie, danach <span class="k2">2. Halbzeit anpfeifen</span>. Am Ende <span class="k2">Abpfiff</span>.</div></div>
+        <div class="step"><div class="num">2</div><div class="tx"><span class="tt">Plus und Minus</span><span class="pm m">−</span> und <span class="pm p">+</span> unter jedem Spieler. Danach 5 Sekunden Zeit für eine Kategorie wie „Toller Pass“ oder „Zweikampf verloren“ – oder <span class="k2">Später</span>.</div></div>
+        <div class="step"><div class="num">3</div><div class="tx"><span class="tt">Tor und Gegentor</span><span class="k2">⚽ Tor</span> zählt sofort, danach 7 Sekunden den Torschützen antippen (auch „Eigentor Gegner“). <span class="k2">Gegentor</span> mit einem Tipp. Die App merkt sich, wer auf dem Feld stand.</div></div>
+        <div class="step"><div class="num">4</div><div class="tx"><span class="tt">Karten</span><span class="cy"></span> Gelb, <span class="cyr"></span> Gelb-Rot oder <span class="cr"></span> Rot antippen, dann den Spieler. Die zweite Gelbe wird automatisch Gelb-Rot. Platzverweise verlassen das Feld, die Position wird frei.</div></div>
+        <div class="step"><div class="num">5</div><div class="tx"><span class="tt">Wechseln und wieder einwechseln</span>Spieler antippen (leuchtet), dann <b>Bankspieler</b> = Wechsel oder <b>Feldspieler</b> = Positionstausch. Kinder können beliebig oft zurück – alle Einsätze werden notiert und addiert.</div></div>
+        <div class="step"><div class="num">6</div><div class="tx"><span class="tt">Spielzeit-Ampel</span><span class="amp" style="background:var(--grn)"></span> im Ziel, <span class="amp" style="background:#c2410c"></span> knapp, <span class="amp" style="background:var(--red)"></span> zu wenig. Das Ziel (33/50/66 %) stellst du unter der Bank ein. Die Bank ist nach Spielzeit sortiert.</div></div>
+        <div class="step"><div class="num">7</div><div class="tx"><span class="tt">Vertippt?</span><span class="k2">↶ Zurück</span> nimmt die letzte Aktion zurück – auch Tore, Karten, Wechsel und ein versehentliches Halbzeit-Ende.</div></div>
+        <div class="step"><div class="num">8</div><div class="tx"><span class="tt">Spiel beenden</span><span class="k2">Spiel beenden &amp; speichern</span>: Das Ergebnis ist eingetragen. Danach Kinder bewerten, unter <span class="k2">Aktionen</span> offene Kategorien und Torschützen zuordnen, unter <span class="k2">Verlauf</span> Spielverlauf und Spielzeiten ansehen.</div></div>
+      </div>
+      <div class="col" style="flex:.55">
+        <div class="shot"><img src="c_sheet.png" alt=""></div>
+        <div class="cap">Nach „+“: Kategorie wählen</div>
+        <div class="shot"><img src="c_tl.png" alt=""></div>
+        <div class="cap">Spielverlauf mit Minuten</div>
+      </div>
+    </div>
+    <div class="box lime" style="margin-top:1mm">
+      <h3>Tipps vom Platz</h3>
+      <ul class="dot"><li>Coachen geht vor: lieber weniger, aber ehrliche Aktionen erfassen. Ohne Kategorie zählt eine Aktion trotzdem.</li><li>Die Uhr läuft weiter, wenn das Handy gesperrt ist – Spielminuten zählen nur, solange die Uhr läuft.</li></ul>
+    </div>
+  </div>
+  <div class="foot"><span>TrainerRadar · Benutzerhandbuch</span><span>Seite 3 von 5</span></div>
+</section>
+
+<!-- 4 BEWERTUNG & AUSWERTUNG -->
+<section class="page">
+  <div class="ph"><div><div class="k">Bewertung &amp; Auswertung</div><h2>Vom Testtag zur Stärkenkarte</h2></div><img src="../icon-192.png" alt=""></div>
+  <div class="inner">
+    <div class="grid">
+      <div class="card"><h3>⏱ Testtag – nur messen</h3><p>14 Tests mit Aufbauanleitung (Sprint, Slalom, Passen, Torschuss, Torwart …). Zeiten per Stoppuhr übernehmen – der bessere Versuch bleibt stehen.</p></div>
+      <div class="card"><h3>📝 Trainereinschätzung</h3><p>1–5 für Spielverständnis, Freilaufen, Zweikampf, Passspiel, Dribbling, Übersicht, Mut, Kommunikation und Athletik – optional Torwart. Dazu Ziele und Notiz.</p></div>
+      <div class="card"><h3>⚽ Spiel</h3><p>Entsteht aus dem Live-Spiel oder über „+ Spiel“. Danach die Kinder bewerten. Es zählt der Schnitt der letzten 3 Bewertungen je Kind.</p></div>
+      <div class="card"><h3>Trainer vs. App</h3><p>Im Spielerprofil stehen deine Einschätzung und der Wert aus Tests und Spielen nebeneinander. ⚠ markiert deutliche Abweichungen – ab 5 Aktionen.</p></div>
+      <div class="card"><h3>Ranglisten</h3><p>Bestwerte, Fortschritt, Tore und Tor-Bilanz auf dem Feld. Nur für dich – zum Zeigen eignet sich die Fortschritts-Rangliste.</p></div>
+      <div class="card"><h3>Ziele &amp; Trainingsschwerpunkte</h3><p>Ein bis zwei Ziele pro Kind (Noch nicht – Wird besser – Erreicht). Unter „Bewertung“: die drei schwächsten Team-Bereiche mit Übungen.</p></div>
+    </div>
+    <div class="cols" style="margin-top:5mm;gap:6mm;align-items:flex-start">
+      <div class="col"><div class="shot"><img src="c_profil.png" alt="" style="height:74mm;object-fit:cover;object-position:top"></div><div class="cap">Trainer vs. App im Spielerprofil</div></div>
+      <div class="col"><div class="shot"><img src="c_karte.png" alt="" style="height:74mm;object-fit:cover;object-position:top"></div><div class="cap">Stärkenkarte fürs Kind – ohne Ranglisten</div></div>
+    </div>
+    <div class="box note" style="margin-top:1mm">
+      <h3>Die App ist ein Hilfsmittel</h3>
+      <p style="margin:0">Werte sind Momentaufnahmen – gerade bei Kindern mit unterschiedlichem Entwicklungsstand und Geburtsmonat. Die Entscheidung triffst du.</p>
+    </div>
+  </div>
+  <div class="foot"><span>TrainerRadar · Benutzerhandbuch</span><span>Seite 4 von 5</span></div>
+</section>
+
+<!-- 5 EINSTELLUNGEN -->
+<section class="page">
+  <div class="ph"><div><div class="k">Einstellungen &amp; Tipps</div><h2>⚙︎ Alles an einem Ort</h2></div><img src="../icon-192.png" alt=""></div>
+  <div class="inner">
+    <div class="cols" style="gap:8mm">
+      <div class="col" style="flex:1.3">
+        <div class="box white">
+          <h3>Spielerprofile als PDF</h3>
+          <ol class="st"><li>Oben rechts auf <span class="k2">⚙︎</span> tippen.</li><li>Kinder antippen oder <span class="k2">Alle</span>, optional Notizen einschließen.</li><li><span class="k2">PDF erstellen</span> – danach teilen oder in Dateien sichern.</li></ol>
+          <p class="sub" style="font-size:8.6pt;color:var(--mut);margin:1mm 0 0">Pro Kind eine Seite: Trainer vs. App, Torwart, Messwerte mit Veränderung, Live-Bilanz und Ziele. Beim allerersten PDF braucht die App einmal Internet.</p>
+        </div>
+        <div class="box">
+          <h3>Anleitung &amp; „Was ist neu“</h3>
+          <p style="margin:0">Unter <span class="k2">⚙︎</span> steckt immer die aktuelle Anleitung – sie wird mit jedem Update aktualisiert. „Alle Änderungen“ zeigt die Neuerungen der letzten Versionen.</p>
+        </div>
+        <div class="box">
+          <h3>Datensicherung</h3>
+          <ul class="dot"><li><span class="k2">Sicherung speichern</span> → „In Dateien sichern“ → iCloud Drive.</li><li><span class="k2">Sicherung einlesen</span> auf neuem Handy oder beim Co-Trainer – es wird nur ergänzt.</li><li>Die App erinnert dich, wenn seit 7 Tagen neue Daten ungesichert sind.</li></ul>
+        </div>
+        <div class="box lime">
+          <h3>Häufige Fragen</h3>
+          <ul class="dot"><li><b>Neue Version wird nicht angezeigt?</b> App ganz schließen und neu öffnen.</li><li><b>Falsches Icon auf dem Home-Bildschirm?</b> Icon entfernen, Seite in Safari öffnen, neu hinzufügen – die Daten bleiben.</li><li><b>Kind verlässt die Mannschaft?</b> Im Profil „aktiv im Kader“ abwählen statt löschen.</li></ul>
+        </div>
+      </div>
+      <div class="col" style="flex:.7">
+        <div class="shot"><img src="c_settings.png" alt="" style="height:150mm;object-fit:cover;object-position:top"></div>
+        <div class="cap">Einstellungen mit PDF-Auswahl und Anleitung</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>TrainerRadar · cschwarte82.github.io/wacker</span><span>Seite 5 von 5</span></div>
+</section>
+</body></html>
