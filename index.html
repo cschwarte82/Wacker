@@ -151,18 +151,18 @@ details textarea{margin-top:8px}
 .lctl .btn{min-height:38px;padding:6px 12px}
 .btn:disabled{opacity:.4}
 .pitch.live{padding:8px 4px}
-.pitch.live .prowl{margin:10px 0;gap:4px}
-.lslot{background:#fff;border-radius:10px;padding:5px 3px 4px;flex:1;max-width:124px;min-width:0;text-align:center;box-shadow:0 2px 4px #0003;cursor:pointer;border:3px solid transparent}
+.pitch.live .prowl{margin:10px 0;gap:3px}
+.lslot{background:#fff;border-radius:10px;padding:4px 2px 3px;flex:1;max-width:124px;min-width:0;text-align:center;box-shadow:0 2px 4px #0003;cursor:pointer;border:3px solid transparent}
 .lslot.empty{background:#ffffffaa;border:2px dashed #fff}
 .lslot.sel,.lb.sel{border-color:var(--lime);box-shadow:0 0 0 3px #d7f25a99}
-.lslot.tw{background:#f4fbd6;max-width:140px}
-.lslot b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lslot small{display:block;font-size:10.5px;color:var(--mut);white-space:nowrap;overflow:hidden}
+.lslot.tw{background:#f4fbd6;max-width:130px}
+.lslot>b{display:block;font-size:12px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lslot small{display:block;font-size:9.5px;line-height:1.2;color:var(--mut);white-space:nowrap;overflow:hidden}
 .pm{display:flex;align-items:center;justify-content:space-between;gap:2px;margin-top:3px}
-.pm button{width:32px;height:32px;border-radius:8px;border:0;font:700 20px/1 var(--ft);color:#fff;cursor:pointer;flex:none;padding:0}
+.pm .cnt{display:flex;flex-direction:column;align-items:center;line-height:1.1;font-size:14px;min-width:16px}
+.pm button{flex:0 1 40px;min-width:30px;height:42px;border-radius:9px;border:0;font:700 28px/1 var(--ft);color:#fff;cursor:pointer;flex:none;padding:0}
 .pm .lm{background:#b4442c}.pm .lp{background:#1d7a3e}
 .pm button:active{transform:scale(.9)}
-.pm span{font-size:11.5px}
 .pos{color:var(--good)}.neg{color:var(--bad)}
 .lbench{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px}
 .lb{flex:none;background:#fff;border:3px solid transparent;border-radius:10px;padding:6px 10px;box-shadow:0 1px 3px #0002;cursor:pointer;text-align:center;min-width:78px}
@@ -212,7 +212,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='7';
+const APP_VERSION='8';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -244,7 +244,7 @@ function hasData(s,pid){
 const METAKEY='u10-meta-v1',LSKEY2='u10-leistungsprofil-v2';
 let META={lastBackup:0,lastChange:0};
 let TEAMS={},CUR=null;
-function setSaving(){const el=$('#save');if(el)el.textContent='auf diesem Gerät';}
+function setSaving(){}
 function syncTeam(){if(CUR&&TEAMS[CUR]){TEAMS[CUR].players=S.players;TEAMS[CUR].sessions=S.sessions;TEAMS[CUR].live=S.live||null;TEAMS[CUR].lu=S.lu;}}
 function saveLocal(){
   syncTeam();
@@ -607,7 +607,7 @@ function vLive(){
   const L=S.live;
   if(!L)return `<h2>Live</h2><div class="card hint">Stelle unter <b>Aufstellung</b> die Startformation zusammen und tippe dort auf „▶ Live mit dieser Aufstellung“.</div><div class="row gap"><button class="btn pri grow" onclick="A.go('lineup')">Zur Aufstellung</button><button class="btn grow" onclick="A.liveEmpty()">Leer starten</button></div><div class="sub" style="margin-top:8px">„Leer starten“ setzt alle Spieler auf die Bank – du stellst dann per Antippen auf.</div>`;
   const sel=S.liveSel,isSel=(k,key)=>sel&&sel.kind===k&&sel.key===key;
-  const pm=pid=>`<div class="pm"><button class="lm" onclick="event.stopPropagation();A.liveAct('${pid}',-1)" aria-label="Minus">−</button><span><b class="neg">${L.minus[pid]||0}</b>·<b class="pos">${L.plus[pid]||0}</b></span><button class="lp" onclick="event.stopPropagation();A.liveAct('${pid}',1)" aria-label="Plus">+</button></div>`;
+  const pm=pid=>`<div class="pm"><button class="lm" onclick="event.stopPropagation();A.liveAct('${pid}',-1)" aria-label="Minus">−</button><span class="cnt"><b class="pos">${L.plus[pid]||0}</b><b class="neg">${L.minus[pid]||0}</b></span><button class="lp" onclick="event.stopPropagation();A.liveAct('${pid}',1)" aria-label="Plus">+</button></div>`;
   const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid)):'frei'}</b><small>${slotLabel(k)}${pid?` · <span class="lmin" data-p="${pid}">${Math.floor(liveSecs(L,pid)/60)}'</span>`:''}</small>${pid?pm(pid):''}</div>`;};
   const order=['L','Z','R'];const line=pt=>FORMS[L.n][L.form].filter(k=>k[0]===pt).sort((a,b)=>order.indexOf(a[2])-order.indexOf(b[2]));
   const tp=Object.values(L.plus).reduce((a,b)=>a+b,0),tm=Object.values(L.minus).reduce((a,b)=>a+b,0);
