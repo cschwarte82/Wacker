@@ -212,7 +212,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='6';
+const APP_VERSION='7';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -594,6 +594,7 @@ function liveSave(){META.lastChange=Date.now();saveLocal();}
 function newLive(n,form,pos,bench){return{n,form,pos,bench,plus:{},minus:{},mins:{},log:[],clock:{running:false,elapsed:0,lastTick:0},started:Date.now()};}
 function slotLabel(k){if(k==='TW')return'Torwart';const[pt,sd]=k.split('-');return(pt==='M'?'Mitte':POS[pt].n)+(sd==='Z'?'':' '+sd);}
 function remapPos(M,n,form){const old=M.pos,slots=FORMS[n][form],np={};slots.forEach(k=>np[k]=old[k]||null);const used=new Set(Object.values(np).filter(Boolean));const rest=Object.entries(old).filter(([k,v])=>k!=='TW'&&v&&!used.has(v)).map(([k,v])=>v);slots.forEach(k=>{if(!np[k]&&rest.length)np[k]=rest.shift();});np.TW=old.TW||null;M.pos=np;M.n=n;M.form=form;}
+function syncLu(n,form){const U=S.lu;if(U.manual)remapPos(U.manual,n,form);U.n=n;U.form=form;}
 function remap(L,n,form){
   const old=L.pos,slots=FORMS[n][form],np={};
   slots.forEach(k=>np[k]=old[k]||null);
@@ -672,8 +673,8 @@ const A={
     liveSave();render(true);
   },
   liveClock(){const L=S.live;if(!L)return;if(L.clock.running){accrue(L);L.clock.running=false;}else{L.clock.running=true;L.clock.lastTick=Date.now();}liveSave();render(true);},
-  liveForm(f){const L=S.live;accrue(L);remap(L,L.n,f);S.liveSel=null;liveSave();render(true);},
-  liveN(n){const L=S.live;if(L.n===n)return;accrue(L);remap(L,n,Object.keys(FORMS[n])[0]);S.liveSel=null;liveSave();render(true);},
+  liveForm(f){const L=S.live;accrue(L);remap(L,L.n,f);syncLu(L.n,L.form);S.liveSel=null;liveSave();render(true);},
+  liveN(n){const L=S.live;if(L.n===n)return;accrue(L);remap(L,n,Object.keys(FORMS[n])[0]);syncLu(L.n,L.form);S.liveSel=null;liveSave();render(true);},
   liveAddBench(pid){const L=S.live;if(!L.bench.includes(pid))L.bench.push(pid);liveSave();render(true);},
   liveEndModal(){showModal(`<h3>Spiel beenden</h3><label>Gegner / Titel<input id="m_title" value="Spiel gegen " autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" placeholder="z. B. 3:2" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Plus/Minus und Spielminuten werden als Spiel unter „Termine“ gespeichert. Danach kannst du die Kinder direkt bewerten.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.liveEnd()">Speichern</button></div>`);},
   liveEnd(){
