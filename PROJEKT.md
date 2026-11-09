@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 62, 09.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 63, 09.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
