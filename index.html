@@ -647,7 +647,7 @@ function appW(cat,pid,per){const[t,k]=cat.split(':');const AV=appValsC(pid,per);
 // Kann die App eine Kategorie nicht messen (z. B. Mut, Kommunikation), zählt der Trainerwert.
 // Live-Aktionen als zusätzliche Bewertungen: Plus = eine 5, Minus = eine 1, je Aktion LIVE_W einer Bewertung.
 // Deckel: Live macht höchstens die Hälfte eines Werts aus (gleich viel Gewicht wie die vorhandenen Bewertungen/Tests).
-const LIVE_W=.25,LIVE_CAP=true;
+const LIVE_W=.25,LIVE_CAP=true,APP_BUF=2;
 let LAC={k:null,m:{}};
 function liveAgg(pid,since){const ck=CUR+'|'+META.lastChange+'|'+(S.archView||'');if(LAC.k!==ck)LAC={k:ck,m:{}};const mk=pid+'|'+since;if(LAC.m[mk])return LAC.m[mk];const agg=LAC.m[mk]={};slist().filter(s=>s.live&&Array.isArray(s.live.actions)&&(!since||(s.date||'')>=since)).forEach(s=>s.live.actions.forEach(a=>{if(a.p!==pid||!a.c)return;const m=ACT_MAP[a.c];if(!m)return;for(const[k,w]of Object.entries(m)){const g=agg[k]||(agg[k]={p:0,m:0});if(a.t==='+')g.p+=w;else g.m+=w;}}));return agg;}
 function liveKeys(cat){const[t,k]=cat.split(':');if(t==='r')return[k];if(t==='a'){if(k==='spiel')return RATINGS.map(r=>r.k);if(k==='torwart')return GK_RATINGS.map(r=>r.k);if(k==='technik')return['technik'];}return[];}
@@ -671,7 +671,7 @@ function srcVal(cat,pid,ss,per){per=per||perMode();ss=ss||sessionsWith(cat);cons
   if(md==='mix'){const lv=trainerVal(cat,pid,ss,per);if(!srcApplies(cat))return mix2(lv,periodVal(cat,pid,ss,per));const ap=appCat(cat,pid,per);if(!isNum(lv)||!isNum(ap))return mix2(lv,ap);const w=appW(cat,pid,per);return (lv+w*ap)/(1+w);}
   const tr=cat.startsWith('x:')?null:periodVal(cat,pid,ss,per);if(!srcApplies(cat))return tr;const ap=appCat(cat,pid,per);return isNum(ap)?ap:tr;}
 function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?'Potenzial: alle Werte der Saison (bei Tests der Bestwert).':pm==='form'?`Form: nur die letzten ${formWeeks()} Wochen. Ohne Werte in dem Zeitraum zählt nichts.`:`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div><div class="sub" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;margin-top:4px">Form-Zeitraum: ${[4,6,8].map(w=>`<button class="chip ${formWeeks()===w?'on':''}" style="padding:2px 8px" onclick="A.cfgSet('formWeeks',${w})">${w} Wo.</button>`).join('')}</div>`;}
-function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Nur deine Einschätzungen, ohne Testmessungen (Tempo, Technik usw. aus deiner Athletik-, Dribbling- und Pass-Einschätzung), dazu jede Live-Aktion als Zusatzbewertung: Plus zählt wie eine 5, Minus wie eine 1 (4 Aktionen = 1 Bewertung, Live höchstens die Hälfte).':md==='app'?'Nur Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':'Mittelwert aus „Trainer“ und dem App-Wert. Der App-Wert zählt erst mit mehr Aktionen voll (4 Aktionen = halbes Gewicht), Tests zählen gleich voll. Fehlt einer, zählt der andere.'}</div>`;}
+function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Nur deine Einschätzungen, ohne Testmessungen (Tempo, Technik usw. aus deiner Athletik-, Dribbling- und Pass-Einschätzung), dazu jede Live-Aktion als Zusatzbewertung: Plus zählt wie eine 5, Minus wie eine 1 (4 Aktionen = 1 Bewertung, Live höchstens die Hälfte).':md==='app'?'Nur Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':'Mittelwert aus „Trainer“ und dem App-Wert. Der App-Wert zählt erst mit mehr Aktionen voll (2 Aktionen = halbes Gewicht), Tests zählen gleich voll. Fehlt einer, zählt der andere.'}</div>`;}
 // Erklärt, woher der Torwart-Wert eines Kindes kommt (Bewertungen mit TW-Einschätzung/TW-Tests, App-Werte aus Torwart-Aktionen)
 function gkInfo(pid){
   const GKT=['tw_fangen','tw_reaktion','tw_abwurf'];
@@ -783,8 +783,9 @@ function appVals(pid,since){
   const agg={};
   games.forEach(s=>s.live.actions.forEach(a=>{if(a.p!==pid||!a.c)return;const m=ACT_MAP[a.c];if(!m)return;for(const[k,w]of Object.entries(m)){const g=agg[k]||(agg[k]={p:0,m:0,n:0});if(a.t==='+')g.p+=w;else g.m+=w;g.n++;}}));
   const out={};
-  // Aktionen wie Zusatzbewertungen: Plus = 5, Minus = 1, dazu eine neutrale 3 als Puffer. w = Gewicht im Mix (wenige Aktionen = wenig Gewicht).
-  for(const[k,g]of Object.entries(agg))out[k]={v:(5*g.p+g.m+3)/(g.p+g.m+1),n:g.n,w:g.n/(g.n+4),src:'Spiele'};
+  // Aktionen wie Zusatzbewertungen: Plus = 5, Minus = 1, Start bei 3 mit Puffer APP_BUF (2 = doppelt so stark wie früher 4: 2 Aktionen wirken wie früher 4).
+  // w = Gewicht im Mix: 2 Aktionen = halbes, 6 Aktionen = 75 % Gewicht.
+  for(const[k,g]of Object.entries(agg))out[k]={v:(5*g.p+g.m+3*APP_BUF)/(g.p+g.m+APP_BUF),n:g.n,w:g.n/(g.n+APP_BUF),src:'Spiele'};
   const tests=s=>s.type!=='game';
   ['tempo','gewandt','kraft','ausdauer','technik'].forEach(ak=>{
     const t=latestVal('a:'+ak,pid,sessionsWith('a:'+ak).filter(tests));if(!isNum(t))return;
@@ -930,7 +931,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
- {v:41,items:['<b>Fairere App-Werte:</b> Live-Aktionen zählen jetzt auch im App-Wert wie Zusatzbewertungen (Plus = 5, Minus = 1). Im Mix hat der App-Wert wenig Gewicht, solange es nur wenige Aktionen sind. Starke Kinder, z. B. im Tor, werden so nicht mehr Richtung 3 gezogen.']},
+ {v:41,items:['<b>Fairere App-Werte:</b> Live-Aktionen zählen jetzt auch im App-Wert wie Zusatzbewertungen (Plus = 5, Minus = 1). Aktionen wirken doppelt so stark wie bisher (2 Aktionen = früher 4). Im Mix hat der App-Wert wenig Gewicht, solange es nur wenige Aktionen sind. Starke Kinder, z. B. im Tor, werden so nicht mehr Richtung 3 gezogen.']},
  {v:40,items:['<b>Saison-Rückblick für die Kinder</b> (Einstellungen): zwei bunte PDF-Seiten pro Kind – „So hast du dich entwickelt“ als Netz (Saisonbeginn und -ende), Rekorde beim Testtag, Highlights wie bestes Spiel und erstes Tor, Abzeichen, geschaffte Ziele und eine Nachricht vom Trainerteam. Jedes Kind wird nur mit sich selbst verglichen.','Die Nachricht für den Rückblick trägst du beim Spieler unter ✏️ ein. Ohne Text bleibt Platz zum Reinschreiben.']},
  {v:39,items:['<b>Stärkenprofil mit zwei Netzen:</b> Im Spielerprofil zeigt das Netzdiagramm jetzt Form (letzte Wochen, gefüllt) und Potenzial (ganze Saison, gestrichelt) übereinander – passend zu „Werte aus“.']},
  {v:38,items:['<b>Torwart in der Aufstellung:</b> „Stärkste“ und „Ausgewogen“ besetzen jetzt auch das Tor. Die App rechnet aus, mit wem im Tor die ganze Aufstellung am besten ist. Fest wählen geht weiterhin.','<b>Zwei Werte für Torwart-Kinder:</b> Kinder mit Torwart-Bewertung zeigen in der Aufstellung und auf der Bank ihren Feld- und ihren Torwart-Wert (z. B. „3,7 · TW 3,5“).']},
