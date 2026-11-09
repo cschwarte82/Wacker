@@ -280,7 +280,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='50';
+const APP_VERSION='51';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -812,9 +812,9 @@ function vLineup(){
 }
 
 // ---------- Aktions-Kategorien & App-Werte ----------
-const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbling',m:'Ballverlust im Dribbling'},{k:'schuss',p:'Guter Abschluss',m:'Chance vergeben'},{k:'lauf',p:'Guter Laufweg',m:'Falsch gelaufen / versteckt'},{k:'zweik',p:'Zweikampf gewonnen',m:'Zweikampf verloren'},{k:'entsch',p:'Kluge Entscheidung',m:'Falsche Entscheidung'},{k:'verp',p:null,m:'Abspiel verpasst'}];
+const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbling',m:'Ballverlust im Dribbling'},{k:'schuss',p:'Guter Abschluss',m:'Chance vergeben'},{k:'lauf',p:'Guter Laufweg',m:'Falsch gelaufen / versteckt'},{k:'zweik',p:'Zweikampf gewonnen',m:'Zweikampf verloren'},{k:'entsch',p:'Kluge Entscheidung',m:'Falsche Entscheidung'},{k:'verp',p:null,m:'Abspiel verpasst'},{k:'gross',p:null,m:'Großchance vergeben'}];
 const ACT_G=[{k:'parade',p:'Starke Parade',m:'Haltbarer Gegentreffer'},{k:'fang',p:'Sicher gefangen',m:'Abprallen lassen'},{k:'raus',p:'Gut herausgelaufen',m:'Falsch herausgelaufen'},{k:'stell',p:'Gut positioniert',m:'Falsch positioniert'},{k:'eroeff',p:'Abwurf/Abstoß angekommen',m:'Abwurf/Abstoß zum Gegner'}];
-const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5},dribb:{dribb:1,technik:1},schuss:{technik:1,abschluss:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},verp:{pass:1,ueber:1},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
+const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5},dribb:{dribb:1,technik:1},schuss:{technik:1,abschluss:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},verp:{pass:1,ueber:1},gross:{abschluss:2,technik:1},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
 const PASS_TESTS=['pass_r','pass_l'];
 const GK_TEST_MAP={tw_fangen:'tw_fang',tw_reaktion:'tw_reak',tw_abwurf:'tw_eroeff'};
 const r1=x=>Math.round(x*10)/10;
@@ -971,7 +971,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
- {v:50,items:['Live-Spiel: Beim Minus gibt es jetzt „Abspiel verpasst“. Es zählt negativ für Passspiel und Übersicht.']},{v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
+ {v:51,items:['Live-Spiel: Beim Minus gibt es jetzt „Großchance vergeben“ für eine 100-prozentige Torchance. Sie zählt beim Torschuss doppelt so stark wie „Chance vergeben“.']},{v:50,items:['Live-Spiel: Beim Minus gibt es jetzt „Abspiel verpasst“. Es zählt negativ für Passspiel und Übersicht.']},{v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
  {v:45,items:['„Zusammenführen“ beim Spieler und bei der Mannschaft steht jetzt in einer eigenen Zeile und ragt nicht mehr aus dem Bildschirm.']},
  {v:44,items:['Datensicherung aufgeräumt: Der Knopf „Text einfügen“ ist weg, „Sicherung einlesen“ reicht.']},
  {v:43,items:['<b>📤 Sicherung teilen:</b> Neuer Knopf neben „Sicherung speichern“ (Kader → Datensicherung). Schickt die Sicherung direkt per WhatsApp, Mail oder AirDrop.','<b>Doppelt erfasste Spiele:</b> Habt ihr dasselbe Spiel auf zwei Handys live erfasst, legt „Sicherung einlesen“ beide zusammen: Pro Kind zählen die Aktionen aus der Erfassung, die bei diesem Kind genauer war. So zählt nichts doppelt, und dein breiter Blick bleibt genauso erhalten wie der genaue Blick des anderen. Schon doppelt vorhandene Spiele zeigt die App unter „Bewertung“ an, ein Tipp legt sie zusammen.','<b>Sicherer zusammenführen:</b> Kinder, die schon gemeinsam in einer Bewertung vorkommen, schlägt die App nie als doppelt vor (z. B. zwei echte Leons). Jedes Zusammenführen lässt sich 24 Stunden lang mit „↶ Rückgängig“ zurücknehmen.']},
