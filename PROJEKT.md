@@ -5,7 +5,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 
 ## Eckdaten
 - **App:** TrainerRadar – Web-App (PWA) für Kinderfußball-Trainer, entstanden für die U10 von Wacker Mecklenbeck
-- **Adresse:** https://cschwarte82.github.io/wacker/ (bleibt so, QR-Code im Flyer zeigt dorthin)
+- **Adresse:** https://cschwarte82.github.io/Wacker/ (großes W! Kleingeschrieben führt der Link ins Leere. QR-Code im Flyer zeigt dorthin)
 - **Repository:** github.com/cschwarte82/wacker (öffentlich, GitHub Pages aus Branch `main`, Wurzelverzeichnis)
 - **Claude-Zugriff:** Die Claude-GitHub-App ist für das Repo „Wacker“ freigegeben (Schreibrechte)
 - **Zielgerät:** hauptsächlich iPhone, als App auf dem Home-Bildschirm
@@ -16,7 +16,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - `manifest.webmanifest`, Icons (`icon.svg`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`)
 - `jspdf.min.js` (jsPDF 2.5.2) für die Spielerprofil-PDFs, wird erst bei Bedarf geladen
 - `TrainerRadar-Anleitung.pdf`: Benutzerhandbuch, in den Einstellungen verlinkt
-- `TrainerRadar-Flyer.pdf`: Werbeflyer als PDF (aus `materialien/werbeflyer.html`), öffentlich unter cschwarte82.github.io/wacker/TrainerRadar-Flyer.pdf – bei Flyer-Änderungen neu erzeugen
+- `TrainerRadar-Flyer.pdf`: Werbeflyer als PDF (aus `materialien/werbeflyer.html`), öffentlich unter cschwarte82.github.io/Wacker/TrainerRadar-Flyer.pdf – bei Flyer-Änderungen neu erzeugen
 - `materialien/`: Quellen für Flyer und Handbuch, Screenshot-Skript, fiktive Demodaten
 
 ### Daten (nur lokal auf dem Gerät, localStorage)
