@@ -280,7 +280,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='48';
+const APP_VERSION='49';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -315,13 +315,13 @@ let TEAMS={},CUR=null;
 function setSaving(){}
 function syncTeam(){if(CUR&&TEAMS[CUR]){if(!S.archView){TEAMS[CUR].players=S.players;TEAMS[CUR].sessions=S.sessions;}TEAMS[CUR].live=S.live||null;TEAMS[CUR].lu=S.lu;TEAMS[CUR].cfg=S.cfg;}}
 function saveLocal(){
-  syncTeam();
+  DV++;syncTeam();
   try{localStorage.setItem(LSKEY2,JSON.stringify({current:CUR,teams:TEAMS}));localStorage.setItem(METAKEY,JSON.stringify(META));}
   catch(e){toast('Speichern auf dem Gerät fehlgeschlagen – bitte Sicherung erstellen.');}
 }
 function saveDoc(col,id,data){if(S.archView){toast('Archiv: nur ansehen – erst zurück zur aktuellen Saison.');return;}S[col][id]=data;META.lastChange=Date.now();saveLocal();}
 async function removeDoc(col,id){if(S.archView){toast('Archiv: nur ansehen – erst zurück zur aktuellen Saison.');return;}delete S[col][id];META.lastChange=Date.now();saveLocal();}
-function loadTeam(){S.archView=null;const t=TEAMS[CUR];t.players=t.players||{};t.sessions=t.sessions||{};S.players=t.players;S.sessions=t.sessions;S.live=t.live||null;S.liveSel=null;S.lu=t.lu||{n:6,form:'2-3-1',mode:'stark',keeper:null,absent:{},manual:null};S.lu.absent=S.lu.absent||{};S.luSel=null;S.luCache=null;S.cfg=t.cfg||{minShare:50};}
+function loadTeam(){DV++;S.archView=null;const t=TEAMS[CUR];t.players=t.players||{};t.sessions=t.sessions||{};S.players=t.players;S.sessions=t.sessions;S.live=t.live||null;S.liveSel=null;S.lu=t.lu||{n:6,form:'2-3-1',mode:'stark',keeper:null,absent:{},manual:null};S.lu.absent=S.lu.absent||{};S.luSel=null;S.luCache=null;S.cfg=t.cfg||{minShare:50};}
 function loadLocal(){
   try{const d=JSON.parse(localStorage.getItem(LSKEY2)||'null');if(d&&d.teams){TEAMS=d.teams;CUR=d.current;}}catch(e){}
   if(!Object.keys(TEAMS).length){
@@ -360,14 +360,15 @@ function dupGames(){const ss=slist().filter(s=>s.type==='game'&&s.live);const ou
 function importData(txt){
   let d;try{d=JSON.parse(txt);}catch(e){toast('Das ist keine gültige Sicherung.');return false;}
   if(!d||typeof d!=='object'||(!d.teams&&!d.players&&!d.sessions)){toast('Keine Spielerdaten gefunden.');return false;}
-  if(S.archView)loadTeam();syncTeam();let nt=0,np=0,ns=0,na=0,ng=0,ngr=0,nf=0;
+  if(S.archView)loadTeam();syncTeam();let nt=0,np=0,ns=0,na=0,ng=0,ngr=0,nf=0,nar=0;
   const merge=(t,src)=>{t.players=t.players||{};t.sessions=t.sessions||{};
     for(const a of (Array.isArray(src.archive)?src.archive:[]))if(a&&a.id&&a.sessions&&!(t.archive||[]).some(x=>x.id===a.id)){(t.archive=t.archive||[]).push(a);na++;}
-    const inArch=id=>(t.archive||[]).some(a=>a.sessions&&a.sessions[id]);
+    // Schon archiviert: gleiche Kennung, als doppelte Erfassung in ein archiviertes Spiel eingeflossen, oder Datum liegt in einer abgeschlossenen Saison
+    const inArch=(id,s)=>(t.archive||[]).some(a=>a.sessions&&(a.sessions[id]||Object.values(a.sessions).some(x=>(x.merged||[]).includes(id)||sameGame(x,s))||(s&&s.date&&a.from&&a.to&&s.date>=a.from&&s.date<=a.to)));
     for(const[id,p]of Object.entries(src.players||{})){if(!t.players[id]){t.players[id]=p;np++;continue;}
       // Vorhandenes Kind: eigene Angaben bleiben, nur leere Felder werden ergänzt
       const q=t.players[id];let f=0;['foot','stil','treue'].forEach(k=>{if(!q[k]&&p&&p[k]){q[k]=p[k];f++;}});if(f)nf++;}
-    for(const[id,s]of Object.entries(src.sessions||{}))if(!t.sessions[id]&&!inArch(id)){
+    for(const[id,s]of Object.entries(src.sessions||{}))if(!t.sessions[id]){if(inArch(id,s)){nar++;continue;}
       // Gleiches Spiel schon vorhanden: pro Kind zählt die Erfassung mit mehr Aktionen (Spielverlauf bleibt der eigene)
       const ex=Object.entries(t.sessions).find(([,x])=>sameGame(x,s));
       if(ex){const[eid,x]=ex;if((x.merged||[]).includes(id)){ng++;continue;}const r=mergeGameRec(x,{...s,id});t.sessions[eid]=r.n;ngr++;continue;}
@@ -378,7 +379,7 @@ function importData(txt){
   // Neues Gerät: leere Start-Mannschaft durch die eingelesene ersetzen
   {const c=TEAMS[CUR],tg=d.current&&TEAMS[d.current]?d.current:null;if(tg&&tg!==CUR&&c&&!Object.keys(c.players||{}).length&&!Object.keys(c.sessions||{}).length&&!(c.archive||[]).length){delete TEAMS[CUR];CUR=tg;}}
   loadTeam();META.lastChange=Date.now();saveLocal();render(true);
-  toast(`${nt?nt+(nt===1?' Mannschaft, ':' Mannschaften, '):''}${np} Spieler und ${ns} Bewertungen übernommen${na?` · ${na} archivierte Saison${na===1?'':'s'}`:''}${ngr?` · ${ngr} doppelt erfasste${ngr===1?'s':''} Spiel${ngr===1?'':'e'} zusammengelegt (pro Kind zählt die genauere Erfassung)`:''}${nf?` · bei ${nf} Kind${nf===1?'':'ern'} fehlende Angaben (Fuß/Spielweise/Positionstreue) ergänzt`:''}`);return true;
+  toast(`${nt?nt+(nt===1?' Mannschaft, ':' Mannschaften, '):''}${np} Spieler und ${ns} Bewertungen übernommen${na?` · ${na} archivierte Saison${na===1?'':'s'}`:''}${ngr?` · ${ngr} doppelt erfasste${ngr===1?'s':''} Spiel${ngr===1?'':'e'} zusammengelegt (pro Kind zählt die genauere Erfassung)`:''}${nf?` · bei ${nf} Kind${nf===1?'':'ern'} fehlende Angaben (Fuß/Spielweise/Positionstreue) ergänzt`:''}${nar?` · ${nar} ältere Bewertung${nar===1?'':'en'} gehör${nar===1?'t':'en'} zu einer abgeschlossenen Saison und ${nar===1?'wurde':'wurden'} übersprungen`:''}`);return true;
 }
 function backupCard(){
   const lb=META.lastBackup?new Date(META.lastBackup).toLocaleDateString('de-DE'):'noch nie';
@@ -585,7 +586,10 @@ function vPlayer(){
 const CATS=[{g:'Tests',items:TESTS.map(t=>({id:'t:'+t.k,n:t.n}))},{g:'Bereiche (Stärkenprofil)',items:AREAS.map(a=>({id:'a:'+a.k,n:a.n}))},{g:'Trainer-Einschätzung',items:RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Spiele (Live)',items:[{id:'g:tore',n:'Tore'},{id:'g:bil',n:'Tor-Bilanz auf dem Feld'}]},{g:'Athletik (Trainer)',items:ATH_RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Torwart',items:[{id:'a:torwart',n:'Torwart gesamt'},...GK_RATINGS.map(r=>({id:'r:'+r.k,n:'TW: '+r.n}))]}];
 function catVal(s,cat,pid){const[t,k]=cat.split(':');if(t==='g'){const lv=s.live;if(!lv||!lv.goals)return null;const played=((lv.mins||{})[pid]||0)>0||lv.goals.some(g=>(g.on||[]).includes(pid));if(!played)return null;const b=gameBal(lv,pid);return k==='tore'?b.tore:b.gf-b.ga;}if(t==='t')return s.results?.[pid]?.[k];if(t==='a')return areaScore(s,pid,k);return s.ratings?.[pid]?.[k];}
 function catMeta(cat){const[t,k]=cat.split(':');if(t==='g')return{u:k==='tore'?'Tore':'',lower:false};if(t==='t')return{u:TEST[k].u,lower:!!TEST[k].lower};if(t==='a')return{u:'',lower:false};return{u:'/5',lower:false};}
-function sessionsWith(cat){const ps=plist(true);return slist().filter(s=>ps.some(p=>isNum(catVal(s,cat,p.id))));}
+// Rechen-Zwischenspeicher: gilt bis zur nächsten gespeicherten Änderung (DV zählt bei jedem saveLocal/loadTeam hoch)
+let DV=0,CC={k:null,sw:{},sv:{}};
+function calcCache(){const k=DV+'|'+CUR+'|'+(S.archView||'')+'|'+formWeeks()+'|'+srcMode()+'|'+Object.keys(S.sessions||{}).length+'|'+Object.keys(S.players||{}).length;if(CC.k!==k)CC={k,sw:{},sv:{}};return CC;}
+function sessionsWith(cat){const C=calcCache();if(C.sw[cat])return C.sw[cat];const ps=plist(true);return C.sw[cat]=slist().filter(s=>ps.some(p=>isNum(catVal(s,cat,p.id))));}
 function latestVal(cat,pid,ss){const multi=cat.startsWith('r:')||cat==='a:spiel'||cat==='a:torwart';const vals=[];for(const s of ss){const v=catVal(s,cat,pid);if(isNum(v)){if(!multi)return v;vals.push(v);if(vals.length===3)break;}}return vals.length?avg(vals):null;}
 // Wer ist in Form? Form (letzte Wochen) gegen Potenzial (ganze Saison), Schnitt über alle Einschätzungs-Kategorien
 function formOverview(){
@@ -701,7 +705,8 @@ function trainerVal(cat,pid,ss,per){const[t,k]=cat.split(':');
   if(t==='a'&&TR_AREA[k]){const vs=TR_AREA[k].map(x=>liveVal('r:'+x,pid,sessionsWith('r:'+x),per)).filter(isNum);return vs.length?avg(vs):null;}
   return liveVal(cat,pid,ss,per);}
 // Wert je Kategorie nach gewählter Quelle: Trainer (Einschätzung + Live-Aktionen als Zusatzbewertungen), App (Live-Aktionen + Tests) oder Mix (Mittelwert).
-function srcVal(cat,pid,ss,per){per=per||perMode();ss=ss||sessionsWith(cat);const md=srcMode();
+function srcVal(cat,pid,ss,per){per=per||perMode();const C=calcCache(),std=!ss||ss===C.sw[cat];ss=ss||sessionsWith(cat);const ck=cat+'|'+pid+'|'+per;if(std&&ck in C.sv)return C.sv[ck];const v=srcVal0(cat,pid,ss,per);if(std)C.sv[ck]=v;return v;}
+function srcVal0(cat,pid,ss,per){const md=srcMode();
   if(md==='trainer')return trainerVal(cat,pid,ss,per);
   if(md==='mix'){const lv=trainerVal(cat,pid,ss,per);if(!srcApplies(cat))return mix2(lv,periodVal(cat,pid,ss,per));const ap=appCat(cat,pid,per);if(!isNum(lv)||!isNum(ap))return mix2(lv,ap);const w=appW(cat,pid,per);return (lv+w*ap)/(1+w);}
   const tr=cat.startsWith('x:')?null:periodVal(cat,pid,ss,per);if(!srcApplies(cat))return tr;const ap=appCat(cat,pid,per);return isNum(ap)?ap:tr;}
@@ -966,7 +971,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
- {v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
+ {v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
  {v:45,items:['„Zusammenführen“ beim Spieler und bei der Mannschaft steht jetzt in einer eigenen Zeile und ragt nicht mehr aus dem Bildschirm.']},
  {v:44,items:['Datensicherung aufgeräumt: Der Knopf „Text einfügen“ ist weg, „Sicherung einlesen“ reicht.']},
  {v:43,items:['<b>📤 Sicherung teilen:</b> Neuer Knopf neben „Sicherung speichern“ (Kader → Datensicherung). Schickt die Sicherung direkt per WhatsApp, Mail oder AirDrop.','<b>Doppelt erfasste Spiele:</b> Habt ihr dasselbe Spiel auf zwei Handys live erfasst, legt „Sicherung einlesen“ beide zusammen: Pro Kind zählen die Aktionen aus der Erfassung, die bei diesem Kind genauer war. So zählt nichts doppelt, und dein breiter Blick bleibt genauso erhalten wie der genaue Blick des anderen. Schon doppelt vorhandene Spiele zeigt die App unter „Bewertung“ an, ein Tipp legt sie zusammen.','<b>Sicherer zusammenführen:</b> Kinder, die schon gemeinsam in einer Bewertung vorkommen, schlägt die App nie als doppelt vor (z. B. zwei echte Leons). Jedes Zusammenführen lässt sich 24 Stunden lang mit „↶ Rückgängig“ zurücknehmen.']},
