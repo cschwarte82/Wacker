@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 51, 09.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 52, 09.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -26,7 +26,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - Schlüssel `u10-meta-v1`: `{lastBackup, lastChange, seenVersion}`
 - Älterer Schlüssel `u10-leistungsprofil-v1` wird beim Start einmalig in Team „U10“ übernommen
 - **Bewertungsarten** (`sessions`, Feld `type`): ohne type = Testtag (nur Messwerte), `eval` = Trainereinschätzung, `game` = Spiel (mit `live`-Daten aus der Live-Erfassung)
-- **Live-Spiel** im Team gespeichert (`live`): Positionen, Bank, Uhr, Plus/Minus, Aktionen mit Kategorie (V50: Minus-only „Abspiel verpasst“ `verp` → Passspiel 1 + Übersicht 1; V51: „Großchance vergeben“ `gross` → Abschluss 2 + Technik 1; Kategorien mit `p:null` erscheinen nur beim Minus), Tore, Karten, Wechsel-Log, Einsatzzeiträume, Spielzeit-Einteilung
+- **Live-Spiel** im Team gespeichert (`live`): Positionen, Bank, Uhr, Plus/Minus, Aktionen mit Kategorie (V50: Minus-only „Abspiel verpasst“ `verp` → Passspiel 1 + Übersicht 1; V51: „Großchance vergeben“ `gross` → Abschluss 2 + Technik 1; V52: Minus „Chance vergeben“ ausgeblendet (`mOff`, alte Aktionen zählen weiter), Minus-Reihenfolge über `mo`, Auswahl über `catsFor`; Christian will Plus (6 + Tor) und Minus (7) ausgewogen; Kategorien mit `p:null` erscheinen nur beim Minus), Tore, Karten, Wechsel-Log, Einsatzzeiträume, Spielzeit-Einteilung
 - Sicherung: JSON-Datei über Teilen-Menü; Einlesen ergänzt nur (nichts wird gelöscht)
 - Es gibt **keine Cloud/Synchronisierung** – Co-Trainer tauschen Sicherungsdateien aus
 
