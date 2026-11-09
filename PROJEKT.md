@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 39, 09.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 40, 09.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -45,7 +45,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **Live:** Wechselvorschlag (💡, ab Minute 3, bis zu 2: wenig gespielt rein ⇄ lange gespielt raus, passende Position; `subSuggest`), kompakter Kopf (Uhr, Spielstand, Pause in einer Zeile; ↶ neben „Halbzeit beenden“), Tor/Gegentor/Karte in einer Zeile, Formation + Spielzeit-Ziel + Tor=Plus unter „Optionen“ (eingeklappt), Plus/Minus-Knöpfe bewusst groß (Wunsch des Trainers); Uhr mit Halbzeiten/Vierteln und Nachspielzeit, Plus/Minus mit Kategorie (5 s), Tor zählt sofort + Torschütze (7 s), Torschütze bekommt automatisch Plus „Guter Abschluss“ (`cfg.goalPlus`, Standard an; Aktion trägt `goal`-Verweis und folgt Torschützen-Änderung/Zurück), Gegentor, Gelb/Gelb-Rot/Rot, Wechsel und Positionstausch per Antippen, wieder einwechseln mit addierten Einsätzen, Spielzeit-Ampel (33/50/66 %), Spielverlauf, ↶ Zurück für alle Aktionen
 - **Ranglisten:** bei Einschätzungs-Kategorien (inkl. Spielverhalten, Torwart, Technik) Werte aus Trainer/App/Mix wählbar; Bestwerte/Fortschritt je Test, Bereich, Einschätzung, Torwart, Tore, Tor-Bilanz auf dem Feld; „Aktuell vorne je Bereich“
 - **Kader:** Spieler (Fuß, Spielweise `stil`: offensiv/ausgewogen/defensiv, Positionstreue `treue`: hoch/mittel/gering), Profil (Stärkenprofil-Radar, Messwerte, Trainer vs. App, Live-Bilanz, Entwicklungsziele), Stärkenkarte fürs Kind, Datensicherung
-- **Einstellungen (⚙︎):** Spielerprofile als PDF, Saisonbericht pro Kind als PDF (aktuelle oder archivierte Saison, fürs Elterngespräch, ohne Ranglisten; `buildSeasonPdf`), Anleitung (PDF + Kurzfassung), Was ist neu, Saison-Archiv (abschließen, ansehen, als Datei, zurückholen, vom Gerät löschen, Speicheranzeige), Datensicherung, Versionsnummer
+- **Einstellungen (⚙︎):** Spielerprofile als PDF, Saisonbericht pro Kind als PDF (aktuelle oder archivierte Saison, fürs Elterngespräch, ohne Ranglisten; `buildSeasonPdf`), Saison-Rückblick für die Kinder (V40, `buildKidPdf`/`kidData`: 2 Seiten, Entwicklungsnetz erste vs. letzte 2 Einschätzungen, Testtag-Rekorde, Highlights wie bestes Spiel/erstes Tor/Markenzeichen, Abzeichen nach eigenen Schwellen, geschaffte und nächste Ziele, Nachricht aus `player.msg` oder Linien zum Reinschreiben; vergleicht nur mit sich selbst), Anleitung (PDF + Kurzfassung), Was ist neu, Saison-Archiv (abschließen, ansehen, als Datei, zurückholen, vom Gerät löschen, Speicheranzeige), Datensicherung, Versionsnummer
 - **Mehrere Mannschaften** über das Feld „U10 ▾“ im Kopf
 
 ## Bewertungslogik
