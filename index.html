@@ -280,7 +280,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='49';
+const APP_VERSION='50';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -812,9 +812,9 @@ function vLineup(){
 }
 
 // ---------- Aktions-Kategorien & App-Werte ----------
-const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbling',m:'Ballverlust im Dribbling'},{k:'schuss',p:'Guter Abschluss',m:'Chance vergeben'},{k:'lauf',p:'Guter Laufweg',m:'Falsch gelaufen / versteckt'},{k:'zweik',p:'Zweikampf gewonnen',m:'Zweikampf verloren'},{k:'entsch',p:'Kluge Entscheidung',m:'Falsche Entscheidung'}];
+const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbling',m:'Ballverlust im Dribbling'},{k:'schuss',p:'Guter Abschluss',m:'Chance vergeben'},{k:'lauf',p:'Guter Laufweg',m:'Falsch gelaufen / versteckt'},{k:'zweik',p:'Zweikampf gewonnen',m:'Zweikampf verloren'},{k:'entsch',p:'Kluge Entscheidung',m:'Falsche Entscheidung'},{k:'verp',p:null,m:'Abspiel verpasst'}];
 const ACT_G=[{k:'parade',p:'Starke Parade',m:'Haltbarer Gegentreffer'},{k:'fang',p:'Sicher gefangen',m:'Abprallen lassen'},{k:'raus',p:'Gut herausgelaufen',m:'Falsch herausgelaufen'},{k:'stell',p:'Gut positioniert',m:'Falsch positioniert'},{k:'eroeff',p:'Abwurf/Abstoß angekommen',m:'Abwurf/Abstoß zum Gegner'}];
-const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5},dribb:{dribb:1,technik:1},schuss:{technik:1,abschluss:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
+const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5},dribb:{dribb:1,technik:1},schuss:{technik:1,abschluss:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},verp:{pass:1,ueber:1},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
 const PASS_TESTS=['pass_r','pass_l'];
 const GK_TEST_MAP={tw_fangen:'tw_fang',tw_reaktion:'tw_reak',tw_abwurf:'tw_eroeff'};
 const r1=x=>Math.round(x*10)/10;
@@ -877,7 +877,7 @@ function vActs(s){
   const onlyOpen=open&&!S.actsAll;
   let h=gh+`<div class="sub" style="margin-bottom:8px">${open?`<b>${open} Aktion${open===1?'':'en'} ohne Kategorie</b> – sie zählen erst mit Kategorie für die Werte. Tippe die passende an.`:'Alle Aktionen sind zugeordnet.'} Nochmal antippen hebt die Zuordnung auf.</div>`;
   if(open)h+=`<div class="seg" style="margin-bottom:8px"><button class="${onlyOpen?'on':''}" onclick="S.actsAll=false;render(true)">Nur offene (${open})</button><button class="${onlyOpen?'':'on'}" onclick="S.actsAll=true;render(true)">Alle (${acts.length})</button></div>`;
-  h+=acts.map((a,i)=>{if(onlyOpen&&a.c)return'';const cats=a.gk?ACT_G:ACT_F;return `<div class="card arow ${a.c?'':'open'}"><div class="row between"><b>${mlOf(a)} ${esc(short(a.p))}${a.gk?' (TW)':''}</b><span class="${a.t==='+'?'pos':'neg'}" style="font-weight:700;font-size:20px">${a.t==='+'?'+':'−'}</span></div><div class="chips">${cats.map(c=>`<button class="chip ${a.c===c.k?(a.t==='+'?'onp':'onm'):''}" onclick="A.actCat(${i},'${c.k}')">${esc(a.t==='+'?c.p:c.m)}</button>`).join('')}</div></div>`;}).join('');
+  h+=acts.map((a,i)=>{if(onlyOpen&&a.c)return'';const cats=(a.gk?ACT_G:ACT_F).filter(c=>a.t==='+'?c.p:c.m);return `<div class="card arow ${a.c?'':'open'}"><div class="row between"><b>${mlOf(a)} ${esc(short(a.p))}${a.gk?' (TW)':''}</b><span class="${a.t==='+'?'pos':'neg'}" style="font-weight:700;font-size:20px">${a.t==='+'?'+':'−'}</span></div><div class="chips">${cats.map(c=>`<button class="chip ${a.c===c.k?(a.t==='+'?'onp':'onm'):''}" onclick="A.actCat(${i},'${c.k}')">${esc(a.t==='+'?c.p:c.m)}</button>`).join('')}</div></div>`;}).join('');
   return h||'<div class="empty">Keine Aktionen erfasst.</div>';
 }
 let sheetT=null;
@@ -887,7 +887,7 @@ function cardBadge(L,pid){const cs=(L.cards||[]).filter(c=>c.p===pid);if(!cs.len
 const CARD_N={y:'Gelbe Karte',yr:'Gelb-Rote Karte',r:'Rote Karte'};
 function showSheet(e){
   const el=$('#sheet');const cats=e.gk?ACT_G:ACT_F;const plus=e.t==='+';
-  el.innerHTML=`<div class="row between" style="margin-bottom:8px"><b>${esc(short(e.p))} <span class="${plus?'pos':'neg'}">${plus?'+':'−'}</span> · Was war's?</b><button class="btn sm2" onclick="A.sheetHide()">Später</button></div><div class="sgrid ${plus?'p':'m'}">${cats.map(c=>`<button onclick="A.sheetPick('${e.id}','${c.k}')">${esc(plus?c.p:c.m)}</button>`).join('')}</div><div class="sbarw"><div class="sbar" id="sbar"></div></div>`;
+  el.innerHTML=`<div class="row between" style="margin-bottom:8px"><b>${esc(short(e.p))} <span class="${plus?'pos':'neg'}">${plus?'+':'−'}</span> · Was war's?</b><button class="btn sm2" onclick="A.sheetHide()">Später</button></div><div class="sgrid ${plus?'p':'m'}">${cats.filter(c=>plus?c.p:c.m).map(c=>`<button onclick="A.sheetPick('${e.id}','${c.k}')">${esc(plus?c.p:c.m)}</button>`).join('')}</div><div class="sbarw"><div class="sbar" id="sbar"></div></div>`;
   el.classList.add('open');
   requestAnimationFrame(()=>{const b=$('#sbar');if(b){b.style.transition='none';b.style.width='100%';requestAnimationFrame(()=>{b.style.transition='width 5s linear';b.style.width='0%';});}});
   clearTimeout(sheetT);sheetT=setTimeout(()=>A.sheetHide(),5000);
@@ -971,7 +971,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
- {v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
+ {v:50,items:['Live-Spiel: Beim Minus gibt es jetzt „Abspiel verpasst“. Es zählt negativ für Passspiel und Übersicht.']},{v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
  {v:45,items:['„Zusammenführen“ beim Spieler und bei der Mannschaft steht jetzt in einer eigenen Zeile und ragt nicht mehr aus dem Bildschirm.']},
  {v:44,items:['Datensicherung aufgeräumt: Der Knopf „Text einfügen“ ist weg, „Sicherung einlesen“ reicht.']},
  {v:43,items:['<b>📤 Sicherung teilen:</b> Neuer Knopf neben „Sicherung speichern“ (Kader → Datensicherung). Schickt die Sicherung direkt per WhatsApp, Mail oder AirDrop.','<b>Doppelt erfasste Spiele:</b> Habt ihr dasselbe Spiel auf zwei Handys live erfasst, legt „Sicherung einlesen“ beide zusammen: Pro Kind zählen die Aktionen aus der Erfassung, die bei diesem Kind genauer war. So zählt nichts doppelt, und dein breiter Blick bleibt genauso erhalten wie der genaue Blick des anderen. Schon doppelt vorhandene Spiele zeigt die App unter „Bewertung“ an, ein Tipp legt sie zusammen.','<b>Sicherer zusammenführen:</b> Kinder, die schon gemeinsam in einer Bewertung vorkommen, schlägt die App nie als doppelt vor (z. B. zwei echte Leons). Jedes Zusammenführen lässt sich 24 Stunden lang mit „↶ Rückgängig“ zurücknehmen.']},
