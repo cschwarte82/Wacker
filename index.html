@@ -1134,7 +1134,7 @@ function pidRemap(o,src,dst,pk){
     if(SUMK.has(pk)&&isNum(d)&&isNum(v))out[dst]=d+v;else if(Array.isArray(d)&&Array.isArray(v))out[dst]=[...d,...v];
     else if(d&&v&&typeof d==='object'&&typeof v==='object')out[dst]=Object.assign({},v,d);}}
   return out;}
-function nameKey(n){return String(n||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zß ]/g,'').trim();}
+function nameKey(n){return String(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zß ]/g,'').trim();}
 function dupPairs(){const ps=plist(true);const out=[];for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){const a=nameKey(ps[i].name),b=nameKey(ps[j].name);if(!a||!b)continue;const fa=a.split(' ')[0],fb=b.split(' ')[0];if(a===b||(fa===fb&&(a.startsWith(b)||b.startsWith(a)||a.split(' ').length===1||b.split(' ').length===1)))out.push([ps[i],ps[j]]);}return out;}
 function mergePlayers(src,dst){
   if(S.archView)loadTeam();syncTeam();const t=TEAMS[CUR];const ps=t.players,a=ps[src],b=ps[dst];if(!a||!b||src===dst)return;
