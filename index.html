@@ -280,7 +280,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='40';
+const APP_VERSION='41';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -632,7 +632,7 @@ function periodVal(cat,pid,ss,per){
 }
 let AVC={k:null,m:{}};
 function appValsC(pid,per){per=per||perMode();const k=CUR+'|'+META.lastChange+'|'+(S.archView||'')+'|'+formWeeks();if(AVC.k!==k)AVC={k,m:{}};const key=pid+'|'+per;
-  if(!AVC.m[key]){if(per==='mix'){const a=appValsC(pid,'pot'),b=appValsC(pid,'form'),o={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(x=>{const va=a[x]&&a[x].v,vb=b[x]&&b[x].v;const v=mix2(va,vb);if(isNum(v))o[x]={...(a[x]||b[x]),v};});AVC.m[key]=o;}
+  if(!AVC.m[key]){if(per==='mix'){const a=appValsC(pid,'pot'),b=appValsC(pid,'form'),o={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(x=>{const va=a[x]&&a[x].v,vb=b[x]&&b[x].v;const v=mix2(va,vb);if(isNum(v))o[x]={...(a[x]||b[x]),v,w:Math.max((a[x]&&a[x].w)||0,(b[x]&&b[x].w)||0)};});AVC.m[key]=o;}
     else AVC.m[key]=appVals(pid,per==='form'?formSince():'');}
   return AVC.m[key];}
 function srcApplies(cat){const[t,k]=cat.split(':');return t==='r'||t==='x'||(t==='a'&&['spiel','torwart','technik'].includes(k));}
@@ -640,10 +640,14 @@ function appCat(cat,pid,per){const[t,k]=cat.split(':');const AV=appValsC(pid,per
   if(t==='r'){if(AV[k])return AV[k].v;const ath=ATH_RATINGS.find(x=>x.k===k);return ath?m(ath.app.map(a=>AV[a])):null;}
   if(t==='a'){if(k==='spiel')return m(RATINGS.map(r=>AV[r.k]));if(k==='torwart')return AV._tw?AV._tw.v:null;return AV[k]?AV[k].v:null;}
   return null;}
+// Gewicht des App-Werts im Mix (0–1): Tests = 1, nur Live-Aktionen = Anzahl/(Anzahl+4)
+function appW(cat,pid,per){const[t,k]=cat.split(':');const AV=appValsC(pid,per);const w=o=>o?(isNum(o.w)?o.w:1):null;const m=os=>{const v=os.map(w).filter(isNum);return v.length?avg(v):1;};
+  if(t==='x')return w(AV[k])??1;if(t==='r'){if(AV[k])return w(AV[k]);const ath=ATH_RATINGS.find(x=>x.k===k);return ath?m(ath.app.map(a=>AV[a])):1;}
+  if(t==='a'){if(k==='spiel')return m(RATINGS.map(r=>AV[r.k]));if(k==='torwart')return w(AV._tw)??1;return w(AV[k])??1;}return 1;}
 // Kann die App eine Kategorie nicht messen (z. B. Mut, Kommunikation), zählt der Trainerwert.
 // Live-Aktionen als zusätzliche Bewertungen: Plus = eine 5, Minus = eine 1, je Aktion LIVE_W einer Bewertung.
 // Deckel: Live macht höchstens die Hälfte eines Werts aus (gleich viel Gewicht wie die vorhandenen Bewertungen/Tests).
-const LIVE_W=.25,LIVE_CAP=true;
+const LIVE_W=.25,LIVE_CAP=true,APP_BUF=2;
 let LAC={k:null,m:{}};
 function liveAgg(pid,since){const ck=CUR+'|'+META.lastChange+'|'+(S.archView||'');if(LAC.k!==ck)LAC={k:ck,m:{}};const mk=pid+'|'+since;if(LAC.m[mk])return LAC.m[mk];const agg=LAC.m[mk]={};slist().filter(s=>s.live&&Array.isArray(s.live.actions)&&(!since||(s.date||'')>=since)).forEach(s=>s.live.actions.forEach(a=>{if(a.p!==pid||!a.c)return;const m=ACT_MAP[a.c];if(!m)return;for(const[k,w]of Object.entries(m)){const g=agg[k]||(agg[k]={p:0,m:0});if(a.t==='+')g.p+=w;else g.m+=w;}}));return agg;}
 function liveKeys(cat){const[t,k]=cat.split(':');if(t==='r')return[k];if(t==='a'){if(k==='spiel')return RATINGS.map(r=>r.k);if(k==='torwart')return GK_RATINGS.map(r=>r.k);if(k==='technik')return['technik'];}return[];}
@@ -664,10 +668,10 @@ function trainerVal(cat,pid,ss,per){const[t,k]=cat.split(':');
 // Wert je Kategorie nach gewählter Quelle: Trainer (Einschätzung + Live-Aktionen als Zusatzbewertungen), App (Live-Aktionen + Tests) oder Mix (Mittelwert).
 function srcVal(cat,pid,ss,per){per=per||perMode();ss=ss||sessionsWith(cat);const md=srcMode();
   if(md==='trainer')return trainerVal(cat,pid,ss,per);
-  if(md==='mix'){const lv=trainerVal(cat,pid,ss,per);return mix2(lv,srcApplies(cat)?appCat(cat,pid,per):periodVal(cat,pid,ss,per));}
+  if(md==='mix'){const lv=trainerVal(cat,pid,ss,per);if(!srcApplies(cat))return mix2(lv,periodVal(cat,pid,ss,per));const ap=appCat(cat,pid,per);if(!isNum(lv)||!isNum(ap))return mix2(lv,ap);const w=appW(cat,pid,per);return (lv+w*ap)/(1+w);}
   const tr=cat.startsWith('x:')?null:periodVal(cat,pid,ss,per);if(!srcApplies(cat))return tr;const ap=appCat(cat,pid,per);return isNum(ap)?ap:tr;}
 function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?'Potenzial: alle Werte der Saison (bei Tests der Bestwert).':pm==='form'?`Form: nur die letzten ${formWeeks()} Wochen. Ohne Werte in dem Zeitraum zählt nichts.`:`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div><div class="sub" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;margin-top:4px">Form-Zeitraum: ${[4,6,8].map(w=>`<button class="chip ${formWeeks()===w?'on':''}" style="padding:2px 8px" onclick="A.cfgSet('formWeeks',${w})">${w} Wo.</button>`).join('')}</div>`;}
-function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Nur deine Einschätzungen, ohne Testmessungen (Tempo, Technik usw. aus deiner Athletik-, Dribbling- und Pass-Einschätzung), dazu jede Live-Aktion als Zusatzbewertung: Plus zählt wie eine 5, Minus wie eine 1 (4 Aktionen = 1 Bewertung, Live höchstens die Hälfte).':md==='app'?'Nur Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':'Mittelwert aus „Trainer“ und dem App-Wert. Fehlt einer, zählt der andere.'}</div>`;}
+function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Nur deine Einschätzungen, ohne Testmessungen (Tempo, Technik usw. aus deiner Athletik-, Dribbling- und Pass-Einschätzung), dazu jede Live-Aktion als Zusatzbewertung: Plus zählt wie eine 5, Minus wie eine 1 (4 Aktionen = 1 Bewertung, Live höchstens die Hälfte).':md==='app'?'Nur Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':'Mittelwert aus „Trainer“ und dem App-Wert. Der App-Wert zählt erst mit mehr Aktionen voll (2 Aktionen = halbes Gewicht), Tests zählen gleich voll. Fehlt einer, zählt der andere.'}</div>`;}
 // Erklärt, woher der Torwart-Wert eines Kindes kommt (Bewertungen mit TW-Einschätzung/TW-Tests, App-Werte aus Torwart-Aktionen)
 function gkInfo(pid){
   const GKT=['tw_fangen','tw_reaktion','tw_abwurf'];
@@ -779,22 +783,24 @@ function appVals(pid,since){
   const agg={};
   games.forEach(s=>s.live.actions.forEach(a=>{if(a.p!==pid||!a.c)return;const m=ACT_MAP[a.c];if(!m)return;for(const[k,w]of Object.entries(m)){const g=agg[k]||(agg[k]={p:0,m:0,n:0});if(a.t==='+')g.p+=w;else g.m+=w;g.n++;}}));
   const out={};
-  for(const[k,g]of Object.entries(agg))out[k]={v:3+2*(g.p-g.m)/(g.p+g.m+4),n:g.n,src:'Spiele'};
+  // Aktionen wie Zusatzbewertungen: Plus = 5, Minus = 1, Start bei 3 mit Puffer APP_BUF (2 = doppelt so stark wie früher 4: 2 Aktionen wirken wie früher 4).
+  // w = Gewicht im Mix: 2 Aktionen = halbes, 6 Aktionen = 75 % Gewicht.
+  for(const[k,g]of Object.entries(agg))out[k]={v:(5*g.p+g.m+3*APP_BUF)/(g.p+g.m+APP_BUF),n:g.n,w:g.n/(g.n+APP_BUF),src:'Spiele'};
   const tests=s=>s.type!=='game';
   ['tempo','gewandt','kraft','ausdauer','technik'].forEach(ak=>{
     const t=latestVal('a:'+ak,pid,sessionsWith('a:'+ak).filter(tests));if(!isNum(t))return;
-    if(out[ak]){out[ak]={v:(out[ak].v+t)/2,n:out[ak].n,src:'Spiele + Tests'};}else out[ak]={v:t,n:null,src:'Tests'};
+    if(out[ak]){out[ak]={v:(out[ak].v+t)/2,n:out[ak].n,w:1,src:'Spiele + Tests'};}else out[ak]={v:t,n:null,w:1,src:'Tests'};
   });
   {const pv=PASS_TESTS.map(tk=>latestVal('t:'+tk,pid,sessionsWith('t:'+tk))).filter(isNum).map(raw=>1+Math.min(10,raw)/10*4);
-   if(pv.length){const t=avg(pv);if(out.pass)out.pass={v:(out.pass.v+t)/2,n:out.pass.n,src:'Spiele + Tests'};else out.pass={v:t,n:null,src:'Tests'};}}
+   if(pv.length){const t=avg(pv);if(out.pass)out.pass={v:(out.pass.v+t)/2,n:out.pass.n,w:1,src:'Spiele + Tests'};else out.pass={v:t,n:null,w:1,src:'Tests'};}}
   for(const[tk,rk]of Object.entries(GK_TEST_MAP)){
     const raw=latestVal('t:'+tk,pid,sessionsWith('t:'+tk));if(!isNum(raw))continue;const t=1+Math.min(10,raw)/10*4;
-    if(out[rk])out[rk]={v:(out[rk].v+t)/2,n:out[rk].n,src:'Spiele + Tests'};else out[rk]={v:t,n:null,src:'Tests'};
+    if(out[rk])out[rk]={v:(out[rk].v+t)/2,n:out[rk].n,w:1,src:'Spiele + Tests'};else out[rk]={v:t,n:null,w:1,src:'Tests'};
   }
   const fk=['spielv','frei','zweik','pass','dribb','ueber','mut','abschluss','technik','tempo','gewandt','kraft','ausdauer'].filter(k=>out[k]);
-  out._gesamt=fk.length?{v:avg(fk.map(k=>out[k].v)),n:fk.length}:null;
+  out._gesamt=fk.length?{v:avg(fk.map(k=>out[k].v)),n:fk.length,w:avg(fk.map(k=>out[k].w))}:null;
   const gk=GK_RATINGS.map(r=>r.k).filter(k=>out[k]);
-  out._tw=gk.length?{v:avg(gk.map(k=>out[k].v)),n:gk.length}:null;
+  out._tw=gk.length?{v:avg(gk.map(k=>out[k].v)),n:gk.length,w:avg(gk.map(k=>out[k].w))}:null;
   return out;
 }
 function cmpCard(pid){
@@ -925,6 +931,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:41,items:['<b>Fairere App-Werte:</b> Live-Aktionen zählen jetzt auch im App-Wert wie Zusatzbewertungen (Plus = 5, Minus = 1). Aktionen wirken doppelt so stark wie bisher (2 Aktionen = früher 4). Im Mix hat der App-Wert wenig Gewicht, solange es nur wenige Aktionen sind. Starke Kinder, z. B. im Tor, werden so nicht mehr Richtung 3 gezogen.']},
  {v:40,items:['<b>Saison-Rückblick für die Kinder</b> (Einstellungen): zwei bunte PDF-Seiten pro Kind – „So hast du dich entwickelt“ als Netz (Saisonbeginn und -ende), Rekorde beim Testtag, Highlights wie bestes Spiel und erstes Tor, Abzeichen, geschaffte Ziele und eine Nachricht vom Trainerteam. Jedes Kind wird nur mit sich selbst verglichen.','Die Nachricht für den Rückblick trägst du beim Spieler unter ✏️ ein. Ohne Text bleibt Platz zum Reinschreiben.']},
  {v:39,items:['<b>Stärkenprofil mit zwei Netzen:</b> Im Spielerprofil zeigt das Netzdiagramm jetzt Form (letzte Wochen, gefüllt) und Potenzial (ganze Saison, gestrichelt) übereinander – passend zu „Werte aus“.']},
  {v:38,items:['<b>Torwart in der Aufstellung:</b> „Stärkste“ und „Ausgewogen“ besetzen jetzt auch das Tor. Die App rechnet aus, mit wem im Tor die ganze Aufstellung am besten ist. Fest wählen geht weiterhin.','<b>Zwei Werte für Torwart-Kinder:</b> Kinder mit Torwart-Bewertung zeigen in der Aufstellung und auf der Bank ihren Feld- und ihren Torwart-Wert (z. B. „3,7 · TW 3,5“).']},
