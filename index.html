@@ -280,7 +280,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='41';
+const APP_VERSION='42';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -333,6 +333,8 @@ function loadLocal(){
   try{const m=JSON.parse(localStorage.getItem(METAKEY)||'null');if(m)META=Object.assign(META,m);}catch(e){}
   saveLocal();
 }
+function rosterJSON(){syncTeam();const t=TEAMS[CUR];const players={};for(const[id,p]of Object.entries(t.players||{}))if(p.active!==false&&!p.guest)players[id]={name:p.name,foot:p.foot||null,stil:p.stil||null,treue:p.treue||null,active:true,created:p.created||Date.now()};
+  return JSON.stringify({app:'u10-leistungsprofil',version:2,kind:'kader',saved:new Date().toISOString(),current:CUR,teams:{[CUR]:{name:t.name,created:t.created,players,sessions:{}}}});}
 function backupJSON(){syncTeam();return JSON.stringify({app:'u10-leistungsprofil',version:2,saved:new Date().toISOString(),current:CUR,teams:TEAMS});}
 function importData(txt){
   let d;try{d=JSON.parse(txt);}catch(e){toast('Das ist keine gültige Sicherung.');return false;}
@@ -346,12 +348,14 @@ function importData(txt){
   if(d.teams&&typeof d.teams==='object'){
     for(const[id,t]of Object.entries(d.teams)){if(!t||typeof t!=='object')continue;if(!TEAMS[id]){TEAMS[id]={name:t.name||'Mannschaft',players:{},sessions:{},created:t.created||Date.now()};nt++;}merge(TEAMS[id],t);}
   }else merge(TEAMS[CUR],d);
+  // Neues Gerät: leere Start-Mannschaft durch die eingelesene ersetzen
+  {const c=TEAMS[CUR],tg=d.current&&TEAMS[d.current]?d.current:null;if(tg&&tg!==CUR&&c&&!Object.keys(c.players||{}).length&&!Object.keys(c.sessions||{}).length&&!(c.archive||[]).length){delete TEAMS[CUR];CUR=tg;}}
   loadTeam();META.lastChange=Date.now();saveLocal();render(true);
   toast(`${nt?nt+(nt===1?' Mannschaft, ':' Mannschaften, '):''}${np} Spieler und ${ns} Bewertungen übernommen${na?` · ${na} archivierte Saison${na===1?'':'s'}`:''}`);return true;
 }
 function backupCard(){
   const lb=META.lastBackup?new Date(META.lastBackup).toLocaleDateString('de-DE'):'noch nie';
-  return `<div class="card"><div class="lbl">Datensicherung</div><div class="sub" style="margin-bottom:10px">Die Daten liegen in der App auf diesem Gerät. Gesichert werden alle Mannschaften. Letzte Sicherung: <b>${lb}</b>. Beim Speichern auf dem iPhone „In Dateien sichern“ → iCloud Drive wählen.</div><div class="row gap" style="flex-wrap:wrap"><button class="btn pri" onclick="A.backup()">Sicherung speichern</button><button class="btn" onclick="A.restoreFile()">Sicherung einlesen</button><button class="btn" onclick="A.pasteModal()">Text einfügen</button></div><div class="sub" style="margin-top:8px">Beim Einlesen wird nur ergänzt, nichts gelöscht. „Text einfügen“ ist für die kopierte Datensicherung aus der alten Version.</div></div><div class="sub" style="text-align:center;margin:6px 0 20px">App-Version ${APP_VERSION}</div>`;
+  return `<div class="card"><div class="lbl">Datensicherung</div><div class="sub" style="margin-bottom:10px">Die Daten liegen in der App auf diesem Gerät. Gesichert werden alle Mannschaften. Letzte Sicherung: <b>${lb}</b>. Beim Speichern auf dem iPhone „In Dateien sichern“ → iCloud Drive wählen.</div><div class="row gap" style="flex-wrap:wrap"><button class="btn pri" onclick="A.backup()">Sicherung speichern</button><button class="btn" onclick="A.restoreFile()">Sicherung einlesen</button><button class="btn" onclick="A.pasteModal()">Text einfügen</button></div><button class="btn" style="width:100%;margin-top:8px" onclick="A.shareRoster()">👥 Nur Kader teilen</button><div class="sub" style="margin-top:4px">Zusätzlich zur Sicherung: nur Namen, Fuß, Spielweise und Positionstreue der aktiven Kinder dieser Mannschaft – ohne Bewertungen, Messwerte, Notizen und Ziele. Ideal für den Co-Trainer zum Start: Wer die Datei einliest, hat dieselben Kinder wie du, und eure Werte passen später zusammen.</div><div class="sub" style="margin-top:8px">Beim Einlesen wird nur ergänzt, nichts gelöscht. „Text einfügen“ ist für die kopierte Datensicherung aus der alten Version.</div></div><div class="sub" style="text-align:center;margin:6px 0 20px">App-Version ${APP_VERSION}</div>`;
 }
 
 // ---------- Auswertung ----------
@@ -504,6 +508,7 @@ function vPlayers(){
   const ps=plist(true),ss=slist();
   let h=`<div class="row between"><h2>Kader</h2><button class="btn pri" onclick="A.playerModal()">+ Spieler</button></div>`;
   if(!ps.length)h+=`<div class="empty">Noch keine Spieler.<br><small>Vornamen oder Kürzel reichen – Nachnamen braucht die App nicht.</small></div>`;
+  const dp=dupPairs();if(dp.length)h+=`<div class="card hint"><b>Doppelt im Kader?</b><div class="sub" style="margin:2px 0 6px">Passiert, wenn du und dein Co-Trainer den Kader getrennt angelegt habt. Zusammenführen legt alle Werte bei einem Kind zusammen.</div>${dp.map(([a,b])=>`<div class="row between" style="margin-top:4px"><span>${esc(a.name)} &amp; ${esc(b.name)}</span><button class="btn sm2" onclick="A.mergeAsk('${a.id}','${b.id}')">Zusammenführen</button></div>`).join('')}${dp.length>1?`<button class="btn pri" style="width:100%;margin-top:10px" onclick="A.mergeAllAsk()">Alle ${dp.length} zusammenführen</button>`:''}</div>`;
   h+=ps.map(p=>{const n=ss.filter(s=>hasData(s,p.id)).length;return `<button class="card item ${p.active===false?'off':''}" onclick="A.openPlayer('${p.id}')"><div class="row between"><div><div class="t">${esc(p.name)}</div><div class="sub">${p.foot?'Fuß: '+esc(p.foot):''}${p.stil?' · '+esc(p.stil):''}${p.treue?' · Positionstreue '+esc(p.treue):''}${p.active===false?' · inaktiv':''}</div></div><div class="pill">${n} Bewertung${n===1?'':'en'}</div></div></button>`;}).join('');
   h+=backupCard();
   return h;
@@ -931,6 +936,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:42,items:['<b>Spieler zusammenführen:</b> Steht ein Kind doppelt im Kader (z. B. weil du und dein Co-Trainer den Kader getrennt angelegt habt), zeigt der Kader „Doppelt im Kader?“. Ein Tipp legt alle Bewertungen, Testwerte, Spiele und Ziele bei einem Eintrag zusammen. Geht auch einzeln über ✏️ → „Zusammenführen“.','<b>Mannschaften zusammenführen:</b> Kommt der Kader des Co-Trainers als eigene Mannschaft an, holst du sie unter Mannschaft → Bearbeiten → „Zusammenführen“ in deine Mannschaft.','<b>Nur Kader teilen</b> (Kader → Datensicherung, zusätzlich zur Sicherung): eine Datei nur mit den Namen der Kinder, ohne Bewertungen, Messwerte und Notizen. Ideal, damit der Co-Trainer mit denselben Kindern startet.']},
  {v:41,items:['<b>Fairere App-Werte:</b> Live-Aktionen zählen jetzt auch im App-Wert wie Zusatzbewertungen (Plus = 5, Minus = 1). Aktionen wirken doppelt so stark wie bisher (2 Aktionen = früher 4). Im Mix hat der App-Wert wenig Gewicht, solange es nur wenige Aktionen sind. Starke Kinder, z. B. im Tor, werden so nicht mehr Richtung 3 gezogen.']},
  {v:40,items:['<b>Saison-Rückblick für die Kinder</b> (Einstellungen): zwei bunte PDF-Seiten pro Kind – „So hast du dich entwickelt“ als Netz (Saisonbeginn und -ende), Rekorde beim Testtag, Highlights wie bestes Spiel und erstes Tor, Abzeichen, geschaffte Ziele und eine Nachricht vom Trainerteam. Jedes Kind wird nur mit sich selbst verglichen.','Die Nachricht für den Rückblick trägst du beim Spieler unter ✏️ ein. Ohne Text bleibt Platz zum Reinschreiben.']},
  {v:39,items:['<b>Stärkenprofil mit zwei Netzen:</b> Im Spielerprofil zeigt das Netzdiagramm jetzt Form (letzte Wochen, gefüllt) und Potenzial (ganze Saison, gestrichelt) übereinander – passend zu „Werte aus“.']},
@@ -968,7 +974,7 @@ const GUIDE=[
  ['Bewertung',`<ul class="dot"><li><b>⏱ Testtag:</b> nur messen. Tests auswählen, Anleitung beachten, Zeiten mit der Stoppuhr übernehmen (der bessere Versuch bleibt).</li><li><b>📝 Trainereinschätzung:</b> 1–5 für Spielverständnis, Passspiel, Dribbling, Mut, Abschluss, Athletik u. v. m., optional Torwart. Dazu Ziele und Notiz.</li><li><b>⚽ Spiel:</b> entsteht aus dem Live-Spiel oder über „+ Spiel“. Danach die Kinder bewerten.</li><li>Es zählt der Schnitt der letzten 3 Bewertungen je Kind.</li></ul>`],
  ['Aufstellung',`<ul class="dot"><li>„Stärkste“ = höchste Gesamtstärke, „Ausgewogen“ = keine Schwachstelle.</li><li><b>Zeitraum:</b> Potenzial (ganze Saison), Form (letzte 4/6/8 Wochen) oder Mix (Standard). Gilt auch für die Ranglisten.</li><li>Spielweise und Positionstreue aus dem Kader geben Zu- oder Abschläge je Position (z. B. offensiver Verteidiger mit geringer Positionstreue: −0,5 in der Abwehr).</li><li><b>Werte aus:</b> „Trainer“ = nur deine Einschätzung ohne Tests (Tempo, Dynamik, Ausdauer aus deiner Athletik-Einschätzung, Technik aus Dribbling und Passspiel), dazu jede Live-Aktion als Zusatzbewertung (Plus = 5, Minus = 1, 4 Aktionen = 1 Bewertung, Live höchstens die Hälfte). „App“ = Werte aus Live-Aktionen und Testtagen. „Mix“ (Standard) = Mittelwert aus „Trainer“ und „App“. Gilt auch für die Ranglisten.</li><li>Torwart fest wählen oder „Automatisch“: Dann besetzen „Stärkste“ bzw. „Ausgewogen“ auch das Tor, mit dem Kind, mit dem die ganze Aufstellung am besten ist. Kinder mit Torwart-Bewertung zeigen beide Werte (Feld und „TW“). „🧤 Torwart“ zeigt, aus welchen Bewertungen der Torwart-Wert stammt und warum das Kind im Tor steht.</li><li>Spieler antippen, dann Ziel antippen = eigene Aufstellung. Sie bleibt gespeichert.</li><li><b>Gastspieler:</b> „+ Gast“ unter „Wer ist heute dabei?“. Gäste haben keine Werte, füllen nur freie Plätze und erscheinen nicht im Kader und in den Ranglisten. ✕ entfernt sie.</li><li><b>🔍 Warum hier?</b> zeigt je Spieler die Teilwerte der Position mit Gewicht und die Zu-/Abschläge.</li></ul>`],
  ['Profil, Ranglisten &amp; Stärkenkarte',`<ul class="dot"><li><b>Profil:</b> Stärkenprofil (Netz: Form gefüllt, Potenzial gestrichelt), Potenzial &amp; Form (▲/▼ = gerade über/unter Saisonniveau), Entwicklung der Messwerte, Trainer vs. App, Live-Bilanz, Ziele.</li><li><b>Trainer vs. App:</b> deine Einschätzung neben dem Wert aus Tests und Spielen. ⚠ = deutliche Abweichung.</li><li><b>Wer ist in Form?</b> oben in den Ranglisten: ▲/▼ für Kinder, die gerade deutlich über/unter ihrem Saisonniveau liegen.</li><li><b>Ranglisten:</b> nur für dich. Bei Einschätzungs-Kategorien wählst du Trainer, App oder Mix. Zum Zeigen eignet sich die Fortschritts-Rangliste.</li><li><b>Saisonbericht</b> (Einstellungen): pro Kind ein PDF mit Entwicklung, Stärken, Spielminuten und Zielen fürs Elterngespräch – auch für archivierte Saisons. <b>Saison-Rückblick</b> für die Kinder selbst: zwei bunte Seiten mit Entwicklung, Testtag-Rekorden, Highlights, Abzeichen und einer Nachricht vom Trainerteam (Text beim Spieler unter ✏️).</li><li><b>Stärkenkarte:</b> kindgerecht, ohne Ranglisten und Minuspunkte – per Screenshot teilen.</li></ul>`],
- ['Co-Trainer &amp; Datensicherung',`<ul class="dot"><li>Alle Daten liegen nur auf diesem Gerät – kein Konto, keine Cloud.</li><li>Gleicher Kader für den Co-Trainer: „Sicherung speichern“, Datei schicken, beim Co-Trainer „Sicherung einlesen“.</li><li>Gegenseitig eingelesene Sicherungen ergänzen fehlende Daten – gelöscht wird nichts.</li><li><b>Saison-Archiv</b> (Einstellungen): „Saison abschließen“ verschiebt alte Bewertungen ins Archiv und speichert eine Archiv-Datei. „Ansehen“ zeigt Ranglisten und Profile der alten Saison, „Zurückholen“ macht es rückgängig.</li></ul>`],
+ ['Co-Trainer &amp; Datensicherung',`<ul class="dot"><li>Alle Daten liegen nur auf diesem Gerät – kein Konto, keine Cloud.</li><li>Gleicher Kader für den Co-Trainer: „Sicherung speichern“, Datei schicken, beim Co-Trainer „Sicherung einlesen“.</li><li>Gegenseitig eingelesene Sicherungen ergänzen fehlende Daten – gelöscht wird nichts.</li><li><b>Wichtig:</b> Die App erkennt Kinder nicht am Namen, sondern an einer Kennung. Den Kader legt deshalb nur einer an und teilt ihn („Nur Kader teilen“ oder Sicherung), der andere liest ihn ein, <i>bevor</i> er selbst Kinder anlegt. Doppelte Kinder oder eine doppelte Mannschaft lassen sich zusammenführen (Kader bzw. Mannschaft → Bearbeiten).</li><li><b>Saison-Archiv</b> (Einstellungen): „Saison abschließen“ verschiebt alte Bewertungen ins Archiv und speichert eine Archiv-Datei. „Ansehen“ zeigt Ranglisten und Profile der alten Saison, „Zurückholen“ macht es rückgängig.</li></ul>`],
  ['Datenschutz',`<ul class="dot"><li>Vornamen oder Kürzel verwenden, Handy mit Code sperren.</li><li>Spielerprofil-PDFs und Sicherungen nicht öffentlich teilen.</li><li>Empfehlung: Eltern informieren, dass du zur Förderung Trainingsdaten notierst.</li></ul>`]
 ];
 function vSettings(){
@@ -1120,6 +1126,36 @@ function buildSeasonPdf(ids,src){return withSeason(src,()=>{
     const pc=doc.getNumberOfPages();doc.setPage(pc);doc.setFontSize(8);doc.setTextColor(...M);doc.text(pdfClean('Für das Gespräch mit Kind und Eltern. Werte sind Einschätzungen und Momentaufnahmen.'),14,290);
   });
   return doc;});}
+
+// ---------- Zusammenführen (Co-Trainer hat eigenen Kader angelegt) ----------
+// Ersetzt die Spieler-Kennung src überall durch dst. Kollisionen: Plus/Minus/Minuten addieren, Listen anhängen, sonst gewinnt dst.
+const SUMK=new Set(['plus','minus','mins']);
+function pidRemap(o,src,dst,pk){
+  if(Array.isArray(o)){const a=o.map(x=>x===src?dst:pidRemap(x,src,dst,pk));return a.every(x=>typeof x==='string')?[...new Set(a)]:a;}
+  if(!o||typeof o!=='object')return o;
+  const out={};for(const[k,v]of Object.entries(o)){if(k===src)continue;out[k]=v===src?dst:pidRemap(v,src,dst,k);}
+  if(src in o){const v=pidRemap(o[src],src,dst,pk);if(!(dst in out))out[dst]=v;else{const d=out[dst];
+    if(SUMK.has(pk)&&isNum(d)&&isNum(v))out[dst]=d+v;else if(Array.isArray(d)&&Array.isArray(v))out[dst]=[...d,...v];
+    else if(d&&v&&typeof d==='object'&&typeof v==='object')out[dst]=Object.assign({},v,d);}}
+  return out;}
+function nameKey(n){return String(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zß ]/g,'').trim();}
+function dupPairs(){const ps=plist(true);const out=[];for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){const a=nameKey(ps[i].name),b=nameKey(ps[j].name);if(!a||!b)continue;const fa=a.split(' ')[0],fb=b.split(' ')[0];if(a===b||(fa===fb&&(a.startsWith(b)||b.startsWith(a)||a.split(' ').length===1||b.split(' ').length===1)))out.push([ps[i],ps[j]]);}return out;}
+function mergePlayers(src,dst){
+  if(S.archView)loadTeam();syncTeam();const t=TEAMS[CUR];const ps=t.players,a=ps[src],b=ps[dst];if(!a||!b||src===dst)return;
+  const nb=clone(b);['foot','stil','treue','msg'].forEach(k=>{if(!nb[k]&&a[k])nb[k]=a[k];});nb.goals=[...(b.goals||[]),...(a.goals||[])];if(a.active!==false)nb.active=true;
+  for(const[id,s]of Object.entries(t.sessions||{}))if(JSON.stringify(s).includes(src))t.sessions[id]=pidRemap(s,src,dst);
+  (t.archive||[]).forEach(ar=>{if(ar.sessions)for(const[id,s]of Object.entries(ar.sessions))if(JSON.stringify(s).includes(src))ar.sessions[id]=pidRemap(s,src,dst);if(ar.players&&ar.players[src]){if(!ar.players[dst])ar.players[dst]=ar.players[src];delete ar.players[src];}});
+  if(t.live)t.live=pidRemap(t.live,src,dst);if(t.lu)t.lu=pidRemap(t.lu,src,dst);
+  ps[dst]=nb;delete ps[src];loadTeam();META.lastChange=Date.now();saveLocal();
+}
+function mergeTeams(src,dst){
+  syncTeam();const a=TEAMS[src],b=TEAMS[dst];if(!a||!b||src===dst)return{np:0,ns:0};let np=0,ns=0;
+  b.players=b.players||{};b.sessions=b.sessions||{};
+  for(const[id,p]of Object.entries(a.players||{}))if(!b.players[id]){b.players[id]=p;np++;}
+  for(const[id,s]of Object.entries(a.sessions||{}))if(!b.sessions[id]){b.sessions[id]=s;ns++;}
+  for(const ar of (a.archive||[]))if(!(b.archive||[]).some(x=>x.id===ar.id))(b.archive=b.archive||[]).push(ar);
+  delete TEAMS[src];META.lastChange=Date.now();return{np,ns};
+}
 
 // ---------- Saison-Rückblick für Kinder (persönlich, motivierend, ohne Vergleich mit anderen) ----------
 const KID_SHORT={spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',pass:'Passspiel',dribb:'Dribbling',ueber:'Übersicht',mut:'Mut',komm:'Kommunikation',abschluss:'Torschuss',schnell:'Schnelligkeit',dyn:'Antritt',ausd:'Ausdauer'};
@@ -1507,7 +1543,7 @@ const A={
     const id=uid('t');TEAMS[id]={name,players,sessions:{},created:Date.now()};META.lastChange=Date.now();
     A.switchTeam(id);toast(name+' angelegt');
   },
-  teamEdit(id){const t=TEAMS[id];if(!t)return;showModal(`<h3>Mannschaft bearbeiten</h3><label>Name<input id="m_tn" value="${esc(t.name)}" autocomplete="off"></label><div class="row end gap">${Object.keys(TEAMS).length>1?`<button class="btn danger" onclick="A.teamAskDel('${id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.teamModal()">Zurück</button><button class="btn pri" onclick="A.teamRename('${id}')">Speichern</button></div>`);},
+  teamEdit(id){const t=TEAMS[id];if(!t)return;showModal(`<h3>Mannschaft bearbeiten</h3><label>Name<input id="m_tn" value="${esc(t.name)}" autocomplete="off"></label><div class="row end gap">${Object.keys(TEAMS).length>1?`<button class="btn danger" onclick="A.teamAskDel('${id}')">Löschen</button><button class="btn" onclick="A.teamMergePick('${id}')">Zusammenführen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.teamModal()">Zurück</button><button class="btn pri" onclick="A.teamRename('${id}')">Speichern</button></div>`);},
   teamRename(id){const n=$('#m_tn').value.trim();if(!n){toast('Bitte einen Namen eingeben.');return;}TEAMS[id].name=n;META.lastChange=Date.now();saveLocal();render(true);A.teamModal();},
   teamAskDel(id){showModal(`<h3>„${esc(TEAMS[id].name)}“ löschen?</h3><p>Alle Spieler, Testtage und Spiele dieser Mannschaft gehen verloren. Mach vorher eine Sicherung.</p><div class="row end gap"><button class="btn" onclick="A.teamEdit('${id}')">Abbrechen</button><button class="btn danger" onclick="A.teamDel('${id}')">Endgültig löschen</button></div>`);},
   teamDel(id){syncTeam();delete TEAMS[id];META.lastChange=Date.now();if(id===CUR){CUR=null;A.switchTeam(Object.keys(TEAMS)[0]);}else{saveLocal();A.teamModal();}toast('Mannschaft gelöscht');},
@@ -1540,6 +1576,13 @@ const A={
       if(navigator.canShare&&navigator.canShare({files:[file]})&&matchMedia('(pointer: coarse)').matches){await navigator.share({files:[file],title:'U10-Sicherung'});mark();return;}
     }catch(e){if(e&&e.name==='AbortError')return;}
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);mark();
+  },
+  async shareRoster(){
+    const t=TEAMS[CUR];const name=`TrainerRadar-Kader-${(t.name||'Team').replace(/[^\w-]+/g,'_')}-${today()}.json`;const blob=new Blob([rosterJSON()],{type:'application/json'});
+    try{const file=new File([blob],name,{type:'application/json'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})&&matchMedia('(pointer: coarse)').matches){await navigator.share({files:[file],title:'TrainerRadar-Kader'});toast('Kader geteilt');return;}
+    }catch(e){if(e&&e.name==='AbortError')return;}
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);toast('Kader-Datei erstellt');
   },
   restoreFile(){const i=$('#restoreInput');i.value='';i.click();},
   async restorePicked(inp){const f=inp.files&&inp.files[0];if(!f)return;try{importData(await f.text());}catch(e){toast('Datei konnte nicht gelesen werden.');}},
@@ -1624,7 +1667,7 @@ const A={
   openPlayer(id){S.view='player';S.playerId=id;render(true);scrollTo(0,0);},
   playerModal(id){
     const p=id?S.players[id]:{name:'',foot:'rechts',active:true};S.draftP=id||null;
-    showModal(`<h3>${id?'Spieler bearbeiten':'Neuer Spieler'}</h3><label>Vorname / Kürzel<input id="m_name" value="${esc(p.name)}" autocomplete="off" onkeydown="if(event.key==='Enter')A.savePlayer(${id?'false':'true'})"></label><label>Starker Fuß<select id="m_foot">${['rechts','links','beide'].map(f=>`<option ${p.foot===f?'selected':''}>${f}</option>`).join('')}</select></label><label>Spielweise<select id="m_stil"><option value="">– keine Angabe –</option>${['offensiv','ausgewogen','defensiv'].map(f=>`<option ${p.stil===f?'selected':''}>${f}</option>`).join('')}</select></label><label>Positionstreue<select id="m_treue"><option value="">– keine Angabe –</option>${[['hoch','hoch – hält seine Position'],['mittel','mittel'],['gering','gering – verlässt oft seine Position']].map(([v,n])=>`<option value="${v}" ${p.treue===v?'selected':''}>${n}</option>`).join('')}</select></label><div class="sub" style="margin:-4px 0 10px">Fließt in den Aufstellungsvorschlag ein, z. B. Abzug für offensive Verteidiger.</div>${id?`<label>Nachricht für den Saison-Rückblick <small class="sub">(optional)</small><textarea id="m_msg" rows="3" placeholder="z. B. Liebe Mia, du hast nie aufgegeben …">${esc(p.msg||'')}</textarea></label><label class="chk"><input type="checkbox" id="m_act" ${p.active!==false?'checked':''}> aktiv im Kader</label>`:''}<div class="row end gap">${id?`<button class="btn danger" onclick="A.askDelPlayer('${id}')">Löschen</button><span class="grow"></span>`:`<button class="btn" onclick="A.savePlayer(true)">+ Nächster</button>`}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.savePlayer(false)">Speichern</button></div>`);
+    showModal(`<h3>${id?'Spieler bearbeiten':'Neuer Spieler'}</h3><label>Vorname / Kürzel<input id="m_name" value="${esc(p.name)}" autocomplete="off" onkeydown="if(event.key==='Enter')A.savePlayer(${id?'false':'true'})"></label><label>Starker Fuß<select id="m_foot">${['rechts','links','beide'].map(f=>`<option ${p.foot===f?'selected':''}>${f}</option>`).join('')}</select></label><label>Spielweise<select id="m_stil"><option value="">– keine Angabe –</option>${['offensiv','ausgewogen','defensiv'].map(f=>`<option ${p.stil===f?'selected':''}>${f}</option>`).join('')}</select></label><label>Positionstreue<select id="m_treue"><option value="">– keine Angabe –</option>${[['hoch','hoch – hält seine Position'],['mittel','mittel'],['gering','gering – verlässt oft seine Position']].map(([v,n])=>`<option value="${v}" ${p.treue===v?'selected':''}>${n}</option>`).join('')}</select></label><div class="sub" style="margin:-4px 0 10px">Fließt in den Aufstellungsvorschlag ein, z. B. Abzug für offensive Verteidiger.</div>${id?`<label>Nachricht für den Saison-Rückblick <small class="sub">(optional)</small><textarea id="m_msg" rows="3" placeholder="z. B. Liebe Mia, du hast nie aufgegeben …">${esc(p.msg||'')}</textarea></label><label class="chk"><input type="checkbox" id="m_act" ${p.active!==false?'checked':''}> aktiv im Kader</label>`:''}<div class="row end gap">${id?`<button class="btn danger" onclick="A.askDelPlayer('${id}')">Löschen</button><button class="btn" onclick="A.mergePick('${id}')">Zusammenführen</button><span class="grow"></span>`:`<button class="btn" onclick="A.savePlayer(true)">+ Nächster</button>`}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.savePlayer(false)">Speichern</button></div>`);
     setTimeout(()=>{const n=$('#m_name');if(n&&!id)n.focus();},60);
   },
   savePlayer(next){
@@ -1634,6 +1677,15 @@ const A={
     saveDoc('players',id,p);closeModal();render(true);
     if(next){toast(name+' angelegt');A.playerModal();}
   },
+  mergePick(id){const p=S.players[id];const others=plist(true).filter(q=>q.id!==id);const k=nameKey(p.name).split(' ')[0];others.sort((a,b)=>(nameKey(b.name).startsWith(k)?1:0)-(nameKey(a.name).startsWith(k)?1:0));
+    showModal(`<h3>„${esc(p.name)}“ zusammenführen</h3><div class="sub" style="margin-bottom:10px">Mit welchem Kind ist ${esc(p.name)} dasselbe Kind? Alle Bewertungen, Testwerte, Spiele und Ziele landen danach bei einem Eintrag.</div><div class="chips">${others.map(q=>`<button class="chip" onclick="A.mergeAsk('${id}','${q.id}')">${esc(q.name)}</button>`).join('')}</div><div class="row end gap" style="margin-top:14px"><button class="btn" onclick="A.closeModal()">Abbrechen</button></div>`);},
+  mergeAsk(a,b){const pa=S.players[a],pb=S.players[b];if(!pa||!pb)return;const n=id=>slist().filter(s=>hasData(s,id)).length;
+    showModal(`<h3>Zusammenführen</h3><div class="sub" style="margin-bottom:10px">Welcher Name soll bleiben? Die Werte beider Einträge werden zusammengelegt, nichts geht verloren. Gibt es in derselben Bewertung Werte bei beiden, zählt der des bleibenden Eintrags.</div><button class="btn pri" style="width:100%;margin-bottom:8px" onclick="A.mergeDo('${b}','${a}')">„${esc(pa.name)}“ behalten <small>(${n(a)} + ${n(b)} Bewertungen)</small></button><button class="btn pri" style="width:100%" onclick="A.mergeDo('${a}','${b}')">„${esc(pb.name)}“ behalten <small>(${n(b)} + ${n(a)} Bewertungen)</small></button><div class="row end gap" style="margin-top:14px"><button class="btn" onclick="A.closeModal()">Abbrechen</button></div>`);},
+  mergeDo(src,dst){const nm=S.players[dst]&&S.players[dst].name;mergePlayers(src,dst);closeModal();if(S.playerId===src)S.playerId=dst;S.luCache=null;render(true);toast(`Zusammengeführt: ${nm}`);},
+  mergeAllAsk(){const n=dupPairs().length;showModal(`<h3>Alle ${n} zusammenführen?</h3><div class="sub" style="margin-bottom:12px">Pro Paar bleibt der Eintrag mit mehr Bewertungen (bei Gleichstand der ältere). Die Werte beider Einträge werden zusammengelegt. Tipp: vorher eine Sicherung speichern.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.mergeAll()">Zusammenführen</button></div>`);},
+  mergeAll(){let k=0,guard=0;let dp;while((dp=dupPairs()).length&&guard++<200){const[a,b]=dp[0];const n=id=>slist().filter(s=>hasData(s,id)).length;const na=n(a.id),nb=n(b.id);const keepA=na>nb||(na===nb&&(a.created||0)<=(b.created||0));mergePlayers(keepA?b.id:a.id,keepA?a.id:b.id);k++;}closeModal();S.luCache=null;render(true);toast(`${k} Kinder zusammengeführt`);},
+  teamMergePick(id){const ids=Object.keys(TEAMS).filter(x=>x!==id);showModal(`<h3>„${esc(TEAMS[id].name)}“ zusammenführen</h3><div class="sub" style="margin-bottom:10px">Alle Spieler, Testtage, Spiele und Archive von „${esc(TEAMS[id].name)}“ wandern in die gewählte Mannschaft. „${esc(TEAMS[id].name)}“ verschwindet danach. Doppelte Kinder führst du anschließend im Kader zusammen.</div>${ids.map(x=>`<button class="btn" style="width:100%;margin-bottom:6px" onclick="A.teamMergeDo('${id}','${x}')">in „${esc(TEAMS[x].name)}“</button>`).join('')}<div class="row end gap" style="margin-top:10px"><button class="btn" onclick="A.teamEdit('${id}')">Zurück</button></div>`);},
+  teamMergeDo(src,dst){const r=mergeTeams(src,dst);CUR=null;A.switchTeam(dst);S.view='players';render(true);toast(`${r.np} Spieler und ${r.ns} Bewertungen übernommen`);},
   askDelPlayer(id){showModal(`<h3>Spieler löschen?</h3><p>Tipp: Wenn ein Kind die Mannschaft verlässt, reicht „aktiv im Kader“ abwählen – dann bleibt der Verlauf erhalten.</p><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn danger" onclick="A.delPlayer('${id}')">Endgültig löschen</button></div>`);},
   async delPlayer(id){
     closeModal();S.view='players';
