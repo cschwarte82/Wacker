@@ -244,7 +244,7 @@ h2{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 .mhead{font:700 13px var(--ft);color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:16px 2px 2px}
 .seg.sf button{padding-left:2px;padding-right:2px;font-size:13px}.seg.sf small{font-weight:500;opacity:.7}
 .kst{display:flex;align-items:center;gap:5px;font:700 22px var(--fc);white-space:nowrap}.kst span{font-size:13px}
-.ov1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ov .ovp{white-space:nowrap;flex:none}
+.ov1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ov .ovp{white-space:nowrap;flex:none}.ov.ovw{flex-direction:column;align-items:flex-start;gap:3px}.ov.ovw .ovn{width:auto}.ov.ovw .ovp{white-space:normal;text-align:left;display:flex;flex-wrap:wrap;gap:2px 14px}.ov.ovw .ovp span{white-space:nowrap}
 .setd>summary{font-size:15px}
 .pill.openp{background:#fbe4dc;color:#b4442c}
 /* Dark Mode: folgt der Handy-Einstellung */
@@ -317,7 +317,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='57';
+const APP_VERSION='58';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -664,7 +664,7 @@ function topOverview(){
   const ps=plist();
   const items=AREAS.map(a=>{const cat='a:'+a.k,ss=sessionsWith(cat);const rows=ps.map(p=>({p,v:srcVal(cat,p.id,ss)})).filter(r=>isNum(r.v)).sort((x,y)=>y.v-x.v).slice(0,3);return{a,cat,rows};}).filter(x=>x.rows.length);
   if(!items.length)return'';
-  return `<div class="card"><div class="lbl">Aktuell vorne je Bereich <small>nach „Werte aus“ und Zeitraum</small></div>${items.map(x=>`<button class="ov" onclick="A.rk('cat','${x.cat}')"><span class="ovn">${esc(x.a.n)}</span><span class="ovp">${x.rows.map((r,i)=>`<b>${i+1}.</b> ${esc(r.p.name)}`).join(' &nbsp;')}</span></button>`).join('')}</div>`;
+  return `<div class="card"><div class="lbl">Aktuell vorne je Bereich <small>nach „Werte aus“ und Zeitraum</small></div>${items.map(x=>`<button class="ov ovw" onclick="A.rk('cat','${x.cat}')"><span class="ovn">${esc(x.a.n)}</span><span class="ovp">${x.rows.map((r,i)=>`<span><b>${i+1}.</b> ${esc(short(r.p.id))}</span>`).join('')}</span></button>`).join('')}</div>`;
 }
 function vRank(){
   const R=S.rk;
@@ -1033,6 +1033,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:58,items:['Rangliste: „Aktuell vorne je Bereich“ ist wieder sauber lesbar. Die Namen stehen jetzt unter dem Bereich und laufen nicht mehr aus der Karte.']},
  {v:57,items:['Die Gesamtstärke im Kader wird neu berechnet: zur Hälfte aus Spielverhalten und Technik, zur Hälfte aus der Athletik. Bisher zählte die Athletik zwei Drittel. Bei Torhütern zählt der Torwart-Wert als dritter Teil mit.']},
  {v:56,items:['Die Datensicherung steht jetzt nur noch in den Einstellungen (ganz oben), nicht mehr zusätzlich unter Kader. Der Filter in der Bewertungsliste erscheint schon ab zwei Einträgen.']},{v:55,items:['<b>Bewertungsliste:</b> Filter für Spiele, Einschätzungen und Testtage, nach Monaten gegliedert.','<b>Kader:</b> zeigt jetzt die Gesamtstärke jedes Kindes und ▲/▼ für die aktuelle Form.','<b>Profil:</b> Live-Bilanz zeigt die letzten 5 Spiele (Rest ausklappbar), Verlaufslinien sind bei vielen Einschätzungen geglättet.','<b>Spielbericht:</b> Im Spiel unter „Export“ gibt es einen fertigen Text für die Elterngruppe mit Ergebnis und Torschützen, ohne Bewertungen.','<b>Live:</b> Hinweis 2 Minuten vor Ende jeder Halbzeit.','<b>Einstellungen:</b> Datensicherung steht oben, der Rest ist einklappbar.']},{v:54,items:['Dunkles Design: Steht dein Handy auf Dark Mode, wird TrainerRadar automatisch dunkel. Die Stärkenkarte fürs Kind und die PDFs bleiben hell.']},{v:53,items:['Einstellungen: TrainerRadar bleibt kostenlos. Wer dem Entwickler einen Kaffee spendieren möchte, findet dort jetzt einen Knopf.']},{v:52,items:['Live-Spiel: Minus-Auswahl gestrafft auf 7 Knöpfe, so viele wie Plus mit Tor. „Chance vergeben“ entfällt, „Großchance vergeben“ steht an seiner Stelle. Bisher erfasste Aktionen zählen weiter.']},{v:51,items:['Live-Spiel: Beim Minus gibt es jetzt „Großchance vergeben“ für eine 100-prozentige Torchance. Sie zählt beim Torschuss doppelt so stark wie „Chance vergeben“.']},{v:50,items:['Live-Spiel: Beim Minus gibt es jetzt „Abspiel verpasst“. Es zählt negativ für Passspiel und Übersicht.']},{v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
  {v:45,items:['„Zusammenführen“ beim Spieler und bei der Mannschaft steht jetzt in einer eigenen Zeile und ragt nicht mehr aus dem Bildschirm.']},
