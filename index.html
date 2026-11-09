@@ -12,6 +12,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <meta name="apple-mobile-web-app-title" content="TrainerRadar">
 <meta name="theme-color" content="#0f3d22">
+<meta name="color-scheme" content="light dark">
 <style>
 :root{--fc:'Avenir Next Condensed','Arial Narrow',system-ui,sans-serif;--ft:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;--bg:#f2f4ef;--card:#fff;--ink:#16241b;--mut:#5f6f64;--g:#1d6b3a;--gd:#0f3d22;--lime:#d7f25a;--line:#e1e6dd;--bad:#b4442c;--good:#1d7a3e}
 *{box-sizing:border-box}
@@ -38,14 +39,14 @@ button.item{cursor:pointer}
 .hint{background:#eef6e2;border-color:#d6e8c0;color:#2e4a33;font-size:14px}
 .empty{text-align:center;color:var(--mut);padding:40px 10px}
 .banner{background:#fff4d6;border:1px solid #f0d68a;border-radius:10px;padding:8px 12px;font-size:13px;margin-bottom:8px}
-.btn{font:600 14px var(--ft);border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:10px 14px;cursor:pointer;min-height:42px}
+.btn{font:600 14px var(--ft);border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:10px 14px;cursor:pointer;min-height:42px}
 .btn.pri{background:var(--g);border-color:var(--g);color:#fff}
 .btn.danger{color:var(--bad);border-color:#efc9bf}
 .btn.sm{padding:6px 10px;min-height:40px;font-size:18px}
 .pill{background:#eef1ea;border-radius:99px;padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .chips.scroll{min-width:0;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
-.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:8px 12px;font:500 13px var(--ft);white-space:nowrap;color:var(--ink);cursor:pointer}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 12px;font:500 13px var(--ft);white-space:nowrap;color:var(--ink);cursor:pointer}
 .chips.sm .chip{padding:2px 8px;font-size:12px;cursor:default}
 .chip.on{background:var(--gd);border-color:var(--gd);color:#fff}
 .back{background:none;border:0;color:var(--g);font:600 15px var(--ft);padding:4px 0;cursor:pointer}
@@ -56,10 +57,10 @@ button.item{cursor:pointer}
 .archrow{border-top:1px solid #e4e9e0;padding:10px 0 4px;margin-top:10px}.archrow small{display:block;color:var(--mut);margin:2px 0 6px}.banner.arch{background:#e8eefc;border-color:#b9c8ee}
 .seg{display:flex;background:#e4e9e0;border-radius:10px;padding:3px;margin:12px 0}
 .seg button{flex:1;border:0;background:none;padding:9px;border-radius:8px;font:600 14px var(--ft);color:var(--mut);cursor:pointer}
-.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px #0002}
-.prow{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 8px 6px 12px;margin:6px 0}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px #0002}
+.prow{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 8px 6px 12px;margin:6px 0}
 .pn{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.num{width:86px;font:600 18px var(--ft);text-align:right;padding:8px;border:1px solid var(--line);border-radius:8px;color:var(--ink)}
+.num{background:var(--card);width:86px;font:600 18px var(--ft);text-align:right;padding:8px;border:1px solid var(--line);border-radius:8px;color:var(--ink)}
 .num.bad{border-color:var(--bad);background:#fff3f0}
 .u{width:46px;color:var(--mut);font-size:12px}
 .sw{text-align:center}
@@ -67,17 +68,17 @@ button.item{cursor:pointer}
 .swd.run{color:#c2410c}
 .sw .sub{margin-top:8px}
 .kidnav{display:flex;gap:8px;align-items:center}
-.kidnav select{flex:1;min-width:0;font:600 16px var(--ft);padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+.kidnav select{flex:1;min-width:0;font:600 16px var(--ft);padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
 .rrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #f0f2ee}
 .rrow:first-of-type{border-top:0}
 .rrow span{font-size:14px;flex:1;min-width:0;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 .scale{display:flex;gap:4px;flex:none}
-.scale button{width:36px;height:38px;border-radius:8px;border:1px solid var(--line);background:#fff;font:600 15px var(--ft);color:var(--ink);cursor:pointer}
+.scale button{width:36px;height:38px;border-radius:8px;border:1px solid var(--line);background:var(--card);font:600 15px var(--ft);color:var(--ink);cursor:pointer}
 .scale button.on{background:var(--g);border-color:var(--g);color:#fff}
 .moods{display:flex;justify-content:space-between}
 .moods button{font-size:30px;width:54px;height:54px;border-radius:12px;border:2px solid transparent;background:#f5f7f3;cursor:pointer}
 .moods button.on{border-color:var(--g);background:#e6f2e2}
-textarea,.mbox input,.mbox select{width:100%;font:16px var(--ft);padding:10px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:#fff}
+textarea,.mbox input,.mbox select{width:100%;font:16px var(--ft);padding:10px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:var(--card)}
 textarea{resize:vertical;margin-bottom:8px}
 .mbox label{display:block;font-weight:600;font-size:14px;margin:0 0 12px}
 .mbox label input,.mbox label select{margin-top:4px}
@@ -86,7 +87,7 @@ textarea{resize:vertical;margin-bottom:8px}
 #modal{display:none}
 #modal.open{display:block}
 .mbg{position:fixed;inset:0;background:#0007;z-index:20}
-.mbox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,94vw);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;padding:18px;z-index:21}
+.mbox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,94vw);max-height:90vh;overflow:auto;background:var(--card);border-radius:14px;padding:18px;z-index:21}
 .mbox .sub{margin:4px 0}
 #toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%) translateY(-20px);background:var(--gd);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:30;max-width:90vw}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -118,7 +119,7 @@ textarea{resize:vertical;margin-bottom:8px}
 .note small{display:block;color:var(--mut)}
 details summary{font-weight:600;cursor:pointer}
 details textarea{margin-top:8px}
-.sel{width:100%;font:600 16px var(--ft);padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);margin:8px 0}
+.sel{width:100%;font:600 16px var(--ft);padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);margin:8px 0}
 .rk{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;border-top:1px solid #f0f2ee;padding:9px 0;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .rk:first-child{border-top:0}
 .rn{width:28px;height:28px;border-radius:50%;background:#eef1ea;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
@@ -135,7 +136,7 @@ details textarea{margin-top:8px}
 .pitch:before{content:'';position:absolute;left:8px;right:8px;top:50%;border-top:2px solid #ffffff55}
 .pitch:after{content:'';position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border:2px solid #ffffff55;border-radius:50%}
 .prowl{display:flex;justify-content:space-around;gap:6px;margin:12px 0;position:relative;z-index:1}
-.slot{background:#fff;border-radius:10px;padding:6px 8px;min-width:0;flex:1;max-width:120px;text-align:center;box-shadow:0 2px 4px #0003}
+.slot{background:var(--card);border-radius:10px;padding:6px 8px;min-width:0;flex:1;max-width:120px;text-align:center;box-shadow:0 2px 4px #0003}
 .slot b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .slot small{display:block;font-size:11px;color:var(--mut)}
 .slot .fit{font:700 15px var(--fc);color:var(--g)}
@@ -150,7 +151,7 @@ details textarea{margin-top:8px}
 .tsel{flex:1;background:none;border:0;text-align:left;font:600 15px var(--ft);color:var(--ink);cursor:pointer;padding:8px 0;min-width:0}
 .tsel small{font-weight:400;color:var(--mut)}
 .lhead{display:flex;gap:8px;align-items:stretch;margin:6px 0}
-.lclock{flex:1;font:700 36px/1 var(--fc);background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;color:var(--gd);font-variant-numeric:tabular-nums;cursor:pointer}
+.lclock{flex:1;font:700 36px/1 var(--fc);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;color:var(--gd);font-variant-numeric:tabular-nums;cursor:pointer}
 .lclock.run{color:#c2410c}
 .lctl{display:flex;flex-direction:column;gap:6px}
 .lsc{flex:none;align-self:center;font:700 34px/1 var(--fc);color:var(--gd);padding:0 4px;font-variant-numeric:tabular-nums}
@@ -158,14 +159,14 @@ details textarea{margin-top:8px}
 .cardb{flex:0 0 auto!important;display:flex;align-items:center;gap:6px}
 .gkinfo a{color:var(--gd);font-weight:600}
 .pfrow{display:grid;grid-template-columns:1fr 70px 70px;gap:6px;padding:5px 0;border-top:1px solid #eef1ea;font-size:14px;align-items:center}.pfrow b{text-align:right}.pfrow b.good{color:var(--good)}.pfrow b.bad{color:var(--bad)}.pfh{border-top:0;font-size:12px;color:var(--mut)}.pfh b{font-weight:600}
-.subsug{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:8px 0 2px}.subsug button{display:block;width:100%;text-align:left;background:#f4fbd6;border:1px solid #d7f25a;border-radius:9px;padding:8px 10px;margin-top:5px;font:600 14px var(--ft);color:var(--ink);cursor:pointer}.subsug small{color:var(--mut);font-weight:500}
+.subsug{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:8px 0 2px}.subsug button{display:block;width:100%;text-align:left;background:#f4fbd6;border:1px solid #d7f25a;border-radius:9px;padding:8px 10px;margin-top:5px;font:600 14px var(--ft);color:var(--ink);cursor:pointer}.subsug small{color:var(--mut);font-weight:500}
 .selhint{background:#f4fbd6;border:1px solid #d7f25a;border-radius:10px;padding:6px 10px;font-size:13px;margin:4px 0}
 .lslot>b .lmin{font-weight:600;font-size:10.5px}
 .lctl .btn{min-height:38px;padding:6px 12px}
 .btn:disabled{opacity:.4}
 .pitch.live{padding:8px 4px}
 .pitch.live .prowl{margin:10px 0;gap:3px}
-.lslot{background:#fff;border-radius:10px;padding:4px 2px 3px;flex:1;max-width:124px;min-width:0;text-align:center;box-shadow:0 2px 4px #0003;cursor:pointer;border:3px solid transparent}
+.lslot{background:var(--card);border-radius:10px;padding:4px 2px 3px;flex:1;max-width:124px;min-width:0;text-align:center;box-shadow:0 2px 4px #0003;cursor:pointer;border:3px solid transparent}
 .lslot.empty{background:#ffffffaa;border:2px dashed #fff}
 .lslot.sel,.lb.sel{border-color:var(--lime);box-shadow:0 0 0 3px #d7f25a99}
 .lslot.tw{background:#f4fbd6;max-width:130px}
@@ -178,14 +179,14 @@ details textarea{margin-top:8px}
 .pm button:active{transform:scale(.9)}
 .pos{color:var(--good)}.neg{color:var(--bad)}
 .lbench{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px}
-.lb{flex:none;background:#fff;border:3px solid transparent;border-radius:10px;padding:6px 10px;box-shadow:0 1px 3px #0002;cursor:pointer;text-align:center;min-width:78px}
+.lb{flex:none;background:var(--card);border:3px solid transparent;border-radius:10px;padding:6px 10px;box-shadow:0 1px 3px #0002;cursor:pointer;text-align:center;min-width:78px}
 .lb b{display:block;font-size:14px}.lb small{font-size:11px;color:var(--mut)}
 button{touch-action:manipulation}
 .slot.tap{cursor:pointer;border:3px solid transparent}
 .slot.empty{background:#ffffffaa;border:2px dashed #fff}
 .slot.sel,.bench span.sel{border-color:var(--lime);box-shadow:0 0 0 3px #d7f25a99}
 .bench span.tap{cursor:pointer;border:2px solid transparent}
-#sheet{position:fixed;left:0;right:0;bottom:0;z-index:25;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -4px 24px #0004;padding:12px 12px calc(12px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .18s;max-width:640px;margin:0 auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--card);border-radius:16px 16px 0 0;box-shadow:0 -4px 24px #0004;padding:12px 12px calc(12px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .18s;max-width:640px;margin:0 auto}
 #sheet.open{transform:none}
 .sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 .sgrid button{min-height:46px;border-radius:10px;border:0;font:600 13px/1.2 var(--ft);color:#fff;padding:6px;cursor:pointer}
@@ -213,19 +214,19 @@ button{touch-action:manipulation}
 .adot{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 3px 0 6px;vertical-align:middle}.adot.ok{background:var(--good)}.adot.warn{background:#c2410c}.adot.low{background:var(--bad)}
 .goal{padding:8px 0;border-top:1px solid #f0f2ee}.goal .gt{font-weight:600;font-size:14px}.goal.done .gt{color:var(--good)}
 .gx{background:none;border:0;font-size:20px;color:var(--mut);cursor:pointer;padding:0 6px}
-.gst{display:flex;gap:4px;margin-top:6px}.gst button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 2px;font:600 12px var(--ft);color:var(--mut);cursor:pointer}
+.gst{display:flex;gap:4px;margin-top:6px}.gst button{flex:1;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 2px;font:600 12px var(--ft);color:var(--mut);cursor:pointer}
 .gst button.on.offen{background:#eef1ea;color:var(--ink);border-color:#cfd6ca}.gst button.on.besser{background:#fff1d6;color:#9a5b00;border-color:#f0d68a}.gst button.on.erreicht{background:#1d7a3e;color:#fff;border-color:#1d7a3e}
 .focus{border-top:1px solid #f0f2ee;padding:10px 0}.ex{background:#f5f7f3;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:13.5px}
 .skarte{background:linear-gradient(160deg,#ffffff 0%,#f4fbd6 100%);border:3px solid var(--gd);border-radius:18px;padding:18px;margin-top:8px}
 .skh{display:flex;align-items:center;gap:10px}.skh img{border-radius:10px}.skt{font:700 22px var(--fc);color:var(--gd)}.sks{font-size:12px;color:var(--mut)}
 .skn{font:700 40px/1.1 var(--fc);color:var(--gd);margin:12px 0 6px}
-.sksec{margin-top:14px}.skl{font-weight:700;color:var(--gd);margin-bottom:4px}.ski{background:#fff;border-radius:10px;padding:8px 10px;margin:5px 0;font-size:14.5px;box-shadow:0 1px 2px #0001}.ski b{display:block;color:var(--g)}
+.sksec{margin-top:14px}.skl{font-weight:700;color:var(--gd);margin-bottom:4px}.ski{background:var(--card);border-radius:10px;padding:8px 10px;margin:5px 0;font-size:14.5px;box-shadow:0 1px 2px #0001}.ski b{display:block;color:var(--g)}
 .skf{margin-top:16px;text-align:center;font:700 18px var(--fc);color:var(--g)}
 @media print{header,.noprint,#toast,#sheet,.banner{display:none!important}main{padding:0}.skarte{border-width:2px}}
 .newrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0 4px}.newrow .btn{padding:8px 4px;font-size:13px;line-height:1.2;hyphens:manual}
 .row.between>div:first-child{min-width:0}.row.between>.btn{flex:none}
 h2{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
-.cardrow{display:flex;gap:6px;margin:0 0 6px}.cardrow button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:10px;min-height:38px;font:600 13px var(--ft);color:var(--ink);cursor:pointer}
+.cardrow{display:flex;gap:6px;margin:0 0 6px}.cardrow button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:10px;min-height:38px;font:600 13px var(--ft);color:var(--ink);cursor:pointer}
 .yc,.rc,.yrc{display:inline-block;width:9px;height:13px;border-radius:2px;vertical-align:-1px;box-shadow:0 0 0 1px #0002}.yc{background:#f5c518}.rc{background:#d42c2c}.yrc{background:linear-gradient(135deg,#f5c518 50%,#d42c2c 50%)}
 .sgrid.cg button{background:#3b4a40}
 .gear{margin-left:auto;background:none;border:0;color:#fff;font-size:22px;line-height:1;padding:4px 2px 4px 10px;cursor:pointer;opacity:.9}
@@ -239,6 +240,37 @@ h2{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 .lclock.over{color:var(--bad)}.lclock small{font-size:20px}
 .fmtp .seg button{font-size:13px;padding:8px 4px}.fmtlen{font:700 22px var(--fc);min-width:30px;text-align:center}
 .lbl2{font-weight:600;font-size:13px;color:var(--mut);margin-top:10px}
+
+.pill.openp{background:#fbe4dc;color:#b4442c}
+/* Dark Mode: folgt der Handy-Einstellung */
+:root{color-scheme:light dark}
+@media (prefers-color-scheme:dark){
+:root{--bg:#0e1511;--card:#18221c;--ink:#e4ebe5;--mut:#9aa99f;--line:#2b3830;--g:#2a8048;--bad:#ec7a63;--good:#57c785}
+.hint{background:#18291d;border-color:#2c4a33;color:#cde6cf}
+.banner,.arow.open,.crow.flag{background:#2b2513;border-color:#5a4a1c;color:var(--ink)}
+.banner.arch{background:#1a2135;border-color:#34446e}
+.btn.danger,.concb{border-color:#5a2e25!important}
+.pill,.rn,.bench span,.sbarw,.cb,.gst button.on.offen{background:#243029;border-color:#33433a}
+.seg{background:#0a100c}
+.num.bad{background:#3a1f19}
+.rrow,.trow,.note,.rk,.ov,.crow,.goal,.focus,.gd,.tl,.archrow,.pfrow{border-top-color:#243029}
+.moods button,.ex{background:#1f2a23}.moods button.on{background:#1d3a26}
+.radar .grid{stroke:#2b3830}.radar .grid.mid{stroke:#4a5b50}.radar .rl.na{fill:#66746b}.radar .pc{fill:rgba(87,199,133,.22);stroke:#57c785}
+.legend i.lp,.radar .pp{border-color:#9aa99f;stroke:#9aa99f}
+.subsug button,.selhint,.lslot.tw{background:#262f14;border-color:#5f7a1f;color:var(--ink)}
+.lslot.empty,.slot.empty{background:#ffffff1f;border-color:#ffffff88}
+.slot,.lslot,.lb{box-shadow:0 2px 4px #0008}
+.gst button.on.besser{background:#3a2c10;color:#f0c060;border-color:#5a4a1c}
+.skarte{--ink:#16241b;--mut:#5f6f64;--card:#fff;--g:#1d6b3a;color:#16241b;border-color:#57c785}
+.lclock{color:var(--ink)}.lclock.run,.swd.run,.lmin.warn{color:#f39a5e}.slot.est{outline-color:#f39a5e}.adot.warn{background:#f39a5e}
+.cb i.t{background:#6fbf8a}.legend i.lt{border-top-color:#6fbf8a}.cv .a{color:#b4dc66}
+.pill.openp{background:#3a1f19;color:#f19a86}
+.mbox,#sheet{border:1px solid var(--line)}
+.spark polyline{stroke:#57c785}.spark circle{fill:#57c785}
+.chip.on{background:#2a8048;border-color:#2a8048}
+.swd,.lsc,.score .sc,.gkinfo a{color:#e4ebe5}
+.goalb{background:#2a8048!important;border-color:#2a8048!important}
+}
 </style>
 </head>
 <body>
@@ -280,7 +312,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='53';
+const APP_VERSION='54';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -473,7 +505,7 @@ function vSessions(){
   if(ss.length)h+=focusCard();
   if(!ss.length)h+=`<div class="empty">Noch keine Bewertung angelegt.<br><small>Ein Testtag pro Monat mit 3–5 Tests reicht. Nach Spielen kurz unter „+ Spiel“ bewerten. Deine Einschätzung zwischendurch, z. B. nach einem Training, unter „+ Trainereinschätzung“.</small></div>`;
   ss.forEach(s=>{
-    if(s.type==='game'||s.type==='eval'){const ev=s.type==='eval';const n=ps.filter(p=>{const r=s.ratings?.[p.id];return r&&Object.values(r).some(isNum);}).length;h+=`<button class="card item" onclick="A.openSession('${s.id}')"><div class="row between"><div><div class="t">${ev?'📝':'⚽'} ${esc(s.title||(ev?'Trainereinschätzung':'Spiel'))}${s.result?' · '+esc(s.result):''}</div><div class="sub">${fdate(s.date)} · ${ev?'Trainereinschätzung':'Spiel'}</div></div><div style="text-align:right"><div class="pill">${n}/${ps.length} bewertet</div>${(()=>{const o=openActs(s);return o?`<div class="pill" style="margin-top:4px;background:#fbe4dc;color:#b4442c">${o} offen</div>`:''})()}</div></div></button>`;return;}
+    if(s.type==='game'||s.type==='eval'){const ev=s.type==='eval';const n=ps.filter(p=>{const r=s.ratings?.[p.id];return r&&Object.values(r).some(isNum);}).length;h+=`<button class="card item" onclick="A.openSession('${s.id}')"><div class="row between"><div><div class="t">${ev?'📝':'⚽'} ${esc(s.title||(ev?'Trainereinschätzung':'Spiel'))}${s.result?' · '+esc(s.result):''}</div><div class="sub">${fdate(s.date)} · ${ev?'Trainereinschätzung':'Spiel'}</div></div><div style="text-align:right"><div class="pill">${n}/${ps.length} bewertet</div>${(()=>{const o=openActs(s);return o?`<div class="pill openp" style="margin-top:4px">${o} offen</div>`:''})()}</div></div></button>`;return;}
     const tests=s.tests||[];let filled=0;const total=tests.length*ps.length;
     ps.forEach(p=>tests.forEach(k=>{if(isNum(s.results?.[p.id]?.[k]))filled++;}));
     h+=`<button class="card item" onclick="A.openSession('${s.id}')"><div class="row between"><div><div class="t">⏱ ${esc(s.title||'Testtag')}</div><div class="sub">${fdate(s.date)} · Testtag</div></div><div class="pill">${filled}/${total} Werte</div></div><div class="chips sm">${tests.map(k=>`<span class="chip">${esc(TEST[k]?.n||k)}</span>`).join('')}</div></button>`;
@@ -974,7 +1006,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
- {v:53,items:['Einstellungen: TrainerRadar bleibt kostenlos. Wer dem Entwickler einen Kaffee spendieren möchte, findet dort jetzt einen Knopf.']},{v:52,items:['Live-Spiel: Minus-Auswahl gestrafft auf 7 Knöpfe, so viele wie Plus mit Tor. „Chance vergeben“ entfällt, „Großchance vergeben“ steht an seiner Stelle. Bisher erfasste Aktionen zählen weiter.']},{v:51,items:['Live-Spiel: Beim Minus gibt es jetzt „Großchance vergeben“ für eine 100-prozentige Torchance. Sie zählt beim Torschuss doppelt so stark wie „Chance vergeben“.']},{v:50,items:['Live-Spiel: Beim Minus gibt es jetzt „Abspiel verpasst“. Es zählt negativ für Passspiel und Übersicht.']},{v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
+ {v:54,items:['Dunkles Design: Steht dein Handy auf Dark Mode, wird TrainerRadar automatisch dunkel. Die Stärkenkarte fürs Kind und die PDFs bleiben hell.']},{v:53,items:['Einstellungen: TrainerRadar bleibt kostenlos. Wer dem Entwickler einen Kaffee spendieren möchte, findet dort jetzt einen Knopf.']},{v:52,items:['Live-Spiel: Minus-Auswahl gestrafft auf 7 Knöpfe, so viele wie Plus mit Tor. „Chance vergeben“ entfällt, „Großchance vergeben“ steht an seiner Stelle. Bisher erfasste Aktionen zählen weiter.']},{v:51,items:['Live-Spiel: Beim Minus gibt es jetzt „Großchance vergeben“ für eine 100-prozentige Torchance. Sie zählt beim Torschuss doppelt so stark wie „Chance vergeben“.']},{v:50,items:['Live-Spiel: Beim Minus gibt es jetzt „Abspiel verpasst“. Es zählt negativ für Passspiel und Übersicht.']},{v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
  {v:45,items:['„Zusammenführen“ beim Spieler und bei der Mannschaft steht jetzt in einer eigenen Zeile und ragt nicht mehr aus dem Bildschirm.']},
  {v:44,items:['Datensicherung aufgeräumt: Der Knopf „Text einfügen“ ist weg, „Sicherung einlesen“ reicht.']},
  {v:43,items:['<b>📤 Sicherung teilen:</b> Neuer Knopf neben „Sicherung speichern“ (Kader → Datensicherung). Schickt die Sicherung direkt per WhatsApp, Mail oder AirDrop.','<b>Doppelt erfasste Spiele:</b> Habt ihr dasselbe Spiel auf zwei Handys live erfasst, legt „Sicherung einlesen“ beide zusammen: Pro Kind zählen die Aktionen aus der Erfassung, die bei diesem Kind genauer war. So zählt nichts doppelt, und dein breiter Blick bleibt genauso erhalten wie der genaue Blick des anderen. Schon doppelt vorhandene Spiele zeigt die App unter „Bewertung“ an, ein Tipp legt sie zusammen.','<b>Sicherer zusammenführen:</b> Kinder, die schon gemeinsam in einer Bewertung vorkommen, schlägt die App nie als doppelt vor (z. B. zwei echte Leons). Jedes Zusammenführen lässt sich 24 Stunden lang mit „↶ Rückgängig“ zurücknehmen.']},
