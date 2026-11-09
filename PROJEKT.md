@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 63, 09.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 64, 09.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -83,3 +83,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 
 ## Materialien
 - Werbeflyer (1 Seite) und Benutzerhandbuch (5 Seiten) als PDF; Quellen in `materialien/`
+- **Gerechtigkeit (V64):** Fehlende Werte = Mannschaftsschnitt (`teamMean`, in `srcVal0` Mix je fehlender Hälfte und in `posFit` über `pr._tm`); Einschätzungen mit Puffer `RATE_BUF=1` (Mannschaftsschnitt zählt wie eine weitere Bewertung, `liveVal`/`shrinkPV`); Testanteile der App-Werte nach Zeitraum (`testPick`: Potenzial bester, Form letzter Wert); Gesamtstärke/beste Position (`bestField`) ohne Spielweise/Treue, Fuß einheitlich +0,1; alle Positionswerte auf 1–5 begrenzt (`clamp15`).
