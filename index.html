@@ -317,7 +317,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='56';
+const APP_VERSION='57';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -595,7 +595,7 @@ function vPlayers(){
   const dp=dupPairs();if(dp.length)h+=`<div class="card hint"><b>Doppelt im Kader?</b><div class="sub" style="margin:2px 0 6px">Passiert, wenn du und dein Co-Trainer den Kader getrennt angelegt habt. Zusammenführen legt alle Werte bei einem Kind zusammen.</div>${dp.map(([a,b])=>`<div class="row between" style="margin-top:4px"><span>${esc(a.name)} &amp; ${esc(b.name)}</span><button class="btn sm2" onclick="A.mergeAsk('${a.id}','${b.id}')">Zusammenführen</button></div>`).join('')}${dp.length>1?`<button class="btn pri" style="width:100%;margin-top:10px" onclick="A.mergeAllAsk()">Alle ${dp.length} zusammenführen</button>`:''}</div>`;
   const fr={};formRows(ps).forEach(r=>fr[r.p.id]=r.d);
   h+=ps.map(p=>{const n=ss.filter(s=>hasData(s,p.id)).length;const ov=p.guest?null:overallOf(p.id),fd=fr[p.id];return `<button class="card item ${p.active===false?'off':''}" onclick="A.openPlayer('${p.id}')"><div class="row between"><div><div class="t">${esc(p.name)}</div><div class="sub">${p.foot?'Fuß: '+esc(p.foot):''}${p.stil?' · '+esc(p.stil):''}${p.treue?' · Positionstreue '+esc(p.treue):''}${p.active===false?' · inaktiv':''}${n?` · ${n} Bewertung${n===1?'':'en'}`:''}</div></div>${isNum(ov)?`<div class="kst"><b>${fnum(r1(ov))}</b>${isNum(fd)&&Math.abs(fd)>=.3?`<span class="${fd>0?'pos':'neg'}">${fd>0?'▲':'▼'}</span>`:''}</div>`:`<div class="pill">neu</div>`}</div></button>`;}).join('');
-  if(ps.some(p=>isNum(overallOf(p.id))))h+=`<div class="sub" style="margin:2px 0 8px">Zahl = Gesamtstärke (Schnitt der Bereiche im Stärkenprofil, 1–5). ▲/▼ = gerade deutlich über/unter dem eigenen Saisonniveau.</div>`;
+  if(ps.some(p=>isNum(overallOf(p.id))))h+=`<div class="sub" style="margin:2px 0 8px">Zahl = Gesamtstärke (1–5): zur Hälfte Spielverhalten und Technik, zur Hälfte Athletik. Bei Torhütern zählt der Torwart-Wert als dritter Teil mit. ▲/▼ = gerade deutlich über/unter dem eigenen Saisonniveau.</div>`;
   if(ps.length)h+=`<div class="sub" style="text-align:center;margin:14px 0">Sicherung speichern, teilen oder einlesen: <a href="#" onclick="A.go('settings');return false" style="color:var(--g);font-weight:600">⚙︎ Einstellungen</a></div>`;else h+=backupCard();
   return h;
 }
@@ -648,8 +648,10 @@ function sessionsWith(cat){const C=calcCache();if(C.sw[cat])return C.sw[cat];con
 function latestVal(cat,pid,ss){const multi=cat.startsWith('r:')||cat==='a:spiel'||cat==='a:torwart';const vals=[];for(const s of ss){const v=catVal(s,cat,pid);if(isNum(v)){if(!multi)return v;vals.push(v);if(vals.length===3)break;}}return vals.length?avg(vals):null;}
 function formRows(ps){const cats=[...RATINGS,...ATH_RATINGS].map(r=>'r:'+r.k);const ss={};cats.forEach(c=>ss[c]=sessionsWith(c));
   return ps.map(p=>{const ds=[];cats.forEach(c=>{const po=srcVal(c,p.id,ss[c],'pot'),fo=srcVal(c,p.id,ss[c],'form');if(isNum(po)&&isNum(fo))ds.push({c,d:fo-po});});if(!ds.length)return null;ds.sort((a,b)=>b.d-a.d);return{p,d:avg(ds.map(x=>x.d)),top:ds[0],low:ds[ds.length-1]};}).filter(Boolean);}
-// Gesamtstärke fürs Kader: Schnitt der Bereiche des Stärkenprofils (Werte aus / Zeitraum wie eingestellt)
-function overallOf(pid){const v=AREAS.map(a=>srcVal('a:'+a.k,pid)).filter(isNum);return v.length?avg(v):null;}
+// Gesamtstärke fürs Kader: halb Fußball (Spielverhalten+Technik), halb Athletik; Torwart-Wert als dritter Teil, wenn er das Kind stärker macht
+function overallOf(pid){const pt=ks=>{const v=ks.map(k=>srcVal('a:'+k,pid)).filter(isNum);return v.length?avg(v):null;};
+  const f=[pt(['spiel','technik']),pt(['tempo','gewandt','kraft','ausdauer'])].filter(isNum);if(!f.length){const g=srcVal('a:torwart',pid);return isNum(g)?g:null;}
+  const fv=avg(f),g=srcVal('a:torwart',pid);return isNum(g)&&g>fv?avg([...f,g]):fv;}
 // Wer ist in Form? Form (letzte Wochen) gegen Potenzial (ganze Saison), Schnitt über alle Einschätzungs-Kategorien
 function formOverview(){
   const rows=formRows(plist());
@@ -1031,6 +1033,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:57,items:['Die Gesamtstärke im Kader wird neu berechnet: zur Hälfte aus Spielverhalten und Technik, zur Hälfte aus der Athletik. Bisher zählte die Athletik zwei Drittel. Bei Torhütern zählt der Torwart-Wert als dritter Teil mit.']},
  {v:56,items:['Die Datensicherung steht jetzt nur noch in den Einstellungen (ganz oben), nicht mehr zusätzlich unter Kader. Der Filter in der Bewertungsliste erscheint schon ab zwei Einträgen.']},{v:55,items:['<b>Bewertungsliste:</b> Filter für Spiele, Einschätzungen und Testtage, nach Monaten gegliedert.','<b>Kader:</b> zeigt jetzt die Gesamtstärke jedes Kindes und ▲/▼ für die aktuelle Form.','<b>Profil:</b> Live-Bilanz zeigt die letzten 5 Spiele (Rest ausklappbar), Verlaufslinien sind bei vielen Einschätzungen geglättet.','<b>Spielbericht:</b> Im Spiel unter „Export“ gibt es einen fertigen Text für die Elterngruppe mit Ergebnis und Torschützen, ohne Bewertungen.','<b>Live:</b> Hinweis 2 Minuten vor Ende jeder Halbzeit.','<b>Einstellungen:</b> Datensicherung steht oben, der Rest ist einklappbar.']},{v:54,items:['Dunkles Design: Steht dein Handy auf Dark Mode, wird TrainerRadar automatisch dunkel. Die Stärkenkarte fürs Kind und die PDFs bleiben hell.']},{v:53,items:['Einstellungen: TrainerRadar bleibt kostenlos. Wer dem Entwickler einen Kaffee spendieren möchte, findet dort jetzt einen Knopf.']},{v:52,items:['Live-Spiel: Minus-Auswahl gestrafft auf 7 Knöpfe, so viele wie Plus mit Tor. „Chance vergeben“ entfällt, „Großchance vergeben“ steht an seiner Stelle. Bisher erfasste Aktionen zählen weiter.']},{v:51,items:['Live-Spiel: Beim Minus gibt es jetzt „Großchance vergeben“ für eine 100-prozentige Torchance. Sie zählt beim Torschuss doppelt so stark wie „Chance vergeben“.']},{v:50,items:['Live-Spiel: Beim Minus gibt es jetzt „Abspiel verpasst“. Es zählt negativ für Passspiel und Übersicht.']},{v:49,items:['Deutlich schneller bei vielen Daten: Rangliste, Aufstellung und Profile rechnen nur noch neu, wenn sich etwas geändert hat.','Nach „Saison abschließen“ holt eine ältere Sicherung keine Spiele oder Bewertungen der abgeschlossenen Saison zurück.']},{v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
  {v:45,items:['„Zusammenführen“ beim Spieler und bei der Mannschaft steht jetzt in einer eigenen Zeile und ragt nicht mehr aus dem Bildschirm.']},
  {v:44,items:['Datensicherung aufgeräumt: Der Knopf „Text einfügen“ ist weg, „Sicherung einlesen“ reicht.']},
