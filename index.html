@@ -280,7 +280,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='42';
+const APP_VERSION='43';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -355,7 +355,7 @@ function importData(txt){
 }
 function backupCard(){
   const lb=META.lastBackup?new Date(META.lastBackup).toLocaleDateString('de-DE'):'noch nie';
-  return `<div class="card"><div class="lbl">Datensicherung</div><div class="sub" style="margin-bottom:10px">Die Daten liegen in der App auf diesem Gerät. Gesichert werden alle Mannschaften. Letzte Sicherung: <b>${lb}</b>. Beim Speichern auf dem iPhone „In Dateien sichern“ → iCloud Drive wählen.</div><div class="row gap" style="flex-wrap:wrap"><button class="btn pri" onclick="A.backup()">Sicherung speichern</button><button class="btn" onclick="A.restoreFile()">Sicherung einlesen</button><button class="btn" onclick="A.pasteModal()">Text einfügen</button></div><button class="btn" style="width:100%;margin-top:8px" onclick="A.shareRoster()">👥 Nur Kader teilen</button><div class="sub" style="margin-top:4px">Zusätzlich zur Sicherung: nur Namen, Fuß, Spielweise und Positionstreue der aktiven Kinder dieser Mannschaft – ohne Bewertungen, Messwerte, Notizen und Ziele. Ideal für den Co-Trainer zum Start: Wer die Datei einliest, hat dieselben Kinder wie du, und eure Werte passen später zusammen.</div><div class="sub" style="margin-top:8px">Beim Einlesen wird nur ergänzt, nichts gelöscht. „Text einfügen“ ist für die kopierte Datensicherung aus der alten Version.</div></div><div class="sub" style="text-align:center;margin:6px 0 20px">App-Version ${APP_VERSION}</div>`;
+  return `<div class="card"><div class="lbl">Datensicherung</div><div class="sub" style="margin-bottom:10px">Die Daten liegen in der App auf diesem Gerät. Gesichert werden alle Mannschaften. Letzte Sicherung: <b>${lb}</b>. „Speichern“: auf dem iPhone „In Dateien sichern“ → iCloud Drive wählen. „Teilen“: direkt per WhatsApp, Mail oder AirDrop verschicken, z. B. an den Co-Trainer.</div><div class="row gap"><button class="btn pri" style="flex:1;padding-left:6px;padding-right:6px" onclick="A.backup()">Sicherung speichern</button><button class="btn pri" style="flex:1;padding-left:6px;padding-right:6px" onclick="A.backup(true)">📤 Sicherung teilen</button></div><div class="row gap" style="margin-top:8px"><button class="btn" style="flex:1;padding-left:6px;padding-right:6px" onclick="A.restoreFile()">Sicherung einlesen</button><button class="btn" style="flex:1;padding-left:6px;padding-right:6px" onclick="A.pasteModal()">Text einfügen</button></div><button class="btn" style="width:100%;margin-top:8px" onclick="A.shareRoster()">👥 Nur Kader teilen</button><div class="sub" style="margin-top:4px">Zusätzlich zur Sicherung: nur Namen, Fuß, Spielweise und Positionstreue der aktiven Kinder dieser Mannschaft – ohne Bewertungen, Messwerte, Notizen und Ziele. Ideal für den Co-Trainer zum Start: Wer die Datei einliest, hat dieselben Kinder wie du, und eure Werte passen später zusammen.</div><div class="sub" style="margin-top:8px">Beim Einlesen wird nur ergänzt, nichts gelöscht. „Text einfügen“ ist für die kopierte Datensicherung aus der alten Version.</div></div><div class="sub" style="text-align:center;margin:6px 0 20px">App-Version ${APP_VERSION}</div>`;
 }
 
 // ---------- Auswertung ----------
@@ -936,6 +936,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:43,items:['<b>📤 Sicherung teilen:</b> Neuer Knopf neben „Sicherung speichern“ (Kader → Datensicherung). Schickt die Sicherung direkt per WhatsApp, Mail oder AirDrop.']},
  {v:42,items:['<b>Spieler zusammenführen:</b> Steht ein Kind doppelt im Kader (z. B. weil du und dein Co-Trainer den Kader getrennt angelegt habt), zeigt der Kader „Doppelt im Kader?“. Ein Tipp legt alle Bewertungen, Testwerte, Spiele und Ziele bei einem Eintrag zusammen. Geht auch einzeln über ✏️ → „Zusammenführen“.','<b>Mannschaften zusammenführen:</b> Kommt der Kader des Co-Trainers als eigene Mannschaft an, holst du sie unter Mannschaft → Bearbeiten → „Zusammenführen“ in deine Mannschaft.','<b>Nur Kader teilen</b> (Kader → Datensicherung, zusätzlich zur Sicherung): eine Datei nur mit den Namen der Kinder, ohne Bewertungen, Messwerte und Notizen. Ideal, damit der Co-Trainer mit denselben Kindern startet.']},
  {v:41,items:['<b>Fairere App-Werte:</b> Live-Aktionen zählen jetzt auch im App-Wert wie Zusatzbewertungen (Plus = 5, Minus = 1). Aktionen wirken doppelt so stark wie bisher (2 Aktionen = früher 4). Im Mix hat der App-Wert wenig Gewicht, solange es nur wenige Aktionen sind. Starke Kinder, z. B. im Tor, werden so nicht mehr Richtung 3 gezogen.']},
  {v:40,items:['<b>Saison-Rückblick für die Kinder</b> (Einstellungen): zwei bunte PDF-Seiten pro Kind – „So hast du dich entwickelt“ als Netz (Saisonbeginn und -ende), Rekorde beim Testtag, Highlights wie bestes Spiel und erstes Tor, Abzeichen, geschaffte Ziele und eine Nachricht vom Trainerteam. Jedes Kind wird nur mit sich selbst verglichen.','Die Nachricht für den Rückblick trägst du beim Spieler unter ✏️ ein. Ohne Text bleibt Platz zum Reinschreiben.']},
@@ -1569,11 +1570,11 @@ const A={
     t.archive=t.archive.filter(x=>x.id!==id);S.luCache=null;META.lastChange=Date.now();saveLocal();closeModal();render(true);toast(`${n} Bewertungen zurückgeholt`);},
   archAskDel(id){const a=archList().find(x=>x.id===id);if(!a)return;showModal(`<h3>„${esc(a.name)}“ vom Gerät löschen?</h3><p>Das spart Speicher. Die Daten sind danach nur noch in der Archiv-Datei – speichere sie vorher, falls du das noch nicht getan hast.</p><div class="row end gap" style="flex-wrap:wrap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn" onclick="A.archFile('${id}')">Datei speichern</button><button class="btn danger" onclick="A.archDel('${id}')">Löschen</button></div>`);},
   archDel(id){if(S.archView===id)loadTeam();const t=TEAMS[CUR];t.archive=(t.archive||[]).filter(x=>x.id!==id);META.lastChange=Date.now();saveLocal();closeModal();render(true);toast('Archiv vom Gerät gelöscht');},
-  async backup(){
+  async backup(share){
     const name='TrainerRadar-Sicherung-'+today()+'.json';const blob=new Blob([backupJSON()],{type:'application/json'});
-    const mark=()=>{META.lastBackup=Date.now();saveLocal();render(true);toast('Sicherung erstellt');};
+    const mark=()=>{META.lastBackup=Date.now();saveLocal();render(true);toast(share?'Sicherung geteilt':'Sicherung erstellt');};
     try{const file=new File([blob],name,{type:'application/json'});
-      if(navigator.canShare&&navigator.canShare({files:[file]})&&matchMedia('(pointer: coarse)').matches){await navigator.share({files:[file],title:'U10-Sicherung'});mark();return;}
+      if(navigator.canShare&&navigator.canShare({files:[file]})&&(share||matchMedia('(pointer: coarse)').matches)){await navigator.share({files:[file],title:'U10-Sicherung'});mark();return;}
     }catch(e){if(e&&e.name==='AbortError')return;}
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);mark();
   },
