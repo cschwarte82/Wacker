@@ -280,7 +280,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='47';
+const APP_VERSION='48';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -360,11 +360,13 @@ function dupGames(){const ss=slist().filter(s=>s.type==='game'&&s.live);const ou
 function importData(txt){
   let d;try{d=JSON.parse(txt);}catch(e){toast('Das ist keine gültige Sicherung.');return false;}
   if(!d||typeof d!=='object'||(!d.teams&&!d.players&&!d.sessions)){toast('Keine Spielerdaten gefunden.');return false;}
-  if(S.archView)loadTeam();syncTeam();let nt=0,np=0,ns=0,na=0,ng=0,ngr=0;
+  if(S.archView)loadTeam();syncTeam();let nt=0,np=0,ns=0,na=0,ng=0,ngr=0,nf=0;
   const merge=(t,src)=>{t.players=t.players||{};t.sessions=t.sessions||{};
     for(const a of (Array.isArray(src.archive)?src.archive:[]))if(a&&a.id&&a.sessions&&!(t.archive||[]).some(x=>x.id===a.id)){(t.archive=t.archive||[]).push(a);na++;}
     const inArch=id=>(t.archive||[]).some(a=>a.sessions&&a.sessions[id]);
-    for(const[id,p]of Object.entries(src.players||{}))if(!t.players[id]){t.players[id]=p;np++;}
+    for(const[id,p]of Object.entries(src.players||{})){if(!t.players[id]){t.players[id]=p;np++;continue;}
+      // Vorhandenes Kind: eigene Angaben bleiben, nur leere Felder werden ergänzt
+      const q=t.players[id];let f=0;['foot','stil','treue'].forEach(k=>{if(!q[k]&&p&&p[k]){q[k]=p[k];f++;}});if(f)nf++;}
     for(const[id,s]of Object.entries(src.sessions||{}))if(!t.sessions[id]&&!inArch(id)){
       // Gleiches Spiel schon vorhanden: pro Kind zählt die Erfassung mit mehr Aktionen (Spielverlauf bleibt der eigene)
       const ex=Object.entries(t.sessions).find(([,x])=>sameGame(x,s));
@@ -376,7 +378,7 @@ function importData(txt){
   // Neues Gerät: leere Start-Mannschaft durch die eingelesene ersetzen
   {const c=TEAMS[CUR],tg=d.current&&TEAMS[d.current]?d.current:null;if(tg&&tg!==CUR&&c&&!Object.keys(c.players||{}).length&&!Object.keys(c.sessions||{}).length&&!(c.archive||[]).length){delete TEAMS[CUR];CUR=tg;}}
   loadTeam();META.lastChange=Date.now();saveLocal();render(true);
-  toast(`${nt?nt+(nt===1?' Mannschaft, ':' Mannschaften, '):''}${np} Spieler und ${ns} Bewertungen übernommen${na?` · ${na} archivierte Saison${na===1?'':'s'}`:''}${ngr?` · ${ngr} doppelt erfasste${ngr===1?'s':''} Spiel${ngr===1?'':'e'} zusammengelegt (pro Kind zählt die genauere Erfassung)`:''}`);return true;
+  toast(`${nt?nt+(nt===1?' Mannschaft, ':' Mannschaften, '):''}${np} Spieler und ${ns} Bewertungen übernommen${na?` · ${na} archivierte Saison${na===1?'':'s'}`:''}${ngr?` · ${ngr} doppelt erfasste${ngr===1?'s':''} Spiel${ngr===1?'':'e'} zusammengelegt (pro Kind zählt die genauere Erfassung)`:''}${nf?` · bei ${nf} Kind${nf===1?'':'ern'} fehlende Angaben (Fuß/Spielweise/Positionstreue) ergänzt`:''}`);return true;
 }
 function backupCard(){
   const lb=META.lastBackup?new Date(META.lastBackup).toLocaleDateString('de-DE'):'noch nie';
@@ -964,7 +966,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
- {v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
+ {v:48,items:['Beim Einlesen einer Sicherung oder eines Kaders werden bei vorhandenen Kindern leere Angaben (Fuß, Spielweise, Positionstreue) ergänzt. Deine eigenen Angaben werden nie überschrieben.']},{v:47,items:['Doppelt erfasste Spiele: Hat nur der andere den Torschützen eingetragen, wird er übernommen. Tor-Plus und Torstatistik passen immer zusammen.']},{v:46,items:['Beim Spieler heißt der Knopf jetzt „Mit anderem Kind zusammenführen“.']},
  {v:45,items:['„Zusammenführen“ beim Spieler und bei der Mannschaft steht jetzt in einer eigenen Zeile und ragt nicht mehr aus dem Bildschirm.']},
  {v:44,items:['Datensicherung aufgeräumt: Der Knopf „Text einfügen“ ist weg, „Sicherung einlesen“ reicht.']},
  {v:43,items:['<b>📤 Sicherung teilen:</b> Neuer Knopf neben „Sicherung speichern“ (Kader → Datensicherung). Schickt die Sicherung direkt per WhatsApp, Mail oder AirDrop.','<b>Doppelt erfasste Spiele:</b> Habt ihr dasselbe Spiel auf zwei Handys live erfasst, legt „Sicherung einlesen“ beide zusammen: Pro Kind zählen die Aktionen aus der Erfassung, die bei diesem Kind genauer war. So zählt nichts doppelt, und dein breiter Blick bleibt genauso erhalten wie der genaue Blick des anderen. Schon doppelt vorhandene Spiele zeigt die App unter „Bewertung“ an, ein Tipp legt sie zusammen.','<b>Sicherer zusammenführen:</b> Kinder, die schon gemeinsam in einer Bewertung vorkommen, schlägt die App nie als doppelt vor (z. B. zwei echte Leons). Jedes Zusammenführen lässt sich 24 Stunden lang mit „↶ Rückgängig“ zurücknehmen.']},
