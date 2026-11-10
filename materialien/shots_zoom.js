@@ -1,7 +1,7 @@
 // Detail-Ausschnitte für den Flyer (z_*.png, dunkel z_*_d.png, ganze Live-Ansicht p_live*.png): node shots_zoom.js (im Ordner materialien)
 const {chromium}=require('playwright');const fs=require('fs');
 (async()=>{const LIVE=fs.readFileSync('shots2.py','utf8').match(/LIVE="(.*?)"\n/)[1];
-const d=JSON.parse(fs.readFileSync('demo.json','utf8'));d.teams[d.current].name='1. Herren';const demo=JSON.stringify(d);
+const d=JSON.parse(fs.readFileSync('demo.json','utf8'));d.teams[d.current].name='U10.1';const demo=JSON.stringify(d);
 const b=await chromium.launch();
 // find: JS-Ausdruck für das Element; box: (r)=>{x,y,w,h} in CSS-Pixeln relativ zur Seite
 for(const dark of [false,true]){const sfx=dark?'_d':'';
@@ -16,7 +16,7 @@ await shot(L,'z_live.png',"document.querySelectorAll('.lslot')[1]",r=>({x:r.x-10
 await shot(L,'z_sub.png',"document.querySelector('.subsug')",r=>({x:r.x-4,y:r.y-4,w:215,h:r.h+8}));
 await shot("A.go('lineup');",'z_lineup.png',"document.querySelector('.pitch')",r=>({x:r.x+r.w/2-150,y:r.y+2,w:300,h:232}));
 // Netz für den Flyer: stimmiges Beispielprofil (Christian 10.11.: schnell, dann auch gewandt/sprungstark); Potenzial überall sichtbar außerhalb der Form
-await shot("{const _r=radar;radar=()=>_r([4.3,3.9,3.5,3.7,3.6,4.0],[4.7,4.4,4.0,4.2,4.2,4.5]);}A.openPlayer('p1');",'z_radar.png',"document.querySelector('svg.radar')",r=>({x:r.x-2,y:r.y+2,w:r.w+4,h:r.h-4}));
+await shot("{const _r=radar;radar=()=>_r([4.4,4.0,3.5,4.0,3.0,3.1],[4.7,4.6,3.8,3.6,3.6,3.5]);}A.openPlayer('p1');",'z_radar.png',"document.querySelector('svg.radar')",r=>({x:r.x-2,y:r.y+2,w:r.w+4,h:r.h-4}));
 await shot("A.openPlayer('p1');",'z_mess.png',"[...document.querySelectorAll('.card')].find(x=>x.textContent.startsWith('Entwicklung der Messwerte'))",r=>({x:r.x+6,y:r.y+52,w:r.w-12,h:Math.min(225,r.h-56)}));
 await shot(L+'window.scrollTo(0,0);','p_live.png',"document.body",null);
 }
