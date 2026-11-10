@@ -321,7 +321,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='78';
+const APP_VERSION='79';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -638,7 +638,7 @@ function vPlayer(){
   const rrows=[...RATINGS,...ATH_RATINGS].map(r=>{const pts=ss.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);if(!pts.length)return'';return `<div class="trow"><div class="t2">${esc(r.n)}</div>${spark(trendPts(ss,s=>s.ratings?.[pid]?.[r.k]),false,1,5)}<div class="val">${pts[pts.length-1]}<small>/5</small></div></div>`;}).join('');
   if(rrows)h+=`<div class="card"><div class="lbl">Trainer-Einschätzung</div>${rrows}</div>`;
   const grows=GK_RATINGS.map(r=>{const pts=ss.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);if(!pts.length)return'';return `<div class="trow"><div class="t2">${esc(r.n)}</div>${spark(trendPts(ss,s=>s.ratings?.[pid]?.[r.k]),false,1,5)}<div class="val">${pts[pts.length-1]}<small>/5</small></div></div>`;}).join('');
-  if(grows){const g=latestVal('a:torwart',pid,ss.slice().reverse());h+=`<div class="card"><div class="lbl">Torwart${isNum(g)?` <small>gesamt ${fnum(Math.round(g*10)/10)} / 5</small>`:''}</div>${grows}</div>`;}
+  if(grows){const g=latestVal('a:torwart',pid,ss.slice().reverse());const ov=(overallAll([{...p,id:pid}])[pid]||{}).tw;h+=`<div class="card"><div class="lbl">🧤 Torwart${isNum(ov)?` <small>Wert ${fnum(r1(ov))} / 5 wie im Kader</small>`:''}</div>${isNum(g)&&isNum(ov)&&r1(g)!==r1(ov)?`<div class="sub" style="margin:-2px 0 6px">Deine letzten Torwart-Einschätzungen allein ergeben ${fnum(r1(g))}. Der Wert ${fnum(r1(ov))} rechnet wie im Kader und in der Aufstellung mit „Mix“: Trainer + App (Torwart-Aktionen aus Live-Spielen), Potenzial (ganze Saison) + Form (letzte Wochen).</div>`:''}${grows}</div>`;}
   const ms=ss.filter(s=>isNum(s.mood?.[pid]));
   if(ms.length)h+=`<div class="card"><div class="lbl">Spaß am Fußball <small>Selbstauskunft</small></div><div class="moodhist">${ms.map(s=>`<span>${MOODS[s.mood[pid]-1]||''}<small>${fdate(s.date).slice(0,5)}</small></span>`).join('')}</div></div>`;
   {const rows=[...RATINGS,...ATH_RATINGS].map(r=>{const c='r:'+r.k,ss2=sessionsWith(c);const po=srcVal(c,pid,ss2,'pot'),fo=srcVal(c,pid,ss2,'form');if(!isNum(po)&&!isNum(fo))return'';const d=isNum(po)&&isNum(fo)?fo-po:0;
@@ -1100,6 +1100,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:79,items:['Profil: Die Torwart-Karte zeigt jetzt denselben Torwart-Wert wie Kader und Aufstellung (Mix aus Trainer + App, Potenzial + Form). Weicht der Schnitt deiner letzten Torwart-Einschätzungen davon ab, steht er darunter mit Erklärung.']},
  {v:78,items:['Lange Namen werden auf den Spielfeld-Karten und auf der Bank wieder mit „…“ gekürzt statt umgebrochen – das Spielfeld bleibt ruhiger.']},
  {v:77,items:['Neue Spielformen: Funino (ohne Torwart) mit Auswahl 2 gegen 2, 3 gegen 3 oder 4 gegen 4 sowie 7 + 1 bis 10 + 1. Erst die Spielform wählen, dann erscheinen die passenden Formationen (z. B. 4-4-2, 4-3-3, 3-5-2). Bei Funino gibt es kein Tor-Feld, alle Kinder sind Feldspieler.','Bei großen Formationen werden die Karten automatisch schmaler, damit fünf Kinder nebeneinander passen.','Aufstellung: Die Bank steht jetzt kompakt in drei Spalten direkt am Spielfeld, der Hinweis „passt nicht zur Position“ erscheint gleich darunter. Die Aufstellung rechnet auch bei 10 + 1 in Sekundenbruchteilen.']},
  {v:76,items:['Aufstellung aufgeräumt: Spielform, Formation und Stärkste/Ausgewogen stehen in einer Zeile, „Dabei“ ist eingeklappt, das Spielfeld steht fast ganz oben und die Bank direkt darunter am Spielfeld. Danach Spielzeit-Einteilung und „Live mit dieser Aufstellung“, ganz unten Torwart-Info, „Warum hier?“ und „So rechnet die App“.','Aufstellung und Wechselvorschläge rechnen jetzt immer mit Mix-Werten (Trainer + App, Potenzial + Form) – genau wie die Gesamtstärke im Kader. Die Auswahl „Werte aus“ und „Zeitraum“ gibt es weiter in den Ranglisten.']},
