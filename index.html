@@ -321,7 +321,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='79';
+const APP_VERSION='80';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -818,7 +818,7 @@ function srcVal0(cat,pid,ss,per){const md=srcMode();
     let lv=trainerVal(cat,pid,ss,per);
     if(!srcApplies(cat)){let tv=periodVal(cat,pid,ss,per);if(!isNum(lv)&&!isNum(tv))return null;if(!isNum(tv))tv=teamMean('tv|'+cat+'|'+per,q=>periodVal(cat,q,sw,per));if(!isNum(lv))lv=tmL();return mix2(lv,tv);}
     let ap=appCat(cat,pid,per),w=isNum(ap)?appW(cat,pid,per):null;if(!isNum(lv)&&!isNum(ap))return null;
-    if(!isNum(ap)){ap=teamMean('ap|'+cat+'|'+per,q=>appCat(cat,q,per));w=teamMean('aw|'+cat+'|'+per,q=>isNum(appCat(cat,q,per))?appW(cat,q,per):null);}
+    if(!isNum(ap))return isNum(lv)?lv:tmL(); // keine Live-Aktionen/Tests: dein Wert zählt allein, kein Mannschaftsschnitt
     if(!isNum(lv))lv=tmL();if(!isNum(ap)||!isNum(w))return lv;if(!isNum(lv))return ap;return (lv+w*ap)/(1+w);}
   const tr=cat.startsWith('x:')?null:shrinkPV(cat,pid,ss,per);if(!srcApplies(cat))return tr;const ap=appCat(cat,pid,per);return isNum(ap)?ap:tr;}
 function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?'Potenzial: alle Werte der Saison (bei Tests der Bestwert).':pm==='form'?`Form: nur die letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test, auch wenn er älter ist.`:`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div><div class="sub" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;margin-top:4px">Form-Zeitraum: ${[4,6,8].map(w=>`<button class="chip ${formWeeks()===w?'on':''}" style="padding:2px 8px" onclick="A.cfgSet('formWeeks',${w})">${w} Wo.</button>`).join('')}</div>`;}
@@ -954,7 +954,9 @@ function appVals(pid,since){
   const out={};
   // Aktionen wie Zusatzbewertungen: Plus = 5, Minus = 1, Start bei 3 mit Puffer APP_BUF (2 = doppelt so stark wie früher 4: 2 Aktionen wirken wie früher 4).
   // w = Gewicht im Mix: 2 Aktionen = halbes, 6 Aktionen = 75 % Gewicht.
-  for(const[k,g]of Object.entries(agg))out[k]={v:(5*g.p+g.m+3*APP_BUF)/(g.p+g.m+APP_BUF),n:g.n,w:g.n/(g.n+APP_BUF),src:'Spiele'};
+  // Startwert = dein unter Potenzial eingetragener Wert des Kindes (ganze Saison); nur ohne Eintrag 3. Live-Aktionen bestätigen ihn, schieben ihn hoch oder korrigieren ihn nach unten.
+  const anchor=k=>{const c=(RATINGS.some(r=>r.k===k)||GK_RATINGS.some(r=>r.k===k)||ATH_RATINGS.some(r=>r.k===k)?'r:':'a:')+k;const v=periodVal(c,pid,sessionsWith(c),'pot');return isNum(v)?v:3;};
+  for(const[k,g]of Object.entries(agg)){const b=anchor(k);out[k]={v:(5*g.p+g.m+b*APP_BUF)/(g.p+g.m+APP_BUF),n:g.n,w:g.n/(g.n+APP_BUF),src:'Spiele',base:b};}
   const tests=s=>s.type!=='game';
   ['tempo','gewandt','kraft','ausdauer','technik'].forEach(ak=>{
     const t=testPick('a:'+ak,pid,since);if(!isNum(t))return;
@@ -993,7 +995,7 @@ function cmpCard(pid){
   if(only.length)h+=`<div class="lbl2">Nur App</div>`+only.map(([k,n])=>row(n,null,AV[k].v,AV[k])).join('');
   const gkT=GK_RATINGS.map(r=>T(r.k));
   if(gkT.some(isNum)||AV._tw){const gt=gkT.filter(isNum);h+=`<div class="lbl2">Torwart</div>`+row('Torwart gesamt',gt.length?avg(gt):null,AV._tw?AV._tw.v:null,null,true)+GK_RATINGS.map((r,i)=>row(r.n,gkT[i],AV[r.k]?.v,AV[r.k]||{n:0,src:''})).join('');}
-  h+=`<details style="margin-top:8px"><summary class="sub">So rechnet die App</summary><div class="wt">Jede kategorisierte Plus-/Minus-Aktion aus Live-Spielen (im gewählten Zeitraum) zählt für die passenden Bereiche (z. B. Toller Pass → Übersicht und Technik). Wert = 3 + 2 × (Plus − Minus) / (Plus + Minus + 4): Mit wenigen Aktionen bleibt er nahe 3, erst mit mehr Aktionen bewegt er sich Richtung 1 oder 5. Technik kommt zusätzlich aus den Testtagen; die Athletik (Schnelligkeit = Sprints, Dynamik = Slalom + Sprung, Ausdauer = Pendellauf) nur aus den Testtagen (3 = Teamschnitt). ⚠ = Trainer und App liegen mindestens 1 Punkt auseinander (ab 5 Aktionen). „Gesamt“ der App enthält auch die Athletik, deins nur deine Einschätzung.</div></details></div>`;
+  h+=`<details style="margin-top:8px"><summary class="sub">So rechnet die App</summary><div class="wt">Jede kategorisierte Plus-/Minus-Aktion aus Live-Spielen (im gewählten Zeitraum) zählt für die passenden Bereiche (z. B. Toller Pass → Übersicht und Technik). Start ist dein unter Potenzial eingetragener Wert des Kindes (nur ohne Eintrag 3). Jedes Plus zählt wie eine 5, jedes Minus wie eine 1, dazu dein Wert doppelt: Live-Aktionen bestätigen ihn, schieben ihn hoch oder korrigieren ihn nach unten – mit wenigen Aktionen nur leicht. Technik kommt zusätzlich aus den Testtagen; die Athletik (Schnelligkeit = Sprints, Dynamik = Slalom + Sprung, Ausdauer = Pendellauf) nur aus den Testtagen (3 = Teamschnitt). ⚠ = Trainer und App liegen mindestens 1 Punkt auseinander (ab 5 Aktionen). „Gesamt“ der App enthält auch die Athletik, deins nur deine Einschätzung.</div></details></div>`;
   return h;
 }
 function openActs(s){const lv=s&&s.live;if(!lv)return 0;return (lv.actions||[]).filter(a=>!a.c).length+(lv.goals||[]).filter(g=>g.t==='goal'&&!g.p&&!g.og).length;}
@@ -1100,6 +1102,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:80,items:['Live-Aktionen orientieren sich jetzt an deinem eingetragenen Potenzial-Wert des Kindes statt am Mittelwert 3: Plus-Aktionen schieben ihn hoch, Minus-Aktionen korrigieren ihn nach unten, ohne Aktionen bleibt er wie eingetragen.','Hat ein Kind in einem Bereich keine Live-Aktionen, zählt im Mix nur dein Wert – es wird kein Mannschaftsschnitt mehr hineingerechnet.']},
  {v:79,items:['Profil: Die Torwart-Karte zeigt jetzt denselben Torwart-Wert wie Kader und Aufstellung (Mix aus Trainer + App, Potenzial + Form). Weicht der Schnitt deiner letzten Torwart-Einschätzungen davon ab, steht er darunter mit Erklärung.']},
  {v:78,items:['Lange Namen werden auf den Spielfeld-Karten und auf der Bank wieder mit „…“ gekürzt statt umgebrochen – das Spielfeld bleibt ruhiger.']},
  {v:77,items:['Neue Spielformen: Funino (ohne Torwart) mit Auswahl 2 gegen 2, 3 gegen 3 oder 4 gegen 4 sowie 7 + 1 bis 10 + 1. Erst die Spielform wählen, dann erscheinen die passenden Formationen (z. B. 4-4-2, 4-3-3, 3-5-2). Bei Funino gibt es kein Tor-Feld, alle Kinder sind Feldspieler.','Bei großen Formationen werden die Karten automatisch schmaler, damit fünf Kinder nebeneinander passen.','Aufstellung: Die Bank steht jetzt kompakt in drei Spalten direkt am Spielfeld, der Hinweis „passt nicht zur Position“ erscheint gleich darunter. Die Aufstellung rechnet auch bei 10 + 1 in Sekundenbruchteilen.']},

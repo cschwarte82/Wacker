@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 79, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 80, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -97,3 +97,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V77:** Bank in der Aufstellung als 3-Spalten-Raster (`.lubench .bench` grid), posBan-Hinweis unter Bank/Spielfeld mit vollem Namen. Spielformen Funino 2/3/4 gegen 2/3/4 (Spielform-Auswahl „Funino“ + Knopfleiste 2/3/4 gegen, `modeSel`/`funSeg`, `A.luN`; Schlüssel 'f2'..'f4', kein 'TW' in pos) und 7+1 bis 10+1 mit Formationen; neue Seiten LZ/RZ (halblinks/halbrechts, `SIDE_ORD`, `bySide`, Fuß-Bonus nur L/R). `bestLineup` jetzt ungarische Methode (`hungarian`), „Ausgewogen“ per Schwellen-Binärsuche; identisch zum alten Brute-Force in 720 Testfällen, 10+1 in <10 ms. Reihen mit ≥4 Kindern bekommen `.prowl.w4` (kompakte Karten). Spielform/Formation in Live-Optionen als Selects.
 - **V78:** Namen auf Spielfeld-Karten (`.slot b`, auch `.w4`) und Bank wieder einzeilig mit Ellipse (Christian: Umbrüche sehen nicht gut aus).
 - **V79:** Profil-Torwartkarte zeigt den Mix-Wert aus `overallAll` (wie Kader/Aufstellung) statt `latestVal` (nur letzte Trainer-Einschätzungen); Abweichung wird erklärt.
+- **V80:** App-Wert aus Live-Aktionen startet beim eigenen Potenzial-Wert des Kindes (`appVals` anchor: periodVal 'pot' von r:/a:-Kategorie, sonst 3) statt bei 3: (5P+M+Basis·2)/(P+M+2). Mix ohne App-Wert = Trainerwert allein (kein Team-Schnitt-App-Wert mehr).
