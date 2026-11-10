@@ -9,34 +9,37 @@
 .page{background:#0b130e;color:#fff}
 .bg{position:absolute;inset:0}
 .bc{font-family:'Barlow Condensed',sans-serif;font-style:italic;text-transform:uppercase}
-.brand{position:absolute;left:12mm;top:12mm;display:flex;align-items:center;gap:3mm}
-.brand img{width:10mm;height:10mm;border-radius:2.4mm}
-.brand b{font:800 14pt 'Inter Display';letter-spacing:-.2px}
-h1{position:absolute;left:11mm;top:27mm;width:110mm;font-weight:900;font-size:50pt;line-height:.9;letter-spacing:.2px}
+.brand{position:absolute;left:11mm;top:10mm;display:flex;align-items:center;gap:3mm}
+.brand img{width:12mm;height:12mm;border-radius:2.8mm}
+.brand b{font:800 17pt 'Inter Display';letter-spacing:-.3px}
+h1{position:absolute;left:11mm;top:25mm;width:112mm;font-weight:900;font-size:55pt;line-height:.89;letter-spacing:.2px}
 h1 em{font-style:italic;color:var(--lime)}
-.lead{position:absolute;left:12mm;top:97mm;width:106mm;font:500 10.6pt/1.45 Inter;color:#c4d6c9}
+.brush{position:absolute;left:28mm;top:91mm;width:70mm;height:5mm}
+.lead{position:absolute;left:11mm;top:99mm;width:110mm;font:500 11.6pt/1.42 Inter;color:#fff}
 .lead span{white-space:nowrap}
-.list{position:absolute;left:12mm;top:116mm;width:109mm}
-.it{display:flex;gap:3.5mm;align-items:baseline;padding:3.6mm 0;border-top:.3mm solid #23382a}
-.it:last-child{border-bottom:.3mm solid #23382a}
-.it .n{flex:none;width:9mm;font-weight:900;font-size:19pt;line-height:1;color:#2f5a3d}
-.it b{display:block;font-weight:800;font-size:15.5pt;line-height:1;color:var(--lime);letter-spacing:.3px}
-.kw{display:block;margin-top:1.4mm;font:500 9.4pt/1.5 Inter;color:#e3ece5;text-transform:none;font-style:normal}
+.list{position:absolute;left:11mm;top:117mm;width:110mm}
+.it{display:flex;gap:4mm;align-items:center;padding:2.7mm 0;border-top:.35mm solid #2a4232}
+.it:last-child{border-bottom:.35mm solid #2a4232}
+.it .n{flex:none;width:14mm;height:10mm;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:21pt;line-height:1;color:var(--lime);background:#173a24;clip-path:polygon(18% 0,100% 0,82% 100%,0 100%)}
+.it b{display:block;font-weight:800;font-size:18pt;line-height:1;color:var(--lime);letter-spacing:.3px}
+.kw{display:block;margin-top:1mm;font:500 12pt/1.3 'Barlow Condensed';color:#fff;text-transform:none;font-style:normal}
 .kw s{text-decoration:none;white-space:nowrap;display:inline-block}
-.kw s+s:before{content:"·";margin:0 1.6mm;color:var(--lime)}
-.ph{position:absolute;right:13mm;top:15mm;width:72mm;border:1.6mm solid #000;border-radius:8mm;overflow:hidden;background:#000}
+.kw s+s:before{content:"·";margin:0 1.8mm;color:#fff}
+.ph{position:absolute;right:11mm;top:14mm;width:74mm;border:1.4mm solid #3a3f3c;border-radius:9mm;overflow:hidden;background:#000}
+.ph .in{border:1.3mm solid #000;border-radius:7.6mm;overflow:hidden}
 .ph img,.radar img{display:block;width:100%}
-.radar{position:absolute;right:13mm;top:181mm;width:72mm;border-radius:4mm;overflow:hidden;border:.5mm solid var(--lime)}
-.bot{position:absolute;left:0;right:0;bottom:0;height:42mm;display:flex;align-items:center;gap:8mm;padding:0 12mm;color:#0b130e}
+.radar{position:absolute;right:11mm;top:176mm;width:74mm;height:56mm;border-radius:5mm;overflow:hidden;border:.8mm solid var(--lime);background:#121a15}
+.radar img{height:100%;object-fit:contain}
+.bot{position:absolute;left:0;right:0;bottom:0;height:52mm;display:flex;align-items:flex-end;gap:8mm;padding:0 11mm 8mm;color:#0b130e}
 .bot .s{flex:1}
-.bot h3{font-weight:900;font-size:24pt;line-height:1}
-.steps{display:flex;gap:2.4mm;margin-top:2.6mm}
-.steps div{background:#0b130e;color:#fff;border-radius:2.5mm;padding:1.8mm 3mm;font:600 8.8pt/1.2 Inter;white-space:nowrap}
-.steps i{font:900 italic 12pt 'Barlow Condensed';color:var(--lime);margin-right:1.4mm}
-.chk{margin-top:2.4mm;font:700 8.6pt Inter}
-.qr{flex:none;background:#fff;border-radius:3.5mm;padding:2.4mm;text-align:center;border:.6mm solid #0b130e}
-.qr img{width:25mm;height:25mm;display:block}
-.qr div{font:700 7pt Inter;color:#0f3d22;margin-top:1mm}
+.bot h3{font-weight:900;font-size:31pt;line-height:1}
+.steps{display:flex;gap:3mm;margin-top:3mm}
+.steps div{background:#0b130e;color:#fff;border-radius:2.5mm;padding:1.8mm 3.2mm;font:600 13pt/1.1 'Barlow Condensed';white-space:nowrap}
+.steps i{font:900 italic 18pt 'Barlow Condensed';color:var(--lime);margin-right:1.6mm;vertical-align:-.6mm}
+.chk{margin-top:3mm;font:600 10.6pt Inter}
+.qr{flex:none;background:#fff;border-radius:4.5mm;padding:3mm;text-align:center;border:.7mm solid #0b130e}
+.qr img{width:31mm;height:31mm;display:block}
+.qr div{font:700 8pt Inter;color:#0b130e;margin-top:1.2mm}
 </style></head>
 <body>
 <section class="page">
@@ -45,12 +48,13 @@ h1 em{font-style:italic;color:var(--lime)}
     <polygon points="118,297 210,120 210,175 146,297" fill="#102419"/>
     <polygon points="150,297 210,182 210,206 163,297" fill="#14301f"/>
     <polygon points="150,0 178,0 120,112 92,112" fill="#0f1f15"/>
-    <polygon points="207,48 210,48 210,52 115,236 111,236" fill="#d7f25a"/>
-    <polygon points="0,262 210,246 210,297 0,297" fill="#d7f25a"/>
+    <polygon points="204,52 210,52 210,60 113,232 106,232" fill="#d7f25a"/>
+    <polygon points="0,250 210,235 210,297 0,297" fill="#d7f25a"/>
   </svg>
 
   <div class="brand"><img src="../icon-512.png" alt=""><b>TrainerRadar</b></div>
   <h1 class="bc">Weniger<br>Bauchgefühl.<br><em>Mehr<br>Überblick.</em></h1>
+  <svg class="brush" viewBox="0 0 100 7" preserveAspectRatio="none"><path d="M0 5.6 C25 3.2 60 1.4 100 0.6 L96 2.4 C62 3.4 30 5 4 7 Z" fill="#d7f25a"/></svg>
   <div class="lead">Die kostenlose Trainer-App für jede Mannschaft –<br><span>von der Jugend bis zu den Senioren.</span></div>
 
   <div class="list bc">
@@ -62,7 +66,7 @@ h1 em{font-style:italic;color:var(--lime)}
     <div class="it"><span class="n">06</span><div><b>Fürs ganze Trainerteam</b><span class="kw"><s>Mehrere Mannschaften</s><s>Co-Trainer</s><s>Offline</s></span></div></div>
   </div>
 
-  <div class="ph"><img src="p_live_d.png" alt=""></div>
+  <div class="ph"><div class="in"><img src="p_live_d.png" alt=""></div></div>
   <div class="radar"><img src="z_radar_d.png" alt=""></div>
 
   <div class="bot">
