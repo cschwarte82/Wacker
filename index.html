@@ -243,7 +243,7 @@ h2{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 
 .mhead{font:700 13px var(--ft);color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:16px 2px 2px}
 .seg.sf button{padding-left:2px;padding-right:2px;font-size:13px}.seg.sf small{font-weight:500;opacity:.7}
-.kst{display:flex;align-items:center;gap:5px;font:700 22px var(--fc);white-space:nowrap}.kst span{font-size:13px}.kst .kl{font:600 12px var(--ft);color:var(--mut)}.kstw{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none}.ktw{font-size:12px;color:var(--mut);white-space:nowrap}
+.kst{display:flex;align-items:center;gap:5px;font:700 22px var(--fc);white-space:nowrap}.kst span{font-size:13px}.tourline{background:var(--card);border:1px solid #e1e6dc;border-radius:10px;padding:6px 10px;font-size:13px;margin:6px 0}.ptrow{padding:7px 0;border-top:1px solid #f0f2ee}.ptrow:first-child{border-top:0}.ptbar{position:relative;height:8px;background:#e8ece4;border-radius:5px;margin:5px 0 3px}.ptbar i{position:absolute;left:0;top:0;bottom:0;background:var(--g);border-radius:5px}.ptbar i.low{background:#c0533a}.ptbar s{position:absolute;top:-3px;bottom:-3px;width:2px;background:#16241b}.kst .kl{font:600 12px var(--ft);color:var(--mut)}.kstw{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none}.ktw{font-size:12px;color:var(--mut);white-space:nowrap}
 .ov1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ov .ovp{white-space:nowrap;flex:none}.ov.ovw{flex-direction:column;align-items:flex-start;gap:3px}.ov.ovw .ovn{width:auto}.ov.ovw .ovp{white-space:normal;text-align:left;display:flex;flex-wrap:wrap;gap:2px 14px}.ov.ovw .ovp span{white-space:nowrap}
 .setd>summary{font-size:15px}
 .pill.openp{background:#fbe4dc;color:#b4442c}
@@ -258,7 +258,7 @@ h2{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 .pill,.rn,.bench span,.sbarw,.cb,.gst button.on.offen{background:#243029;border-color:#33433a}
 .seg{background:#0a100c}
 .num.bad{background:#3a1f19}
-.rrow,.trow,.note,.rk,.ov,.crow,.goal,.focus,.gd,.tl,.archrow,.pfrow{border-top-color:#243029}
+.rrow,.trow,.note,.rk,.ov,.crow,.goal,.focus,.gd,.tl,.archrow,.pfrow,.ptrow{border-top-color:#243029}.tourline{border-color:#2c3a31}.ptbar{background:#26332b}.ptbar s{background:#e8efe9}
 .moods button,.ex{background:#1f2a23}.moods button.on{background:#1d3a26}
 .radar .grid{stroke:#2b3830}.radar .grid.mid{stroke:#4a5b50}.radar .rl.na{fill:#66746b}.radar .pc{fill:rgba(87,199,133,.22);stroke:#57c785}
 .legend i.lp,.radar .pp{border-color:#9aa99f;stroke:#9aa99f}
@@ -317,7 +317,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='65';
+const APP_VERSION='66';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -387,7 +387,7 @@ function mergeGameRec(base,other){const n=JSON.parse(JSON.stringify(base)),L=n.l
   // Tore: eigene Torliste bleibt; offene Torschützen aus der anderen Erfassung (gleiches Tor = Spielzeit ±3 Min.) übernehmen
   const og=(O.goals||[]).filter(g=>g.t==='goal'),used=new Set();
   (L.goals||[]).forEach(g=>{if(g.t!=='goal')return;g.id=g.id||uid('g');let bi=-1,bd=1e9;og.forEach((o,i)=>{if(used.has(i))return;const d=Math.abs((o.sec||0)-(g.sec||0));if(d<bd){bd=d;bi=i;}});
-    if(bi>=0&&bd<=180){used.add(bi);const o=og[bi];if(!g.p&&!g.og&&(o.p||o.og)){g.p=o.p||null;g.og=!!o.og;k++;}}});
+    if(bi>=0&&bd<=180){used.add(bi);const o=og[bi];if(!g.p&&!g.og&&(o.p||o.og)){g.p=o.p||null;g.og=!!o.og;k++;}if(!g.a&&o.a&&o.a!==g.p){g.a=o.a;k++;}}});
   // Tor-Plus immer passend zur Torliste: alte Tor-Aktionen raus, je Torschütze genau ein Plus
   if(goalPlusOn()){L.actions=L.actions.filter(a=>{if(!a.goal)return true;L.plus[a.p]=Math.max(0,(L.plus[a.p]||0)-1);return false;});
     (L.goals||[]).forEach(g=>{if(g.t==='goal'&&g.p){L.plus[g.p]=(L.plus[g.p]||0)+1;L.actions.push({t:'+',p:g.p,c:'schuss',at:isNum(g.at)?g.at:null,ml:g.ml,sec:g.sec,gk:false,goal:g.id});}});}
@@ -534,6 +534,7 @@ function vSession(){
   const game=s.type==='game',ev=s.type==='eval'; if((game||ev)&&S.sessTab==='tests')S.sessTab='kids';
   const oldEval=Object.keys(s.ratings||{}).length||Object.keys(s.mood||{}).length||Object.keys(s.notes||{}).length;if(!game&&!ev&&S.sessTab==='kids'&&!oldEval)S.sessTab='tests';
   let h=`<button class="back" onclick="A.go('sessions')">‹ Bewertung</button><div class="row between"><div><h2>${game?'⚽ ':ev?'📝 ':'⏱ '}${esc(s.title)}</h2><div class="sub">${fdate(s.date)}${game?' · Spiel'+(s.result?' · '+esc(s.result):''):ev?' · Trainereinschätzung':' · Testtag'}</div></div><button class="btn" onclick="A.editSession()">Bearbeiten</button></div>`;
+  if(game&&s.live&&s.live.tour)h+=tourCard(s);
   h+=`<div class="seg">${(ev?[['kids','Einschätzung'],['export','Export']]:game?[['kids','Bewertung'],...(s.live&&((s.live.goals||[]).length||(s.live.cards||[]).length||(s.live.subs||[]).length||Object.keys(s.live.periods||{}).length)?[['tl','Verlauf']]:[]),...(s.live&&((s.live.actions||[]).length||(s.live.goals||[]).some(g=>g.t==='goal'))?[['acts','Aktionen'+(((s.live.actions||[]).some(a=>!a.c)||(s.live.goals||[]).some(g=>g.t==='goal'&&!g.p&&!g.og))?' •':'')]]:[]),['export','Export']]:[['tests','Messungen'],...((Object.keys(s.ratings||{}).length||Object.keys(s.mood||{}).length||Object.keys(s.notes||{}).length)?[['kids','Alte Einschätzung']]:[]),['export','Export']]).map(([k,n])=>`<button class="${S.sessTab===k?'on':''}" onclick="A.sessTab('${k}')">${n}</button>`).join('')}</div>`;
   if(S.sessTab==='tests')h+=vTests(s); else if(S.sessTab==='kids')h+=vKids(s); else if(S.sessTab==='acts'&&s.live)h+=vActs(s); else if(S.sessTab==='tl'&&s.live)h+=`<div class="card">${tlHtml(s.live.goals,s.live.cards,s.live.subs)}</div>`+(s.live.periods&&Object.keys(s.live.periods).length?`<div class="card"><div class="lbl">Spielzeiten</div>${plist(true).filter(p=>s.live.periods[p.id]).sort((a,b)=>((s.live.mins||{})[b.id]||0)-((s.live.mins||{})[a.id]||0)).map(p=>`<div class="tl"><span class="tlm">${(s.live.mins||{})[p.id]||0}'</span><span><b>${esc(short(p.id))}</b> <span class="sub">${fmtP(s.live.periods[p.id],s.live.fmt,s.live.partStarts)}</span></span></div>`).join('')}</div>`:''); else h+=vExport(s);
   return h;
@@ -578,10 +579,20 @@ function csv(s){
   return rows.map(r=>r.map(c=>{c=String(c);return /[;"\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(';')).join('\n');
 }
 // Spielbericht für die Elterngruppe: Ergebnis, Torschützen, wer dabei war. Bewusst ohne Plus/Minus und Bewertungen.
+// Turnier-Übersicht: Spielzeit je Kind über alle Spiele des Turniers
+function tourCard(s){const gs=slist().filter(x=>x.live&&x.live.tour===s.live.tour).reverse();const dur=gs.reduce((a,x)=>a+(x.live.duration||0),0);const t=((S.cfg&&S.cfg.minShare)||50);
+  const rows=plist(true).map(p=>{let m=0,d=0,n=0;gs.forEach(x=>{const mi=(x.live.mins||{})[p.id]||0;const inSq=x.live.squad?x.live.squad.includes(p.id):mi>0;if(!inSq)return;n++;m+=mi;d+=x.live.duration||0;});return{p,m,d,n};}).filter(r=>r.n).sort((a,b)=>b.m-a.m);
+  const sc=gs.map(x=>{const c=score(x.live);return x.result||((x.live.goals||[]).length?c.gf+':'+c.ga:'');});
+  return `<details class="card"><summary><b>🏆 ${esc(s.live.tourName||'Turnier')}</b> <small class="sub">${gs.length} Spiel${gs.length===1?'':'e'} · ${dur} Min.${sc.some(Boolean)?' · '+sc.filter(Boolean).join(', '):''}</small></summary><div class="sub" style="margin:6px 0">Spielzeit über das ganze Turnier (Ziel ${t} %):</div>${rows.map(r=>{const sh=r.d?Math.min(100,Math.round(r.m/r.d*100)):0;return `<div class="tl"><span class="tlm">${r.m}'</span><span><b>${esc(short(r.p.id))}</b> <span class="${sh<t?'neg':'sub'}">${sh} %${sh<t?' ⚠':''}</span> <span class="sub">· ${r.n} von ${gs.length} Spielen</span></span></div>`;}).join('')}</details>`;}
+// Spielzeit der Saison: Minuten und Anteil je Kind über alle Live-Spiele (nur Spiele, bei denen das Kind dabei war)
+function playtimeCard(){const gs=slist().filter(s=>s.type==='game'&&s.live&&(s.live.duration||0)>0);if(!gs.length)return'';const t=((S.cfg&&S.cfg.minShare)||50);
+  const rows=plist().map(p=>{let m=0,d=0,n=0;gs.forEach(s=>{const mi=(s.live.mins||{})[p.id]||0;const inSq=s.live.squad?s.live.squad.includes(p.id):mi>0;if(!inSq)return;n++;m+=mi;d+=s.live.duration||0;});return{p,m,d,n,sh:d?Math.min(100,Math.round(m/d*100)):0};}).filter(r=>r.n).sort((a,b)=>b.sh-a.sh||b.m-a.m);
+  if(!rows.length)return'';const low=rows.filter(r=>r.sh<t).length;
+  return `<details class="card" ${S.ptOpen?'open':''} ontoggle="S.ptOpen=this.open"><summary><b>⏱ Spielzeit der Saison</b> <small class="sub">${gs.length} Live-Spiel${gs.length===1?'':'e'} · Ziel ${t} %${low?` · <span class="neg">${low} darunter</span>`:''}</small></summary><div style="margin-top:8px">${rows.map(r=>`<div class="ptrow"><div class="row between"><b>${esc(r.p.name)}</b><span class="${r.sh<t?'neg':''}"><b>${r.sh} %</b>${r.sh<t?' ⚠':''}</span></div><div class="ptbar"><i style="width:${r.sh}%" class="${r.sh<t?'low':''}"></i><s style="left:${t}%"></s></div><div class="sub">${r.n} Spiel${r.n===1?'':'e'} · ${r.m} Min. · Ø ${Math.round(r.m/r.n)} Min. pro Spiel</div></div>`).join('')}</div><div class="sub" style="margin-top:6px">Anteil = gespielte Minuten ÷ Spielzeit der Spiele, bei denen das Kind dabei war. Der Strich markiert das Spielzeit-Ziel aus den Live-Optionen.</div></details>`;}
 function gameReport(s){const lv=s.live||{},t=TEAMS[CUR]||{};const gs=(lv.goals||[]).filter(g=>g.t==='goal');const sc=score(lv);const res=s.result||((lv.goals||[]).length?`${sc.gf}:${sc.ga}`:'');
-  const by={};gs.forEach(g=>{const n=g.p?short(g.p):g.og?'Eigentor Gegner':null;if(n)by[n]=(by[n]||0)+1;});const tor=Object.entries(by).map(([n,c])=>c>1?`${n} (${c})`:n);
+  const by={};gs.forEach(g=>{const n=g.p?short(g.p):g.og?'Eigentor Gegner':null;if(n)by[n]=(by[n]||0)+1;});const tor=Object.entries(by).map(([n,c])=>c>1?`${n} (${c})`:n);const ab={};gs.forEach(g=>{if(g.a&&g.p){const n=short(g.a);ab[n]=(ab[n]||0)+1;}});const vor=Object.entries(ab).map(([n,c])=>c>1?`${n} (${c})`:n);
   const pl=Object.keys(lv.mins||{}).filter(p=>S.players[p]).map(short).sort((a,b)=>a.localeCompare(b,'de'));
-  return [`⚽ ${t.name||'Unser Team'}: ${s.title||'Spiel'}${s.date?' am '+fdate(s.date):''}`,res?`Ergebnis: ${res}`:'',tor.length?`Tore: ${tor.join(', ')}`:'',pl.length?`Dabei waren: ${pl.join(', ')}`:'','Danke an alle fürs Mitfiebern! 👏'].filter(Boolean).join('\n');}
+  return [`⚽ ${t.name||'Unser Team'}: ${s.title||'Spiel'}${s.date?' am '+fdate(s.date):''}`,res?`Ergebnis: ${res}`:'',tor.length?`Tore: ${tor.join(', ')}`:'',vor.length?`Vorlagen: ${vor.join(', ')}`:'',pl.length?`Dabei waren: ${pl.join(', ')}`:'','Danke an alle fürs Mitfiebern! 👏'].filter(Boolean).join('\n');}
 function vExport(s){
   if(s.type==='game')return `<div class="card"><div class="lbl">📣 Spielbericht für die Elterngruppe</div><div class="sub" style="margin-bottom:6px">Ergebnis, Torschützen und wer dabei war – ohne Bewertungen. Du kannst den Text vor dem Teilen noch ändern.</div><textarea id="rep" rows="8">${esc(gameReport(s))}</textarea><div class="row gap" style="margin-top:8px"><button class="btn pri" style="flex:1" onclick="A.shareText('#rep')">📤 Teilen</button><button class="btn" style="flex:1" onclick="A.copy('#rep')">Kopieren</button></div></div><div class="card"><div class="lbl">Tabelle für Excel / Numbers <small>(Trennzeichen ;)</small></div><textarea id="csv" rows="8" readonly>${esc(csv(s))}</textarea><button class="btn pri" onclick="A.copy('#csv')">Kopieren</button></div>`;
   return `<div class="card"><div class="lbl">Tabelle für Excel / Numbers <small>(Trennzeichen ;)</small></div><textarea id="csv" rows="8" readonly>${esc(csv(s))}</textarea><button class="btn pri" onclick="A.copy('#csv')">Kopieren</button></div>`;
@@ -630,17 +641,17 @@ function vPlayer(){
     if(rows)h+=`<div class="card"><div class="lbl">Potenzial &amp; Form <small>Form = letzte ${formWeeks()} Wochen</small></div><div class="pfrow pfh"><span></span><b>Potenzial</b><b>Form</b></div>${rows}<div class="sub" style="margin-top:6px">▲ / ▼ = gerade deutlich über bzw. unter dem Saisonniveau. Werte aus: ${srcMode()==='trainer'?'Trainer':srcMode()==='app'?'App':'Mix'}.</div></div>`;}
   h+=cmpCard(pid);
   const lg=ss.filter(s=>s.live&&((s.live.plus||{})[pid]||(s.live.minus||{})[pid]||(s.live.mins||{})[pid]||(s.live.goals||[]).some(g=>(g.on||[]).includes(pid))));
-  if(lg.length){const tot=lg.reduce((a,s)=>{const b=gameBal(s.live,pid);a.t+=b.tore;a.f+=b.gf;a.a+=b.ga;a.m+=(s.live.mins||{})[pid]||0;return a;},{t:0,f:0,a:0,m:0});
-    h+=`<div class="card"><div class="lbl">Live-Bilanz <small>${lg.length} Spiel${lg.length===1?'':'e'} · ${tot.m} Min. · ⚽ ${tot.t} · Tore auf dem Feld ${tot.f}:${tot.a}</small></div>${lg.slice().reverse().slice(0,S.bilAll?999:5).map(s=>{const b=gameBal(s.live,pid);return `<div class="trow"><div><div class="t2">${esc(s.title)}${s.result?' · '+esc(s.result):''}</div><div class="sub">${fdate(s.date)} · ${(s.live.mins||{})[pid]||0} Min.${s.live.goals?` · ⚽ ${b.tore} · auf dem Feld ${b.gf}:${b.ga}`:''}${(s.live.cards||[]).filter(c=>c.p===pid).map(c=>` <span class="${c.c==='y'?'yc':c.c==='yr'?'yrc':'rc'}"></span>`).join('')}</div></div><div class="val"><span class="pos">+${(s.live.plus||{})[pid]||0}</span> <span class="neg">−${(s.live.minus||{})[pid]||0}</span></div></div>`;}).join('')}${lg.length>5?`<button class="btn sm2" style="width:100%;margin-top:8px" onclick="A.bilAll()">${S.bilAll?'Nur die letzten 5 zeigen':`Alle ${lg.length} Spiele anzeigen`}</button>`:''}</div>`;}
+  if(lg.length){const tot=lg.reduce((a,s)=>{const b=gameBal(s.live,pid);a.t+=b.tore;a.v+=b.vorl;a.f+=b.gf;a.a+=b.ga;a.m+=(s.live.mins||{})[pid]||0;return a;},{t:0,v:0,f:0,a:0,m:0});
+    h+=`<div class="card"><div class="lbl">Live-Bilanz <small>${lg.length} Spiel${lg.length===1?'':'e'} · ${tot.m} Min. · ⚽ ${tot.t}${tot.v?` · 🅰 ${tot.v}`:''} · Tore auf dem Feld ${tot.f}:${tot.a}</small></div>${lg.slice().reverse().slice(0,S.bilAll?999:5).map(s=>{const b=gameBal(s.live,pid);return `<div class="trow"><div><div class="t2">${esc(s.title)}${s.result?' · '+esc(s.result):''}</div><div class="sub">${fdate(s.date)} · ${(s.live.mins||{})[pid]||0} Min.${s.live.goals?` · ⚽ ${b.tore} · auf dem Feld ${b.gf}:${b.ga}`:''}${(s.live.cards||[]).filter(c=>c.p===pid).map(c=>` <span class="${c.c==='y'?'yc':c.c==='yr'?'yrc':'rc'}"></span>`).join('')}</div></div><div class="val"><span class="pos">+${(s.live.plus||{})[pid]||0}</span> <span class="neg">−${(s.live.minus||{})[pid]||0}</span></div></div>`;}).join('')}${lg.length>5?`<button class="btn sm2" style="width:100%;margin-top:8px" onclick="A.bilAll()">${S.bilAll?'Nur die letzten 5 zeigen':`Alle ${lg.length} Spiele anzeigen`}</button>`:''}</div>`;}
   const notes=ss.filter(s=>s.notes?.[pid]).map(s=>`<div class="note"><small>${fdate(s.date)}</small>${esc(s.notes[pid])}</div>`).join('');
   if(notes)h+=`<div class="card"><div class="lbl">Notizen</div>${notes}</div>`;
   return h;
 }
 
 // ---------- Ranglisten ----------
-const CATS=[{g:'Tests',items:TESTS.map(t=>({id:'t:'+t.k,n:t.n}))},{g:'Bereiche (Stärkenprofil)',items:AREAS.map(a=>({id:'a:'+a.k,n:a.n}))},{g:'Trainer-Einschätzung',items:RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Spiele (Live)',items:[{id:'g:tore',n:'Tore'},{id:'g:bil',n:'Tor-Bilanz auf dem Feld'}]},{g:'Athletik (Trainer)',items:ATH_RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Torwart',items:[{id:'a:torwart',n:'Torwart gesamt'},...GK_RATINGS.map(r=>({id:'r:'+r.k,n:'TW: '+r.n}))]}];
-function catVal(s,cat,pid){const[t,k]=cat.split(':');if(t==='g'){const lv=s.live;if(!lv||!lv.goals)return null;const played=((lv.mins||{})[pid]||0)>0||lv.goals.some(g=>(g.on||[]).includes(pid));if(!played)return null;const b=gameBal(lv,pid);return k==='tore'?b.tore:b.gf-b.ga;}if(t==='t')return s.results?.[pid]?.[k];if(t==='a')return areaScore(s,pid,k);return s.ratings?.[pid]?.[k];}
-function catMeta(cat){const[t,k]=cat.split(':');if(t==='g')return{u:k==='tore'?'Tore':'',lower:false};if(t==='t')return{u:TEST[k].u,lower:!!TEST[k].lower};if(t==='a')return{u:'',lower:false};return{u:'/5',lower:false};}
+const CATS=[{g:'Tests',items:TESTS.map(t=>({id:'t:'+t.k,n:t.n}))},{g:'Bereiche (Stärkenprofil)',items:AREAS.map(a=>({id:'a:'+a.k,n:a.n}))},{g:'Trainer-Einschätzung',items:RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Spiele (Live)',items:[{id:'g:tore',n:'Tore'},{id:'g:vorl',n:'Vorlagen'},{id:'g:bil',n:'Tor-Bilanz auf dem Feld'}]},{g:'Athletik (Trainer)',items:ATH_RATINGS.map(r=>({id:'r:'+r.k,n:r.n}))},{g:'Torwart',items:[{id:'a:torwart',n:'Torwart gesamt'},...GK_RATINGS.map(r=>({id:'r:'+r.k,n:'TW: '+r.n}))]}];
+function catVal(s,cat,pid){const[t,k]=cat.split(':');if(t==='g'){const lv=s.live;if(!lv||!lv.goals)return null;const played=((lv.mins||{})[pid]||0)>0||lv.goals.some(g=>(g.on||[]).includes(pid));if(!played)return null;const b=gameBal(lv,pid);return k==='tore'?b.tore:k==='vorl'?b.vorl:b.gf-b.ga;}if(t==='t')return s.results?.[pid]?.[k];if(t==='a')return areaScore(s,pid,k);return s.ratings?.[pid]?.[k];}
+function catMeta(cat){const[t,k]=cat.split(':');if(t==='g')return{u:k==='tore'?'Tore':k==='vorl'?'Vorl.':'',lower:false};if(t==='t')return{u:TEST[k].u,lower:!!TEST[k].lower};if(t==='a')return{u:'',lower:false};return{u:'/5',lower:false};}
 // Rechen-Zwischenspeicher: gilt bis zur nächsten gespeicherten Änderung (DV zählt bei jedem saveLocal/loadTeam hoch)
 let DV=0,CC={k:null,sw:{},sv:{}};
 function calcCache(){const k=DV+'|'+CUR+'|'+(S.archView||'')+'|'+formWeeks()+'|'+srcMode()+'|'+Object.keys(S.sessions||{}).length+'|'+Object.keys(S.players||{}).length;if(CC.k!==k)CC={k,sw:{},sv:{}};return CC;}
@@ -672,7 +683,7 @@ function vRank(){
   if(!R.cat||!sessionsWith(R.cat).length){const f=CATS.flatMap(g=>g.items).find(i=>sessionsWith(i.id).length);R.cat=f?f.id:'t:'+TESTS[0].k;}
   const type=R.cat[0];if(type==='a'||type==='g')R.mode='best';const meta=catMeta(R.cat);
   let h=`<h2>Ranglisten</h2><div class="sub">Nur für dich als Trainer sichtbar. Tipp: Zum Zeigen eignet sich eher die Fortschritts-Rangliste.</div>`;
-  h+=formOverview()+topOverview();
+  h+=formOverview()+topOverview()+playtimeCard();
   h+=`<select class="sel" onchange="A.rk('cat',this.value)">${CATS.map(g=>`<optgroup label="${esc(g.g)}">${g.items.map(i=>`<option value="${i.id}" ${i.id===R.cat?'selected':''}>${esc(i.n)}</option>`).join('')}</optgroup>`).join('')}</select>`;
   if(type!=='a'&&type!=='g')h+=`<div class="seg">${[['best','Bestwerte'],['progress','Fortschritt']].map(([k,n])=>`<button class="${R.mode===k?'on':''}" onclick="A.rk('mode','${k}')">${n}</button>`).join('')}</div>`;
   const ps=plist(),ss=sessionsWith(R.cat);const useSrc=R.mode==='best'&&srcApplies(R.cat);
@@ -683,7 +694,7 @@ function vRank(){
     const s=ss.find(x=>x.id===R.sess);
     if(ss.length)h+=`<select class="sel" onchange="A.rk('sess',this.value)"><option value="cur" ${s?'':'selected'}>Aktuell</option>${ss.map(x=>`<option value="${x.id}" ${s&&x.id===s.id?'selected':''}>${fdate(x.date)} – ${x.type==='game'?'⚽ ':x.type==='eval'?'📝 ':''}${esc(x.title)}</option>`).join('')}</select>`;
     rows=ps.map(p=>({p,v:s?catVal(s,R.cat,p.id):(type==='g'?(()=>{let t=null;ss.forEach(x=>{const v=catVal(x,R.cat,p.id);if(isNum(v))t=(t||0)+v;});return t;})():srcVal(R.cat,p.id,ss))}));
-    if(!s&&type!=='g'){note='';}else if(!s)note=type==='g'?(R.cat==='g:tore'?'Summe aller Spiele mit Live-Erfassung.':'Tore minus Gegentore, während das Kind auf dem Feld stand – Summe aller Live-Spiele.'):(type==='t'?'Pro Kind zählt die jeweils letzte Messung – so fehlt niemand, der beim letzten Testtag krank war.':'Einschätzungen: Schnitt der letzten 3 Bewertungen je Kind (Testtage, Spiele und Einschätzungen).');
+    if(!s&&type!=='g'){note='';}else if(!s)note=type==='g'?(R.cat!=='g:bil'?'Summe aller Spiele mit Live-Erfassung.':'Tore minus Gegentore, während das Kind auf dem Feld stand – Summe aller Live-Spiele.'):(type==='t'?'Pro Kind zählt die jeweils letzte Messung – so fehlt niemand, der beim letzten Testtag krank war.':'Einschätzungen: Schnitt der letzten 3 Bewertungen je Kind (Testtage, Spiele und Einschätzungen).');
     if(!s&&useSrc&&srcMode()!=='trainer')note='';
     else if(type==='a')note+=(note?' ':'')+'Wert 3 = Teamschnitt am jeweiligen Testtag.';
     if(s&&useSrc&&srcMode()!=='trainer')note='Bei einer einzelnen Bewertung zählen immer die Trainerwerte.';
@@ -955,7 +966,7 @@ function vActs(s){
   const acts=s.live.actions||[];const open=acts.filter(a=>!a.c).length;
   const goals=(s.live.goals||[]).map((g,i)=>({g,i})).filter(x=>x.g.t==='goal');
   let gh='';
-  if(goals.length)gh=`<div class="lbl2">Torschützen</div>`+goals.map(({g,i})=>`<div class="card arow ${!g.p&&!g.og?'open':''}"><b>${mlOf(g)} ⚽ Tor${g.p?' · '+esc(short(g.p)):g.og?' · Eigentor Gegner':' · Torschütze?'}</b><div class="chips">${(g.on||[]).map(pid=>`<button class="chip ${g.p===pid?'onp':''}" onclick="A.goalSet(${i},'${pid}')">${esc(short(pid))}</button>`).join('')}<button class="chip ${g.og?'onp':''}" onclick="A.goalSet(${i},'og')">Eigentor Gegner</button></div></div>`).join('')+`<div class="lbl2">Aktionen</div>`;
+  if(goals.length)gh=`<div class="lbl2">Torschützen</div>`+goals.map(({g,i})=>`<div class="card arow ${!g.p&&!g.og?'open':''}"><b>${mlOf(g)} ⚽ Tor${g.p?' · '+esc(short(g.p)):g.og?' · Eigentor Gegner':' · Torschütze?'}</b><div class="chips">${(g.on||[]).map(pid=>`<button class="chip ${g.p===pid?'onp':''}" onclick="A.goalSet(${i},'${pid}')">${esc(short(pid))}</button>`).join('')}<button class="chip ${g.og?'onp':''}" onclick="A.goalSet(${i},'og')">Eigentor Gegner</button></div>${g.p?`<div class="sub" style="margin-top:6px">🅰 Vorlage (optional):</div><div class="chips">${(g.on||[]).filter(pid=>pid!==g.p).map(pid=>`<button class="chip ${g.a===pid?'onp':''}" onclick="A.astSet(${i},'${pid}')">${esc(short(pid))}</button>`).join('')}</div>`:''}</div>`).join('')+`<div class="lbl2">Aktionen</div>`;
   if(!acts.length)return gh;
   const onlyOpen=open&&!S.actsAll;
   let h=gh+`<div class="sub" style="margin-bottom:8px">${open?`<b>${open} Aktion${open===1?'':'en'} ohne Kategorie</b> – sie zählen erst mit Kategorie für die Werte. Tippe die passende an.`:'Alle Aktionen sind zugeordnet.'} Nochmal antippen hebt die Zuordnung auf.</div>`;
@@ -1054,6 +1065,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:66,items:['<b>🏆 Turniermodus:</b> In den Live-Optionen „Turnierspiel“ anhaken. Spielzeit, Ampel und Wechselvorschläge zählen dann über alle Spiele des Tages. „Speichern & nächstes Turnierspiel“ startet gleich das nächste Spiel.','<b>🅰 Vorlagen:</b> Nach dem Torschützen kannst du die Vorlage antippen (auch nachträglich unter „Aktionen“). Vorlagen gibt es als Rangliste, im Profil und im Spielbericht.','<b>⏱ Vor dem Abpfiff:</b> Der 2-Minuten-Hinweis nennt alle Kinder, die unter dem Spielzeit-Ziel liegen. In der letzten Phase steht das auch über der Bank.','<b>Spielzeit der Saison</b> unter Ranglisten: Minuten und Anteil je Kind über alle Live-Spiele.','<b>Bildschirm bleibt an:</b> neuer Schalter in den Live-Optionen.']},
  {v:65,items:['Form: Hat ein Kind keinen neuen Test, zählt sein letzter Test weiter, zusammen mit den aktuellen Live-Aktionen. Der Mannschaftsschnitt zählt nur noch, wenn ein Kind noch nie getestet wurde.']},
  {v:64,items:['Gerechtere Stärkenberechnung: Fehlt einem Kind ein Wert (z. B. beim Testtag gefehlt), zählt dort der Mannschaftsschnitt. Fehlen bringt so keinen Vor- oder Nachteil mehr.','Eine einzelne Einschätzung zählt noch nicht voll: Der Mannschaftsschnitt zählt wie eine weitere Bewertung dazu.','Gesamtstärke: Spielweise und Positionstreue zählen nur noch in der Aufstellung, der Bonus für den starken Fuß ist für alle gleich.','Behoben: Testwerte in „App“ und „Mix“ beachten jetzt den Zeitraum, Werte bleiben immer zwischen 1 und 5.']},
  {v:63,items:['Kader: Die Bezeichnung „Torwart“ steht jetzt immer direkt vor dem Torwart-Wert.']},
@@ -1190,8 +1202,8 @@ function buildProfilePdf(ids){
       trows.forEach(r=>{ensure(6);doc.text(pdfClean(r[0]),14,y);doc.text(pdfClean(r[1]+' '+r[4]),90,y);doc.text(pdfClean(r[2]+' '+r[4]),115,y);doc.text(pdfClean(r[3]),140,y);y+=5.5;});y+=3;}
     // live
     const lg=ss.filter(s=>s.live&&hasData(s,pid));
-    if(lg.length){const t=lg.reduce((a,s)=>{const b=gameBal(s.live,pid);a.t+=b.tore;a.f+=b.gf;a.a+=b.ga;a.m+=(s.live.mins||{})[pid]||0;a.p+=(s.live.plus||{})[pid]||0;a.n+=(s.live.minus||{})[pid]||0;a.y+=(s.live.cards||[]).filter(c=>c.p===pid&&c.c==='y').length;a.r+=(s.live.cards||[]).filter(c=>c.p===pid&&c.c!=='y').length;return a;},{t:0,f:0,a:0,m:0,p:0,n:0,y:0,r:0});
-      head('Live-Bilanz');doc.text(pdfClean(`${lg.length} Spiel${lg.length===1?'':'e'} · ${t.m} Spielminuten · ${t.t} Tor${t.t===1?'':'e'} · Tore auf dem Feld ${t.f}:${t.a} · Aktionen +${t.p} / -${t.n}${t.y||t.r?` · Karten: ${t.y} Gelb, ${t.r} Platzverweis`:''}`),14,y,{maxWidth:182});y+=7;
+    if(lg.length){const t=lg.reduce((a,s)=>{const b=gameBal(s.live,pid);a.t+=b.tore;a.v=(a.v||0)+b.vorl;a.f+=b.gf;a.a+=b.ga;a.m+=(s.live.mins||{})[pid]||0;a.p+=(s.live.plus||{})[pid]||0;a.n+=(s.live.minus||{})[pid]||0;a.y+=(s.live.cards||[]).filter(c=>c.p===pid&&c.c==='y').length;a.r+=(s.live.cards||[]).filter(c=>c.p===pid&&c.c!=='y').length;return a;},{t:0,f:0,a:0,m:0,p:0,n:0,y:0,r:0});
+      head('Live-Bilanz');doc.text(pdfClean(`${lg.length} Spiel${lg.length===1?'':'e'} · ${t.m} Spielminuten · ${t.t} Tor${t.t===1?'':'e'}${t.v?` · ${t.v} Vorlage${t.v===1?'':'n'}`:''} · Tore auf dem Feld ${t.f}:${t.a} · Aktionen +${t.p} / -${t.n}${t.y||t.r?` · Karten: ${t.y} Gelb, ${t.r} Platzverweis`:''}`),14,y,{maxWidth:182});y+=7;
       const best={};lg.forEach(s=>(s.live.actions||[]).forEach(a=>{if(a.p===pid&&a.c){const k=a.t+a.c;best[k]=(best[k]||0)+1;}}));
       const cats=[...ACT_F,...ACT_G];const top=Object.entries(best).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,n])=>{const c=cats.find(x=>x.k===k.slice(1));return `${k[0]==='+'?c.p:c.m} ${n}x`;});
       if(top.length){doc.setTextColor(...M);doc.text(pdfClean('Häufigste Aktionen: '+top.join(' · ')),14,y,{maxWidth:182});doc.setTextColor(22,36,27);y+=7;}y+=1;}
@@ -1422,6 +1434,18 @@ function buildKidPdf(ids,src){return withSeason(src,()=>{
 const glist=()=>Object.entries(S.players).map(([id,p])=>({...p,id})).filter(p=>p.guest&&p.active!==false).sort((a,b)=>(a.name||'').localeCompare(b.name||'','de'));
 function short(pid){const p=S.players[pid];if(!p)return'?';const parts=(p.name||'').trim().split(/\s+/);const first=parts[0]||'?';const dup=Object.entries(S.players).some(([id,q])=>id!==pid&&q.active!==false&&(q.name||'').trim().split(/\s+/)[0]===first);return dup&&parts[1]?first+' '+parts[1][0]+'.':first;}
 function liveField(L){return Object.values(L.pos).filter(Boolean);}
+// Turnier: mehrere Spiele eines Tages; Spielzeit zählt über alle bereits gespeicherten Spiele des Turniers
+let TPC={k:null,v:null};
+function tourPrev(L){if(!L||!L.tour)return{el:0,m:{},n:0};const k=L.tour.id+'|'+META.lastChange+'|'+Object.keys(S.sessions||{}).length;if(TPC.k===k)return TPC.v;const gs=slist().filter(s=>s.live&&s.live.tour===L.tour.id);const m={};let el=0;gs.forEach(s=>{el+=(s.live.duration||0)*60;for(const[p,v]of Object.entries(s.live.mins||{}))m[p]=(m[p]||0)+v*60;});TPC={k,v:{el,m,n:gs.length}};return TPC.v;}
+const daySecs=(L,pid)=>liveSecs(L,pid)+(tourPrev(L).m[pid]||0);
+const dayEl=L=>liveSecs(L)+tourPrev(L).el;
+// Wer erreicht das Spielzeit-Ziel voraussichtlich nicht? (Feldspieler bekommen die Restzeit dazu)
+function underTarget(L){const PI=partInfo(L);const t=((S.cfg&&S.cfg.minShare)||50)/100;const rem=PI.last?Math.max(0,-PI.over):Math.max(0,-PI.over)+(PI.F.parts-PI.part)*PI.F.len*60;const tot=dayEl(L)+rem;const sent=new Set(L.sentOff||[]);const fld=new Set(liveField(L));
+  return [...liveField(L),...L.bench].filter(p=>!sent.has(p)&&S.players[p]).map(p=>({p,s:daySecs(L,p),proj:daySecs(L,p)+(fld.has(p)?rem:0)})).filter(x=>x.proj<t*tot).sort((a,b)=>a.s-b.s);}
+const underTxt=L=>underTarget(L).map(x=>`${short(x.p)} ${Math.floor(x.s/60)}'`).join(', ');
+// Bildschirm bleibt an während eines Live-Spiels (Schalter in den Live-Optionen)
+let WL=null;async function wakeSync(){const want=!!(S.live&&S.cfg&&S.cfg.wake&&document.visibilityState==='visible');try{if(want&&!WL&&navigator.wakeLock){WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>{WL=null;});}else if(!want&&WL){const w=WL;WL=null;await w.release();}}catch(e){WL=null;}}
+document.addEventListener('visibilitychange',()=>wakeSync());
 function accrue(L){if(!L.clock.running)return;const now=Date.now();const d=Math.max(0,(now-L.clock.lastTick)/1000);L.clock.elapsed+=d;liveField(L).forEach(p=>{L.mins[p]=(L.mins[p]||0)+d;});L.clock.lastTick=now;}
 function liveSecs(L,pid){let v=pid?(L.mins[pid]||0):L.clock.elapsed;if(L.clock.running&&(!pid||liveField(L).includes(pid)))v+=Math.max(0,(Date.now()-L.clock.lastTick)/1000);return v;}
 const fclock=s=>{s=Math.floor(s);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
@@ -1456,7 +1480,7 @@ function liveGoalPlus(L,g,pid){
   const e={t:'+',p:pid,id:uid('a'),c:'schuss',goal:g.id,at:g.at,ml:g.ml,sec:g.sec,gk:false};
   if(gi>=0)L.log.splice(gi,0,e);else L.log.push(e);
 }
-function liveSave(){if(S.live){normalize(S.live);syncOn(S.live);}META.lastChange=Date.now();saveLocal();}
+function liveSave(){if(S.live){normalize(S.live);syncOn(S.live);}META.lastChange=Date.now();saveLocal();wakeSync();}
 function newLive(n,form,pos,bench){const F=(S.cfg&&S.cfg.fmt)||{parts:2,len:25};return{n,form,pos,bench,plus:{},minus:{},mins:{},log:[],clock:{running:false,elapsed:0,lastTick:0},started:Date.now(),fmt:{parts:F.parts,len:F.len},part:1,partStart:0,partStarts:[0]};}
 function slotLabel(k){if(k==='TW')return'Torwart';const[pt,sd]=k.split('-');return(pt==='M'?'Mitte':POS[pt].n)+(sd==='Z'?'':' '+sd);}
 function remapPos(M,n,form){const old=M.pos,slots=FORMS[n][form],np={};slots.forEach(k=>np[k]=old[k]||null);const used=new Set(Object.values(np).filter(Boolean));const rest=Object.entries(old).filter(([k,v])=>k!=='TW'&&v&&!used.has(v)).map(([k,v])=>v);slots.forEach(k=>{if(!np[k]&&rest.length)np[k]=rest.shift();});np.TW=old.TW||null;M.pos=np;M.n=n;M.form=form;}
@@ -1469,8 +1493,8 @@ function remap(L,n,form){
   slots.forEach(k=>{if(!np[k]&&rest.length)np[k]=rest.shift();});
   np.TW=old.TW||null;L.bench.push(...rest);L.pos=np;L.n=n;L.form=form;
 }
-function ampel(L,pid){const el=liveSecs(L);if(el<180)return'';const t=((S.cfg&&S.cfg.minShare)||50)/100;const sh=liveSecs(L,pid)/el;return sh>=t?'ok':sh>=t*.6?'warn':'low';}
-function gameBal(lv,pid){const g=(lv&&lv.goals)||[];let tore=0,gf=0,ga=0;g.forEach(e=>{const on=(e.on||[]).includes(pid);if(e.t==='goal'){if(e.p===pid)tore++;if(on)gf++;}else if(e.t==='conc'&&on)ga++;});return{tore,gf,ga};}
+function ampel(L,pid){const el=dayEl(L);if(el<180)return'';const t=((S.cfg&&S.cfg.minShare)||50)/100;const sh=daySecs(L,pid)/el;return sh>=t?'ok':sh>=t*.6?'warn':'low';}
+function gameBal(lv,pid){const g=(lv&&lv.goals)||[];let tore=0,gf=0,ga=0,vorl=0;g.forEach(e=>{const on=(e.on||[]).includes(pid);if(e.t==='goal'){if(e.p===pid)tore++;if(e.a===pid)vorl++;if(on)gf++;}else if(e.t==='conc'&&on)ga++;});return{tore,gf,ga,vorl};}
 function score(L){const g=L.goals||[];return{gf:g.filter(e=>e.t==='goal').length,ga:g.filter(e=>e.t==='conc').length};}
 function tlHtml(goals,cards,subs){
   const ev=[];let i=0;
@@ -1480,7 +1504,7 @@ function tlHtml(goals,cards,subs){
   if(!ev.length)return'<div class="sub">Noch keine Ereignisse.</div>';
   ev.sort((a,b)=>(isNum(a.sec)&&isNum(b.sec)&&a.sec!==b.sec)?a.sec-b.sec:(a.ts&&b.ts&&a.ts!==b.ts)?a.ts-b.ts:(a.at-b.at||a.i-b.i));let gf=0,ga=0;
   return ev.map(e=>{let t='';
-    if(e.k==='goal'){gf++;t=`<b>⚽ ${gf}:${ga}</b> ${e.g.p?esc(short(e.g.p)):e.g.og?'Eigentor Gegner':'Torschütze offen'}`;}
+    if(e.k==='goal'){gf++;t=`<b>⚽ ${gf}:${ga}</b> ${e.g.p?esc(short(e.g.p)):e.g.og?'Eigentor Gegner':'Torschütze offen'}${e.g.a&&e.g.p?` <span class="sub">(Vorlage ${esc(short(e.g.a))})</span>`:''}`;}
     else if(e.k==='conc'){ga++;t=`<b class="neg">${gf}:${ga}</b> Gegentor`;}
     else if(e.k==='card'){t=`<span class="${e.c.c==='y'?'yc':e.c.c==='yr'?'yrc':'rc'}"></span> ${e.c.c==='y'?'Gelb':e.c.c==='yr'?'Gelb-Rot':'Rot'} · ${esc(short(e.c.p))}`;}
     else{t=`<span class="sw">⇄</span> <b class="pos">${esc(short(e.s.in))}</b>${e.s.out?` für <span class="neg">${esc(short(e.s.out))}</span>`:' eingesetzt'}`;}
@@ -1494,24 +1518,28 @@ function fmtPicker(fn){const F=(fn==='A.liveFmt'&&S.live&&S.live.fmt)||(S.cfg&&S
 function subSuggest(L){
   const el=liveSecs(L);if(el<180||!L.bench.length||L.finished)return[];
   const sent=new Set(L.sentOff||[]);
-  const ins=L.bench.filter(p=>!sent.has(p)).sort((a,b)=>liveSecs(L,a)-liveSecs(L,b));
-  const outs=Object.keys(L.pos).filter(k=>k!=='TW'&&L.pos[k]).sort((a,b)=>liveSecs(L,L.pos[b])-liveSecs(L,L.pos[a]));
+  const ins=L.bench.filter(p=>!sent.has(p)).sort((a,b)=>daySecs(L,a)-daySecs(L,b));
+  const outs=Object.keys(L.pos).filter(k=>k!=='TW'&&L.pos[k]).sort((a,b)=>daySecs(L,L.pos[b])-daySecs(L,L.pos[a]));
   const res=[],usedS=new Set();
   for(const pin of ins.slice(0,3)){
     let best=null;
-    for(const k of outs.slice(0,4)){if(usedS.has(k))continue;const pout=L.pos[k];const gap=(liveSecs(L,pout)-liveSecs(L,pin))/60;if(gap<2)continue;
+    for(const k of outs.slice(0,4)){if(usedS.has(k))continue;const pout=L.pos[k];const gap=(daySecs(L,pout)-daySecs(L,pin))/60;if(gap<2)continue;
       const fit=slotFit({...S.players[pin],id:pin},profileOf(pin),k).v;const sc=gap/3+fit;if(!best||sc>best.sc)best={pin,pout,slot:k,sc,gap,fit};}
     if(best){res.push(best);usedS.add(best.slot);}if(res.length===2)break;
   }
   return res;
 }
+const t0n=L=>{const n=tourPrev(L).n;return n?` – ${n} Spiel${n===1?'':'e'} schon gespeichert`:'';};
+function tourChk(L){return `<input type="checkbox" ${L.tour?'checked':''} onchange="A.liveTour(this.checked)"> 🏆 Turnierspiel – Spielzeit zählt über alle Spiele des Tages`;}
+// Nach dem Torschützen: wer hat vorbereitet? (optional)
+function astAsk(L,g){const ps=(g.on||liveField(L)).filter(p=>p&&p!==g.p);if(!ps.length){A.sheetHide();return;}sheetOpen(`<div class="row between" style="margin-bottom:8px"><b>🅰 Vorlage von?</b><button class="btn sm2" onclick="A.goalAst('${g.id}','')">Keine</button></div><div class="sgrid p">${ps.map(pid=>`<button onclick="A.goalAst('${g.id}','${pid}')">${esc(short(pid))}</button>`).join('')}</div>`,6000);}
 function vLive(){
-  const L=S.live;
+  const L=S.live;wakeSync();
   if(!L)return `<h2>Live</h2><div class="card hint">Stelle unter <b>Aufstellung</b> die Startformation zusammen und tippe dort auf „▶ Live mit dieser Aufstellung“.</div><div class="row gap"><button class="btn pri grow" onclick="A.go('lineup')">Zur Aufstellung</button><button class="btn grow" onclick="A.liveEmpty()">Leer starten</button></div><div class="sub" style="margin-top:8px">„Leer starten“ setzt alle Spieler auf die Bank – du stellst dann per Antippen auf.</div>`;
   L.goals=L.goals||[];
   const sel=S.liveSel,isSel=(k,key)=>sel&&sel.kind===k&&sel.key===key;
   const pm=pid=>`<div class="pm"><button class="lm" onclick="event.stopPropagation();A.liveAct('${pid}',-1)" aria-label="Minus">−</button><span class="cnt"><b class="pos">${L.plus[pid]||0}</b><b class="neg">${L.minus[pid]||0}</b></span><button class="lp" onclick="event.stopPropagation();A.liveAct('${pid}',1)" aria-label="Plus">+</button></div>`;
-  const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid))+cardBadge(L,pid):'frei'}${pid?` <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(liveSecs(L,pid)/60)}'</span>`:''}</b>${pid?'':`<small>${slotLabel(k)}</small>`}${pid?pm(pid):''}</div>`;};
+  const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid))+cardBadge(L,pid):'frei'}${pid?` <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span>`:''}</b>${pid?'':`<small>${slotLabel(k)}</small>`}${pid?pm(pid):''}</div>`;};
   const order=['L','Z','R'];const line=pt=>FORMS[L.n][L.form].filter(k=>k[0]===pt).sort((a,b)=>order.indexOf(a[2])-order.indexOf(b[2]));
   const tp=Object.values(L.plus).reduce((a,b)=>a+b,0),tm=Object.values(L.minus).reduce((a,b)=>a+b,0);
   const PI=partInfo(L);const pn=PART_N(PI.F.parts);
@@ -1519,15 +1547,17 @@ function vLive(){
   const sc=score(L);
   let h=`<div class="lhead"><button id="lclock" class="lclock ${L.clock.running?'run':''} ${PI.over>0?'over':''}" onclick="A.liveClock()">${clockTxt(L)}</button><div class="lsc">${sc.gf}:${sc.ga}</div><button class="btn lstart ${L.clock.running?'':'pri'}" onclick="A.liveClock()" ${PI.done?'disabled':''}>${startLbl}</button></div>`;
   h+=`<div class="partline"><span id="lpart">${partTxt(L)}</span><span class="row gap" style="flex:none">${PI.done?'':`<button class="btn sm2 ${PI.over>=0&&liveSecs(L)>0?'pri':''}" onclick="A.partEnd()" ${liveSecs(L)>0?'':'disabled'}>${PI.last?'Abpfiff':pn+' beenden'}</button>`}<button class="btn sm2" onclick="A.liveUndo()" ${L.log.length?'':'disabled'} aria-label="Zurück">↶</button></span></div>`;
-  if(liveSecs(L)===0&&!L.clock.running)h+=fmtPicker('A.liveFmt');
+  if(L.tour){const tp=tourPrev(L);h+=`<div class="tourline">🏆 <b>${esc(L.tour.name)}</b> · Spiel ${tp.n+1} · Minuten zählen über den ganzen Tag</div>`;}
+  if(liveSecs(L)===0&&!L.clock.running)h+=fmtPicker('A.liveFmt')+`<label class="chk2 card" style="margin-top:0">${tourChk(L)}</label>`;
   h+=`<div class="score"><button class="btn goalb" onclick="A.goalAsk()">⚽ Tor</button><button class="btn concb" onclick="A.concede()">Gegentor</button><button class="btn cardb" onclick="A.cardMenu()"><span class="yc"></span> Karte</button></div>`;
   if(sel)h+=`<div class="selhint">Ziel antippen: Feldspieler = tauschen, Bankspieler = Wechsel. Nochmal = abbrechen.</div>`;
   h+=`<div class="pitch live">${['S','M','A'].map(pt=>{const l=line(pt);return l.length?`<div class="prowl">${l.map(card).join('')}</div>`:'';}).join('')}<div class="prowl">${card('TW')}</div></div>`;
-  {const sg=subSuggest(L);if(sg.length)h+=`<div class="subsug"><div class="lbl2" style="margin:0 0 4px">💡 Wechselvorschlag</div>${sg.map(x=>`<button onclick="A.liveSub('${x.slot}','${x.pin}')"><b>${esc(short(x.pin))}</b> <small>${Math.floor(liveSecs(L,x.pin)/60)}'</small> ⇄ <b>${esc(short(x.pout))}</b> <small>${Math.floor(liveSecs(L,x.pout)/60)}' · ${slotLabel(x.slot)}</small></button>`).join('')}</div>`;}
+  {const PI2=partInfo(L);if(!PI2.done&&PI2.last&&PI2.F.len>=6&&PI2.over>=-180){const u=underTxt(L);if(u)h+=`<div class="banner">⏱ <b>Unter dem Spielzeit-Ziel:</b> ${esc(u)}</div>`;}}
+  {const sg=subSuggest(L);if(sg.length)h+=`<div class="subsug"><div class="lbl2" style="margin:0 0 4px">💡 Wechselvorschlag</div>${sg.map(x=>`<button onclick="A.liveSub('${x.slot}','${x.pin}')"><b>${esc(short(x.pin))}</b> <small>${Math.floor(daySecs(L,x.pin)/60)}'</small> ⇄ <b>${esc(short(x.pout))}</b> <small>${Math.floor(daySecs(L,x.pout)/60)}' · ${slotLabel(x.slot)}</small></button>`).join('')}</div>`;}
   h+=`<div class="row between" style="margin-top:6px"><div class="lbl2" style="margin:0">Bank</div><div class="pill">Team <b class="pos">+${tp}</b> <b class="neg">−${tm}</b></div></div>`;
-  const bsort=L.bench.slice().sort((a,b)=>liveSecs(L,a)-liveSecs(L,b));
-  h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}${cardBadge(L,pid)}</b><small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(liveSecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
-  h+=`<details class="card" ${S.optOpen?'open':''} ontoggle="S.optOpen=this.open"><summary><b>Optionen</b> <small class="sub">Formation, Spielzeit-Ziel, Tor = Plus</small></summary><div class="lbl2">Spielform &amp; Formation</div><div class="chips">${[4,5,6].map(n=>`<button class="chip ${L.n===n?'on':''}" onclick="A.liveN(${n})">${n}+1</button>`).join('')}${Object.keys(FORMS[L.n]).map(f=>`<button class="chip ${L.form===f?'on':''}" onclick="A.liveForm('${f}')">${f}</button>`).join('')}</div><div class="ampel"><span>Spielzeit-Ziel je Kind:</span>${[33,50,66].map(n=>`<button class="chip ${((S.cfg&&S.cfg.minShare)||50)===n?'on':''}" onclick="A.cfgSet('minShare',${n})">${n} %</button>`).join('')}</div><div class="sub"><span class="adot ok"></span>im Ziel <span class="adot warn"></span>knapp <span class="adot low"></span>zu wenig (ab Minute 3)</div><label class="chk2"><input type="checkbox" ${goalPlusOn()?'checked':''} onchange="A.cfgSet('goalPlus',this.checked)"> Tor zählt als Plus („Guter Abschluss“) für den Torschützen</label></details>`;
+  const bsort=L.bench.slice().sort((a,b)=>daySecs(L,a)-daySecs(L,b));
+  h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}${cardBadge(L,pid)}</b><small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
+  h+=`<details class="card" ${S.optOpen?'open':''} ontoggle="S.optOpen=this.open"><summary><b>Optionen</b> <small class="sub">Formation, Spielzeit-Ziel, Tor = Plus</small></summary><div class="lbl2">Spielform &amp; Formation</div><div class="chips">${[4,5,6].map(n=>`<button class="chip ${L.n===n?'on':''}" onclick="A.liveN(${n})">${n}+1</button>`).join('')}${Object.keys(FORMS[L.n]).map(f=>`<button class="chip ${L.form===f?'on':''}" onclick="A.liveForm('${f}')">${f}</button>`).join('')}</div><div class="ampel"><span>Spielzeit-Ziel je Kind:</span>${[33,50,66].map(n=>`<button class="chip ${((S.cfg&&S.cfg.minShare)||50)===n?'on':''}" onclick="A.cfgSet('minShare',${n})">${n} %</button>`).join('')}</div><div class="sub"><span class="adot ok"></span>im Ziel <span class="adot warn"></span>knapp <span class="adot low"></span>zu wenig (ab Minute 3)</div><label class="chk2"><input type="checkbox" ${goalPlusOn()?'checked':''} onchange="A.cfgSet('goalPlus',this.checked)"> Tor zählt als Plus („Guter Abschluss“) für den Torschützen</label><label class="chk2"><input type="checkbox" ${S.cfg&&S.cfg.wake?'checked':''} onchange="A.cfgSet('wake',this.checked);wakeSync()"> Bildschirm bleibt an, solange ein Live-Spiel läuft</label><label class="chk2">${tourChk(L)}</label></details>`;
   if((L.sentOff||[]).length)h+=`<div class="sub" style="margin-top:4px"><b>Platzverweis:</b> ${(L.cards||[]).filter(c=>c.c!=='y').map(c=>`${esc(short(c.p))} (${c.c==='yr'?'Gelb-Rot':'Rot'}, ${mlOf(c)})`).join(', ')}</div>`;
   const inGame=new Set([...liveField(L),...L.bench,...(L.sentOff||[])]);const others=plist().filter(p=>!inGame.has(p.id));
   if(others.length)h+=`<details class="card"><summary>Weitere Spieler zur Bank (${others.length})</summary><div class="chips">${others.map(p=>`<button class="chip" onclick="A.liveAddBench('${p.id}')">+ ${esc(short(p.id))}</button>`).join('')}</div></details>`;
@@ -1536,7 +1566,7 @@ function vLive(){
   h+=`<div class="row gap" style="margin-top:14px"><button class="btn pri grow" onclick="A.liveEndModal()">Spiel beenden &amp; speichern</button><button class="btn danger" onclick="A.liveAskDiscard()">Verwerfen</button></div>`;
   return h;
 }
-setInterval(()=>{const L=S.live;if(!L||!L.clock.running)return;const PI=partInfo(L);L.alerted=L.alerted||{};if(PI.over>=-120&&PI.over<-100&&PI.F.len>=6&&!L.alerted['w'+PI.part]){L.alerted['w'+PI.part]=1;saveLocal();toast(PI.last?'⏱ Noch 2 Minuten bis zum Abpfiff – letzte Wechsel?':`⏱ Noch 2 Minuten in dieser ${PART_N(PI.F.parts)} – noch wechseln?`,5000);try{navigator.vibrate&&navigator.vibrate(300);}catch(e){}}if(PI.over>=0&&!L.alerted[PI.part]){L.alerted[PI.part]=1;saveLocal();toast(PI.last?'⏱ Spielzeit erreicht – Abpfiff?':`⏱ ${PART_N(PI.F.parts)} vorbei – ${PART_N(PI.F.parts)} beenden?`);try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}if(S.view==='live')render();}if(S.view!=='live')return;const c=$('#lclock');if(c){c.innerHTML=clockTxt(L);c.classList.toggle('over',PI.over>0);}const lp=$('#lpart');if(lp)lp.innerHTML=partTxt(L);document.querySelectorAll('.lmin').forEach(e=>{e.textContent=Math.floor(liveSecs(L,e.dataset.p)/60)+"'";e.className='lmin '+ampel(L,e.dataset.p);});},1000);
+setInterval(()=>{const L=S.live;if(!L||!L.clock.running)return;const PI=partInfo(L);L.alerted=L.alerted||{};if(PI.over>=-120&&PI.over<-100&&PI.F.len>=6&&!L.alerted['w'+PI.part]){L.alerted['w'+PI.part]=1;saveLocal();{const u=PI.last?underTxt(L):'';toast(PI.last?'⏱ Noch 2 Minuten bis zum Abpfiff – letzte Wechsel?'+(u?' Unter dem Spielzeit-Ziel: '+u:''):`⏱ Noch 2 Minuten in dieser ${PART_N(PI.F.parts)} – noch wechseln?`,u?8000:5000);}try{navigator.vibrate&&navigator.vibrate(300);}catch(e){}}if(PI.over>=0&&!L.alerted[PI.part]){L.alerted[PI.part]=1;saveLocal();toast(PI.last?'⏱ Spielzeit erreicht – Abpfiff?':`⏱ ${PART_N(PI.F.parts)} vorbei – ${PART_N(PI.F.parts)} beenden?`);try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}if(S.view==='live')render();}if(S.view!=='live')return;const c=$('#lclock');if(c){c.innerHTML=clockTxt(L);c.classList.toggle('over',PI.over>0);}const lp=$('#lpart');if(lp)lp.innerHTML=partTxt(L);document.querySelectorAll('.lmin').forEach(e=>{e.textContent=Math.floor(daySecs(L,e.dataset.p)/60)+"'";e.className='lmin '+ampel(L,e.dataset.p);});},1000);
 
 // ---------- Stoppuhr ----------
 const sw={running:false,t0:0,elapsed:0};
@@ -1569,6 +1599,7 @@ const A={
     S.live=newLive(R.n,R.form,pos,R.bench.slice());S.liveSel=null;liveSave();A.go('live');
   },
   liveEmpty(){const n=S.lu.n,form=FORMS[n][S.lu.form]?S.lu.form:Object.keys(FORMS[n])[0];const pos={};FORMS[n][form].forEach(k=>pos[k]=null);pos.TW=null;S.live=newLive(n,form,pos,plist().map(p=>p.id));S.liveSel=null;liveSave();render(true);},
+  liveTour(on){const L=S.live;if(!L)return;if(!on)L.tour=null;else{const t=slist().find(s=>s.date===today()&&s.live&&s.live.tour);L.tour=t?{id:t.live.tour,name:t.live.tourName||'Turnier'}:{id:uid('tr'),name:'Turnier '+fdate(today())};}liveSave();render(true);toast(on?`🏆 ${L.tour.name}${t0n(L)}`:'Kein Turnierspiel');},
   liveSub(slot,pid){const L=S.live;if(!L||!L.bench.includes(pid))return;S.liveSel={kind:'slot',key:slot};A.liveTap('bench',pid);},
   liveTap(kind,key){
     const L=S.live,sel=S.liveSel;if(!L)return;
@@ -1583,7 +1614,8 @@ const A={
   liveAct(pid,d){const L=S.live;if(!L)return;const o=d>0?L.plus:L.minus;o[pid]=(o[pid]||0)+1;const e={t:d>0?'+':'-',p:pid,id:uid('a'),c:null,...gameMin(L),gk:L.pos.TW===pid};L.log.push(e);try{navigator.vibrate&&navigator.vibrate(15);}catch(x){}liveSave();render(true);showSheet(e);},
   sheetPick(id,c){const L=S.live;if(L){const e=L.log.find(x=>x.id===id);if(e){const cats=e.gk?ACT_G:ACT_F;const cc=cats.find(x=>x.k===c);if(cc){e.c=c;liveSave();toast((e.t==='+'?cc.p:cc.m)+' · '+short(e.p));}}}A.sheetHide();},
   sheetHide(){clearTimeout(sheetT);const el=$('#sheet');if(el)el.classList.remove('open');},
-  goalSet(i,pid){const s=clone(S.sessions[S.sessionId]);const g=s.live&&s.live.goals&&s.live.goals[i];if(!g)return;if(pid==='og'){g.og=!g.og;g.p=null;}else{g.p=g.p===pid?null:pid;g.og=false;}
+  astSet(i,pid){const s=clone(S.sessions[S.sessionId]);const g=s.live&&s.live.goals&&s.live.goals[i];if(!g)return;g.a=g.a===pid?null:pid;saveDoc('sessions',S.sessionId,s);render(true);},
+  goalSet(i,pid){const s=clone(S.sessions[S.sessionId]);const g=s.live&&s.live.goals&&s.live.goals[i];if(!g)return;if(pid==='og'){g.og=!g.og;g.p=null;g.a=null;}else{g.p=g.p===pid?null:pid;g.og=false;if(g.a===g.p)g.a=null;}
     const lv=s.live;g.id=g.id||uid('g');lv.plus=lv.plus||{};lv.actions=lv.actions||[];
     const j=lv.actions.findIndex(a=>a.goal===g.id);if(j>=0){const o=lv.actions[j];lv.plus[o.p]=Math.max(0,(lv.plus[o.p]||0)-1);lv.actions.splice(j,1);}
     if(g.p&&goalPlusOn()){lv.plus[g.p]=(lv.plus[g.p]||0)+1;lv.actions.push({t:'+',p:g.p,c:'schuss',at:isNum(g.at)?g.at:null,ml:g.ml,gk:false,goal:g.id});}
@@ -1617,7 +1649,8 @@ const A={
     const sc=score(L);const rank=k=>k==='TW'?9:({S:0,M:1,A:2}[k[0]]*3+({L:0,Z:1,R:2}[k[2]]||0));const ps=Object.keys(L.pos).filter(k=>L.pos[k]).sort((a,b)=>rank(a)-rank(b)).map(k=>L.pos[k]);
     sheetOpen(`<div class="row between" style="margin-bottom:8px"><b>⚽ Tor! ${sc.gf}:${sc.ga} · Wer hat getroffen?</b><button class="btn sm2" onclick="A.sheetHide()">Später</button></div><div class="sgrid p">${ps.map(pid=>`<button onclick="A.goalScorer('${e.id}','${pid}')">${esc(short(pid))}</button>`).join('')}<button onclick="A.goalScorer('${e.id}','og')" style="background:#5f6f64">Eigentor Gegner</button></div>`,7000);
   },
-  goalScorer(gid,pid){const L=S.live;const g=L&&(L.goals||[]).find(x=>x.id===gid);if(g){g.p=pid==='og'?null:pid;g.og=pid==='og';liveGoalPlus(L,g,g.p);liveSave();render(true);toast(pid==='og'?'Eigentor des Gegners':`⚽ ${short(pid)}`);}A.sheetHide();},
+  goalScorer(gid,pid){const L=S.live;const g=L&&(L.goals||[]).find(x=>x.id===gid);if(g){g.p=pid==='og'?null:pid;g.og=pid==='og';liveGoalPlus(L,g,g.p);liveSave();render(true);toast(pid==='og'?'Eigentor des Gegners':`⚽ ${short(pid)}`);if(pid!=='og'){astAsk(L,g);return;}}A.sheetHide();},
+  goalAst(gid,pid){const L=S.live;const g=L&&(L.goals||[]).find(x=>x.id===gid);if(g){g.a=pid||null;liveSave();render(true);if(pid)toast(`🅰 Vorlage ${short(pid)}`);}A.sheetHide();},
   cardMenu(){sheetOpen(`<div class="row between" style="margin-bottom:8px"><b>Welche Karte?</b><button class="btn sm2" onclick="A.sheetHide()">Abbrechen</button></div><div class="cardrow"><button onclick="A.cardAsk('y')"><span class="yc"></span>Gelb</button><button onclick="A.cardAsk('yr')"><span class="yrc"></span>Gelb-Rot</button><button onclick="A.cardAsk('r')"><span class="rc"></span>Rot</button></div>`,0);},
   cardAsk(c){
     const L=S.live;if(!L)return;const ps=[...Object.values(L.pos).filter(Boolean),...L.bench];
@@ -1631,7 +1664,7 @@ const A={
     L.cards.push(e);L.log.push({t:'card',id:e.id});A.sheetHide();liveSave();render(true);
     toast(`${CARD_N[cc]} · ${short(pid)}${cc==='yr'&&c==='y'?' (2. Gelbe)':''}${cc!=='y'?' – Platz ist frei':''}`);
   },
-  goalPick(pid){const L=S.live;if(!L)return;accrue(L);L.goals=L.goals||[];const e={t:'goal',p:pid||null,...gameMin(L),on:liveField(L),id:uid('g')};L.goals.push(e);L.log.push({t:'goal',id:e.id});A.sheetHide();liveSave();render(true);const sc=score(L);toast(`⚽ ${pid?short(pid):'Tor'} · ${sc.gf}:${sc.ga}`);},
+  goalPick(pid){const L=S.live;if(!L)return;accrue(L);L.goals=L.goals||[];const e={t:'goal',p:pid||null,...gameMin(L),on:liveField(L),id:uid('g')};L.goals.push(e);L.log.push({t:'goal',id:e.id});A.sheetHide();liveSave();render(true);const sc=score(L);toast(`⚽ ${pid?short(pid):'Tor'} · ${sc.gf}:${sc.ga}`);if(pid)astAsk(L,e);},
   concede(){const L=S.live;if(!L)return;accrue(L);L.goals=L.goals||[];const e={t:'conc',...gameMin(L),on:liveField(L),id:uid('g'),ts:Date.now()};L.goals.push(e);L.log.push({t:'conc',id:e.id});liveSave();render(true);const sc=score(L);toast(`Gegentor · ${sc.gf}:${sc.ga}`);},
   liveUndo(){
     const L=S.live;if(!L)return;const e=L.log.pop();if(!e)return;
@@ -1648,22 +1681,23 @@ const A={
   liveForm(f){const L=S.live;accrue(L);remap(L,L.n,f);syncLu(L.n,L.form);S.liveSel=null;liveSave();render(true);},
   liveN(n){const L=S.live;if(L.n===n)return;accrue(L);remap(L,n,Object.keys(FORMS[n])[0]);syncLu(L.n,L.form);S.liveSel=null;liveSave();render(true);},
   liveAddBench(pid){const L=S.live;if(!L.bench.includes(pid))L.bench.push(pid);liveSave();render(true);},
-  liveEndModal(){showModal(`<h3>Spiel beenden</h3><label>Gegner / Titel<input id="m_title" value="Spiel gegen " autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" placeholder="z. B. 3:2" value="${(S.live&&S.live.goals&&S.live.goals.length)?score(S.live).gf+':'+score(S.live).ga:''}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Plus/Minus und Spielminuten werden als Spiel unter „Bewertung“ gespeichert. Danach kannst du die Kinder direkt bewerten.</div><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.liveEnd()">Speichern</button></div>`);},
+  liveEndModal(){showModal(`<h3>Spiel beenden</h3><label>Gegner / Titel<input id="m_title" value="Spiel gegen " autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" placeholder="z. B. 3:2" value="${(S.live&&S.live.goals&&S.live.goals.length)?score(S.live).gf+':'+score(S.live).ga:''}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Plus/Minus und Spielminuten werden als Spiel unter „Bewertung“ gespeichert. Danach kannst du die Kinder direkt bewerten.</div>${S.live&&S.live.tour?`<button class="btn pri" style="width:100%;margin-bottom:8px" onclick="A.liveEnd(true)">🏆 Speichern &amp; nächstes Turnierspiel</button>`:''}<div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn ${S.live&&S.live.tour?'':'pri'}" onclick="A.liveEnd()">Speichern</button></div>`);},
   partEnd(){const L=S.live;if(!L)return;accrue(L);L.clock.running=false;const PI=partInfo(L);
     L.log.push({t:'part',fin:PI.last,prevPart:L.part||1,prevStart:L.partStart||0});
     if(PI.last){L.finished=true;liveSave();render(true);toast('Abpfiff! Jetzt „Spiel beenden & speichern“.');return;}
     L.part=(L.part||1)+1;L.partStart=Math.round(L.clock.elapsed);L.clock.elapsed=L.partStart;L.partStarts=(L.partStarts||[0]).concat(L.partStart);liveSave();render(true);toast(`${PI.part}. ${PART_N(PI.F.parts)} beendet`);},
   liveFmt(k,v){const L=S.live;if(!L)return;L.fmt=L.fmt||{parts:2,len:25};if(k==='parts')L.fmt.parts=v;else L.fmt.len=Math.max(5,Math.min(60,L.fmt.len+v));S.cfg=S.cfg||{};S.cfg.fmt={...L.fmt};liveSave();render(true);},
   cfgFmt(k,v){S.cfg=S.cfg||{};const F=S.cfg.fmt=S.cfg.fmt||{parts:2,len:25};if(k==='parts')F.parts=v;else F.len=Math.max(5,Math.min(60,F.len+v));saveLocal();render(true);},
-  liveEnd(){
+  liveEnd(next){
     const L=S.live;if(!L)return;accrue(L);L.clock.running=false;
     syncOn(L);Object.keys(L.on||{}).forEach(p=>{const a=L.on[p];const b=Math.round(L.clock.elapsed);if(b>a)(L.per[p]=L.per[p]||[]).push([a,b]);});L.on={};
     const mins={};Object.entries(L.mins).forEach(([p,s])=>{if(s>=1)mins[p]=Math.round(s/60);});
     const periods={};Object.entries(L.per||{}).forEach(([p,ps])=>{const v=ps.filter(([a,b])=>b-a>=10);if(v.length)periods[p]=v;});
     const id=uid('s');let title=($('#m_title').value||'').trim()||'Spiel';if(/^Spiel gegen$/i.test(title))title='Spiel';
-    const doc={type:'game',by:META.dev,date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{t0:L.t0||null,plus:L.plus,minus:L.minus,mins,periods,fmt:liveFmt(L),n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({id:g.id,t:g.t,p:g.p||null,og:!!g.og,at:g.at,ml:g.ml,sec:g.sec,on:g.on||[],ts:g.ts||0})),cards:(L.cards||[]).map(c=>({c:c.c,p:c.p,at:c.at,ml:c.ml,sec:c.sec,ts:c.ts||0})),subs:L.log.filter(e=>e.t==='sub').map(e=>({at:isNum(e.at)?e.at:0,ml:e.ml,sec:e.sec,in:e.inP,out:e.outP||null,ts:e.ts||0})),partStarts:L.partStarts||[0],actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,ml:e.ml,gk:!!e.gk,...(e.goal?{goal:e.goal}:{})}))}};
+    const doc={type:'game',by:META.dev,date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{t0:L.t0||null,plus:L.plus,minus:L.minus,mins,periods,fmt:liveFmt(L),n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({id:g.id,t:g.t,p:g.p||null,a:g.a||null,og:!!g.og,at:g.at,ml:g.ml,sec:g.sec,on:g.on||[],ts:g.ts||0})),cards:(L.cards||[]).map(c=>({c:c.c,p:c.p,at:c.at,ml:c.ml,sec:c.sec,ts:c.ts||0})),subs:L.log.filter(e=>e.t==='sub').map(e=>({at:isNum(e.at)?e.at:0,ml:e.ml,sec:e.sec,in:e.inP,out:e.outP||null,ts:e.ts||0})),partStarts:L.partStarts||[0],squad:[...new Set([...liveField(L),...L.bench,...(L.sentOff||[]),...Object.keys(L.mins||{})])],...(L.tour?{tour:L.tour.id,tourName:L.tour.name}:{}),actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,ml:e.ml,gk:!!e.gk,...(e.goal?{goal:e.goal}:{})}))}};
     A.sheetHide();
-    S.live=null;S.liveSel=null;saveDoc('sessions',id,doc);closeModal();A.openSession(id);{const o=openActs(doc);if(o){S.sessTab='acts';S.actsAll=false;render(true);}A.backupAsk(o);}
+    if(next&&L.tour){const pos={...L.pos};const bench=[...new Set([...L.bench,...(L.sentOff||[])])];const nl=newLive(L.n,L.form,pos,bench);nl.tour={...L.tour};nl.fmt={...liveFmt(L)};S.live=null;saveDoc('sessions',id,doc);S.live=nl;S.liveSel=null;liveSave();closeModal();S.view='live';render(true);scrollTo(0,0);const o=openActs(doc);toast(`✅ Spiel gespeichert – Spiel ${tourPrev(nl).n+1} ist bereit${o?` (${o} offene Aktion${o===1?'':'en'} später zuordnen)`:''}`,5000);return;}
+    S.live=null;S.liveSel=null;saveDoc('sessions',id,doc);wakeSync();closeModal();A.openSession(id);{const o=openActs(doc);if(o){S.sessTab='acts';S.actsAll=false;render(true);}A.backupAsk(o);}
   },
   backupAsk(o){showModal(`<h3>✅ Spiel gespeichert</h3>${o?`<p><b>${o} Aktion${o===1?'':'en'} oder Tor${o===1?'':'e'} ohne Zuordnung.</b> Ordne sie gleich unter „Aktionen“ zu, sonst zählen sie nicht für die Werte.</p>`:''}<p>Jetzt gleich eine Sicherung speichern? Dann geht nach dem Spieltag nichts verloren – z. B. in iCloud Drive.</p><div class="row end gap"><button class="btn" onclick="A.closeModal();toast('Danach kurz die Kinder bewerten')">Später</button><button class="btn pri" onclick="A.closeModal();A.backup()">Jetzt sichern</button></div>`);},
   liveAskDiscard(){showModal(`<h3>Live-Spiel verwerfen?</h3><p>Plus/Minus und Spielminuten dieses Spiels werden nicht gespeichert.</p><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn danger" onclick="A.liveDiscard()">Verwerfen</button></div>`);},
