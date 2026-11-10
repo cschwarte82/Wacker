@@ -323,7 +323,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='90';
+const APP_VERSION='91';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -832,9 +832,9 @@ function trainerVal(cat,pid,ss,per){const[t,k]=cat.split(':');
   if(t==='a'&&TR_AREA[k]){const vs=TR_AREA[k].map(x=>liveVal('r:'+x,pid,sessionsWith('r:'+x),per)).filter(isNum);return vs.length?avg(vs):null;}
   return liveVal(cat,pid,ss,per);}
 // ---------- Potenzial & Form (Werte aus „Mix“, seit V83) ----------
-// Potenzial = deine Einschätzungen + Messwerte (Bestwert) als Mittelwert, dazu jeder abgeschlossene Form-Block (Länge = Form-Wochen, ab Saisonstart)
-// mit mindestens BLOCK_MIN Aktionen wie eine weitere Einschätzung. Form = Potenzial, durch die Live-Aktionen der letzten Form-Wochen bestätigt,
-// hochgeschoben oder nach unten korrigiert: (5·Plus + 1·Minus + Potenzial·APP_BUF) / (Plus + Minus + APP_BUF). Ohne Aktionen: Form = Potenzial.
+// Potenzial = Trainereinschätzungen + Messwerte (Bestwert) als Mittelwert, dazu jeder abgeschlossene Form-Block (Länge = Form-Wochen, ab Saisonstart)
+// mit mindestens BLOCK_MIN Aktionen oder einer Spielbewertung wie eine weitere Einschätzung. Form = Startwert (Spielbewertungen der letzten Form-Wochen,
+// sonst Potenzial), durch die Live-Aktionen dieser Wochen bestätigt, hochgeschoben oder korrigiert: (5·Plus + 1·Minus + Start·APP_BUF) / (Plus + Minus + APP_BUF).
 const BLOCK_MIN=4;
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const addDays=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return ymd(x);};
@@ -852,7 +852,9 @@ function pfTest(cat,pid){const[t,k]=cat.split(':');const best=c=>testPick(c,pid,
   if(k==='pass'){const v=PASS_TESTS.map(tk=>best('t:'+tk)).filter(isNum).map(raw=>1+Math.min(10,raw)/10*4);return v.length?avg(v):null;}
   if(gkTestByR(k)){const raw=best('t:'+gkTestByR(k));return isNum(raw)?1+Math.min(10,raw)/10*4:null;}
   return null;}
-function pfRatings(cat,pid){const[t,k]=cat.split(':');const ks=t==='a'&&k==='technik'?['dribb','pass']:t==='r'?[k]:[];const v=[];ks.forEach(x=>sessionsWith('r:'+x).forEach(s=>{const y=catVal(s,'r:'+x,pid);if(isNum(y))v.push(y);}));return v;}
+// Bewertungen einer Kategorie: Trainereinschätzungen (ev) und Spielbewertungen mit Datum (gm). Seit V91 zählen Spielbewertungen nur zur Form
+// und erst nach ihrem abgeschlossenen Form-Block ins Potenzial (Christian 10.11.2026: Potenzial = Messen + Trainereinschätzung).
+function pfRatings(cat,pid){const[t,k]=cat.split(':');const ks=t==='a'&&k==='technik'?['dribb','pass']:t==='r'?[k]:[];const ev=[],gm=[];ks.forEach(x=>sessionsWith('r:'+x).forEach(s=>{const y=catVal(s,'r:'+x,pid);if(!isNum(y))return;if(s.type==='game')gm.push({d:s.date||'',v:y});else ev.push(y);}));return{ev,gm};}
 const pfLiveKeys=cat=>{const[t,k]=cat.split(':');return t==='a'&&k==='technik'?['technik']:t==='r'?[k]:[];};
 const pfLive=(agg,ks)=>{let p=0,m=0,n=0;ks.forEach(k=>{const g=agg[k];if(g){p+=g.p;m+=g.m;n+=g.n;}});return{p,m,n};};
 const pfAnch=(b,L)=>(5*L.p+L.m+b*APP_BUF)/(L.p+L.m+APP_BUF);
@@ -860,15 +862,17 @@ const pfAnch=(b,L)=>(5*L.p+L.m+b*APP_BUF)/(L.p+L.m+APP_BUF);
 function pfCalc(cat,pid){const C=calcCache();C.pf=C.pf||{};const ck=cat+'|'+pid;if(ck in C.pf)return C.pf[ck];
   const[t,k]=cat.split(':');let res;
   if(t==='a'&&(k==='spiel'||k==='torwart')){const subs=(k==='spiel'?RATINGS:GK_RATINGS).map(r=>pfCalc('r:'+r.k,pid));const P=subs.map(x=>x.pot).filter(isNum),F=subs.map(x=>x.form).filter(isNum);res={pot:P.length?avg(P):null,form:F.length?avg(F):null,blocks:subs.reduce((a,x)=>a+x.blocks,0)};}
-  else{const R=pfRatings(cat,pid),T=pfTest(cat,pid),ks=pfLiveKeys(cat);
+  else{const RR=pfRatings(cat,pid),R=RR.ev,G=RR.gm,T=pfTest(cat,pid),ks=pfLiveKeys(cat);
     const base=mix2(R.length?avg(R):null,T);const anch=isNum(base)?base:3;
     const fs0=formSince();
-    const blk=ks.length?pfBlocks().map(([a,b])=>({b,L:pfLive(liveAggR(pid,a,b),ks)})).filter(x=>x.L.n>=BLOCK_MIN).map(x=>({b:x.b,v:pfAnch(anch,x.L)})):[];const bl=blk.map(x=>x.v);
+    // Abgeschlossener Block: Startwert = Spielbewertungen im Block (sonst Grundwert), Live-Aktionen schieben ihn; zählt ab BLOCK_MIN Aktionen oder mit einer Spielbewertung
+    const blk=pfBlocks().map(([a,b])=>{const L=ks.length?pfLive(liveAggR(pid,a,b),ks):{p:0,m:0,n:0},g=G.filter(x=>x.d>=a&&x.d<b).map(x=>x.v);return{b,L,g};}).filter(x=>x.L.n>=BLOCK_MIN||x.g.length).map(x=>({b:x.b,v:pfAnch(x.g.length?avg(x.g):anch,x.L)}));const bl=blk.map(x=>x.v);
     const E=[...R,...bl];const pot=E.length?mix2(avg(E),T):T;
     // Form zählt jede Aktion nur einmal: Blöcke, deren Spiele noch im Form-Fenster liegen, bleiben beim Startwert der Form außen vor
     const Ef=[...R,...blk.filter(x=>x.b<=fs0).map(x=>x.v)];const fAnch=Ef.length?mix2(avg(Ef),T):T;
+    const Gw=G.filter(x=>x.d>=fs0).map(x=>x.v);const fStart=Gw.length?avg(Gw):fAnch;
     const L=ks.length?pfLive(liveAggR(pid,fs0,''),ks):{p:0,m:0,n:0};
-    const form=L.n?pfAnch(isNum(fAnch)?fAnch:3,L):pot;
+    const form=L.n||Gw.length?pfAnch(isNum(fStart)?fStart:3,L):pot;
     res={pot,form,base,blocks:bl.length};}
   return C.pf[ck]=res;}
 // Wert je Kategorie nach gewählter Quelle: Trainer (Einschätzung + Live-Aktionen als Zusatzbewertungen), App (Live-Aktionen + Tests) oder Mix (Mittelwert).
@@ -883,7 +887,7 @@ function srcVal0(cat,pid,ss,per){const md=srcMode();
     if(!isNum(ap))return isNum(lv)?lv:tmL(); // keine Live-Aktionen/Tests: dein Wert zählt allein, kein Mannschaftsschnitt
     if(!isNum(lv))lv=tmL();if(!isNum(ap)||!isNum(w))return lv;if(!isNum(lv))return ap;return (lv+w*ap)/(1+w);}
   const tr=cat.startsWith('x:')?null:shrinkPV(cat,pid,ss,per);if(!srcApplies(cat))return tr;const ap=appCat(cat,pid,per);return isNum(ap)?ap:tr;}
-function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?(srcMode()==='mix'?'Potenzial: deine Einschätzungen und Messwerte der Saison (Tests: Bestwert) plus abgeschlossene Form-Blöcke.':'Potenzial: alle Werte der Saison (bei Tests der Bestwert).'):pm==='form'?(srcMode()==='mix'?`Form: Potenzial plus Live-Aktionen der letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test.`:`Form: nur die letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test, auch wenn er älter ist.`):`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div><div class="sub" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;margin-top:4px">Form-Zeitraum: ${[4,6,8].map(w=>`<button class="chip ${formWeeks()===w?'on':''}" style="padding:2px 8px" onclick="A.cfgSet('formWeeks',${w})">${w} Wo.</button>`).join('')}</div>`;}
+function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?(srcMode()==='mix'?'Potenzial: deine Trainereinschätzungen und Messwerte der Saison (Tests: Bestwert) plus abgeschlossene Form-Blöcke.':'Potenzial: alle Werte der Saison (bei Tests der Bestwert).'):pm==='form'?(srcMode()==='mix'?`Form: Spielbewertungen und Live-Aktionen der letzten ${formWeeks()} Wochen, ohne neue Spielbewertung ausgehend vom Potenzial. Bei Tests zählt der letzte Test.`:`Form: nur die letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test, auch wenn er älter ist.`):`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div><div class="sub" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;margin-top:4px">Form-Zeitraum: ${[4,6,8].map(w=>`<button class="chip ${formWeeks()===w?'on':''}" style="padding:2px 8px" onclick="A.cfgSet('formWeeks',${w})">${w} Wo.</button>`).join('')}</div>`;}
 function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Nur deine Einschätzungen, ohne Testmessungen (Tempo, Technik usw. aus deiner Athletik-, Dribbling- und Pass-Einschätzung), dazu jede Live-Aktion als Zusatzbewertung: Plus zählt wie eine 5, Minus wie eine 1 (4 Aktionen = 1 Bewertung, Live höchstens die Hälfte).':md==='app'?'Nur Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':`Potenzial = deine Einschätzungen + Messwerte (Mittelwert), jeder abgeschlossene ${formWeeks()}-Wochen-Block mit mindestens 4 Aktionen zählt wie eine weitere Einschätzung. Form = Potenzial, durch die Live-Aktionen der letzten ${formWeeks()} Wochen bestätigt oder korrigiert.`}</div>`;}
 // Erklärt, woher der Torwart-Wert eines Kindes kommt (Bewertungen mit TW-Einschätzung/TW-Tests, App-Werte aus Torwart-Aktionen)
 function gkInfo(pid){
@@ -1173,6 +1177,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:91,items:['<b>Spielbewertungen zählen zur Form:</b> Deine Bewertung nach einem Spiel fließt jetzt in die Form der letzten 6 Wochen ein, zusammen mit den Live-Aktionen. Ist der 6-Wochen-Block vorbei, wandert sie ins Potenzial. Das Potenzial selbst kommt aus Messwerten und Trainereinschätzungen.']},
  {v:90,items:['<b>Live: Stärke auf der Position:</b> Das Schild links oben zeigt jetzt neben der Position auch den Wert des Spielers dort, z. B. „LM 3,6“. Gleich gerechnet wie in der Aufstellung, ohne extra Platz.']},
  {v:89,items:['<b>Aufstellung wie Live:</b> Auch hier stehen links oben die jetzige Position und rechts oben mit ★ die stärkste. Die Bank zeigt „★Kürzel Wert“. So sieht alles gleich aus. Die lange Erklärung unter dem Spielfeld ist weg, sie steht im Handbuch.']},
  {v:88,items:['<b>Live:</b> Links oben auf der Karte steht die jetzige Position, rechts oben mit ★ die stärkste. Beide gelb = das Kind spielt gerade auf seiner stärksten Position.']},
@@ -1739,8 +1744,8 @@ function closeModal(){const m=$('#modal');m.classList.remove('open');m.innerHTML
 function toast(t,ms){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),ms||2400);}
 function sessionModal(s){
   S.draft=s;
-  if(s.type==='eval')return showModal(`<h3>${s.id?'Einschätzung bearbeiten':'Neue Trainereinschätzung'}</h3><label>Datum<input type="date" id="m_date" value="${esc(s.date)}"></label><label>Titel<input id="m_title" value="${esc(s.title)}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Für deine Einschätzung zwischendurch, z. B. nach einem Training. Sie fließt wie die Bewertungen nach Spielen in Profil, Ranglisten und Aufstellung ein.</div><div class="row end gap">${s.id?`<button class="btn danger" onclick="A.askDelSession('${s.id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.saveSession()">Speichern</button></div>`);
-  if(s.type==='game')return showModal(`<h3>${s.id?'Spiel bearbeiten':'Neues Spiel'}</h3><label>Datum<input type="date" id="m_date" value="${esc(s.date)}"></label><label>Gegner / Titel<input id="m_title" value="${esc(s.title)}" autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" value="${esc(s.result||'')}" placeholder="z. B. 3:2" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Danach bewertest du jedes Kind, das gespielt hat, in den 6 Bereichen. Das fließt in Profil, Ranglisten und Aufstellung ein.</div><div class="row end gap">${s.id?`<button class="btn danger" onclick="A.askDelSession('${s.id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.saveSession()">Speichern</button></div>`);
+  if(s.type==='eval')return showModal(`<h3>${s.id?'Einschätzung bearbeiten':'Neue Trainereinschätzung'}</h3><label>Datum<input type="date" id="m_date" value="${esc(s.date)}"></label><label>Titel<input id="m_title" value="${esc(s.title)}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Für deine Einschätzung zwischendurch, z. B. nach einem Training. Sie bildet mit den Messwerten das Potenzial und fließt so in Profil, Ranglisten und Aufstellung ein.</div><div class="row end gap">${s.id?`<button class="btn danger" onclick="A.askDelSession('${s.id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.saveSession()">Speichern</button></div>`);
+  if(s.type==='game')return showModal(`<h3>${s.id?'Spiel bearbeiten':'Neues Spiel'}</h3><label>Datum<input type="date" id="m_date" value="${esc(s.date)}"></label><label>Gegner / Titel<input id="m_title" value="${esc(s.title)}" autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" value="${esc(s.result||'')}" placeholder="z. B. 3:2" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Danach bewertest du jedes Kind, das gespielt hat, in den 6 Bereichen. Das zählt mit den Live-Aktionen zur Form und nach dem Form-Block ins Potenzial.</div><div class="row end gap">${s.id?`<button class="btn danger" onclick="A.askDelSession('${s.id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.saveSession()">Speichern</button></div>`);
   showModal(`<h3>${s.id?'Testtag bearbeiten':'Neuer Testtag'}</h3><label>Datum<input type="date" id="m_date" value="${esc(s.date)}"></label><label>Titel<input id="m_title" value="${esc(s.title)}" autocomplete="off"></label><div class="lbl">Tests auswählen</div>${TEST_GROUPS.map(a=>`<div class="sub">${a.n}</div><div class="chips">${TESTS.filter(t=>t.area===a.k).map(t=>`<button class="chip ${s.tests.includes(t.k)?'on':''}" onclick="A.togDraft('${t.k}',this)">${esc(t.n)}</button>`).join('')}</div>`).join('')}<div class="sub" style="margin:10px 0 14px">Am Testtag wird nur gemessen. Deine Einschätzung gibst du über „+ Trainereinschätzung“ oder nach Spielen.</div><div class="row end gap">${s.id?`<button class="btn danger" onclick="A.askDelSession('${s.id}')">Löschen</button><span class="grow"></span>`:''}<button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.saveSession()">Speichern</button></div>`);
 }
 

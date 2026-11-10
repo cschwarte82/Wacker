@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 90, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 91, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,5 +106,6 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V91:** `pfRatings` trennt Trainereinschätzungen (ev) und Spielbewertungen (gm, type game). Potenzial = ev + Tests + abgeschlossene Blöcke; Block zählt ab BLOCK_MIN Aktionen ODER mit einer Spielbewertung, Startwert des Blocks = Schnitt der Spielbewertungen darin (sonst Grundwert). Form-Start = Spielbewertungen im Form-Fenster, sonst bisheriger Startwert (Christian 10.11.).
 - **V90:** Live-Karten: linkes Schild zeigt Position + Wert (`posBadges(pid,k,v)`, v aus `curV` = slotFit mit Mix, TW = a:torwart), Wunsch Christian.
 - **V89:** `posBadges(pid,k)` global, Legende unter dem Feld entfernt (Live + Aufstellung, Wunsch Christian); Aufstellungskarten mit denselben Schildern (Text „Abwehr links“ entfällt, Wert bleibt), Bank „★Kürzel Wert“ aus `bestSlot`.
