@@ -317,7 +317,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='68';
+const APP_VERSION='69';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1042,8 +1042,8 @@ function vStrength(){
   if(AV.technik)cand.push({k:'technik',v:AV.technik.v});
   [['tempo','schnell'],['gewandt','dyn'],['ausdauer','ausd']].forEach(([k,rk])=>{const vs=[AV[k]?.v,T(rk)].filter(isNum);if(vs.length)cand.push({k,v:avg(vs)});});
   if(AV.kraft&&!isNum(T('dyn')))cand.push({k:'kraft',v:AV.kraft.v});
-  {const gt=GK_RATINGS.map(r=>T(r.k)).filter(isNum);const vs=[gt.length?avg(gt):null,AV._tw?.v].filter(isNum);if(vs.length)cand.push({k:'torwart',v:avg(vs)});}
-  const top=cand.sort((a,b)=>b.v-a.v).slice(0,3);
+  GK_RATINGS.forEach(r=>{const vs=[T(r.k),AV[r.k]?.v].filter(isNum);if(vs.length)cand.push({k:'torwart',v:avg(vs)});});
+  const top=cand.sort((a,b)=>b.v-a.v).filter((x,i,a)=>a.findIndex(y=>y.k===x.k)===i).slice(0,3);
   const ss=slist().reverse();const prog=[];
   TESTS.forEach(t=>{const pts=ss.map(s=>s.results?.[pid]?.[t.k]).filter(isNum);if(pts.length<2)return;const d=pts[pts.length-1]-pts[0];const better=t.lower?d<0:d>0;if(!better)return;const rel=Math.abs(d)/Math.max(.01,Math.abs(pts[0]));prog.push({t,d:Math.abs(Math.round(d*100)/100),rel});});
   prog.sort((a,b)=>b.rel-a.rel);
@@ -1066,6 +1066,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:69,items:['Torwart gerechter bei den Stärken: Auf der Stärkenkarte tritt jeder Torwartwert einzeln an, genau wie die Feldwerte, statt nur als Durchschnitt. Saisonbericht und Saison-Rückblick zeigen die Torwartwerte jetzt auch bei Stärken und Entwicklung.']},
  {v:68,items:['Mehr Zeit beim Plus und Minus: Die Auswahl der Kategorie bleibt jetzt 8 statt 5 Sekunden offen.']},
  {v:67,items:['Eine Vorlage zählt jetzt auch für die Werte: Der Vorbereiter bekommt automatisch ein Plus „Torvorlage“, das auf Passspiel und Übersicht wirkt, leicht auch auf Spielverständnis. Ein guter Pass und „Abspiel verpasst“ zählen jetzt ebenfalls leicht für Spielverständnis.']},
  {v:66,items:['<b>🏆 Turniermodus:</b> In den Live-Optionen „Turnierspiel“ anhaken. Spielzeit, Ampel und Wechselvorschläge zählen dann über alle Spiele des Tages. „Speichern & nächstes Turnierspiel“ startet gleich das nächste Spiel.','<b>🅰 Vorlagen:</b> Nach dem Torschützen kannst du die Vorlage antippen (auch nachträglich unter „Aktionen“). Vorlagen gibt es als Rangliste, im Profil und im Spielbericht.','<b>⏱ Vor dem Abpfiff:</b> Der 2-Minuten-Hinweis nennt alle Kinder, die unter dem Spielzeit-Ziel liegen. In der letzten Phase steht das auch über der Bank.','<b>Spielzeit der Saison</b> unter Ranglisten: Minuten und Anteil je Kind über alle Live-Spiele.','<b>Bildschirm bleibt an:</b> neuer Schalter in den Live-Optionen.']},
@@ -1250,7 +1251,7 @@ function buildSeasonPdf(ids,src){return withSeason(src,()=>{
     facts.forEach((f,i)=>{const x=14+i*30.5;doc.setFillColor(244,251,214);doc.roundedRect(x,y-4,28,17,2,2,'F');doc.setTextColor(...G);doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(pdfClean(String(f[0])),x+14,y+4,{align:'center'});doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...M);doc.text(pdfClean(f[1]),x+14,y+10,{align:'center'});});
     doc.setFontSize(9.5);doc.setTextColor(22,36,27);y+=21;
     // Einschätzung: erste vs. letzte
-    const cats=[...RATINGS,...ATH_RATINGS];const ev=cats.map(r=>{const vals=asc.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);return vals.length?{n:r.n.replace('\u00AD','').replace('­',''),first:vals[0],last:latestVal('r:'+r.k,pid,sessionsWith('r:'+r.k)),cnt:vals.length}:null;}).filter(Boolean);
+    const cats=[...RATINGS,...ATH_RATINGS,...GK_RATINGS];const ev=cats.map(r=>{const vals=asc.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);return vals.length?{n:GK_SHORT[r.k]||r.n.replace('\u00AD','').replace('­',''),first:vals[0],last:latestVal('r:'+r.k,pid,sessionsWith('r:'+r.k)),cnt:vals.length}:null;}).filter(Boolean);
     if(ev.length){
       const top=ev.slice().sort((a,b)=>b.last-a.last).filter(x=>x.last>=3).slice(0,3);
       if(top.length){head('Stärken');doc.text(pdfClean(top.map(x=>x.n).join(' · ')),14,y);y+=8;}
@@ -1310,7 +1311,7 @@ function mergeTeams(src,dst){
 }
 
 // ---------- Saison-Rückblick für Kinder (persönlich, motivierend, ohne Vergleich mit anderen) ----------
-const KID_SHORT={spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',pass:'Passspiel',dribb:'Dribbling',ueber:'Übersicht',mut:'Mut',komm:'Kommunikation',abschluss:'Torschuss',schnell:'Schnelligkeit',dyn:'Antritt',ausd:'Ausdauer'};
+const GK_SHORT={tw_reak:'TW Reaktion',tw_fang:'TW Fangen',tw_stell:'TW Stellungsspiel',tw_raus:'TW Herauslaufen',tw_eroeff:'TW Spieleröffnung',tw_komm:'TW Kommandos'},KID_SHORT={tw_reak:'Reaktion im Tor',tw_fang:'Fangen',tw_stell:'Stellungsspiel im Tor',tw_raus:'Herauslaufen',tw_eroeff:'Abwurf & Aufbau',tw_komm:'Kommandos im Tor',spielv:'Spielverständnis',frei:'Freilaufen',zweik:'Zweikampf',pass:'Passspiel',dribb:'Dribbling',ueber:'Übersicht',mut:'Mut',komm:'Kommunikation',abschluss:'Torschuss',schnell:'Schnelligkeit',dyn:'Antritt',ausd:'Ausdauer'};
 function kidSeasonName(arch,ds){if(arch)return arch.name;if(!ds.length)return'';const[y,m]=ds[0].split('-').map(Number);const y1=m>=7?y:y-1;return `Saison ${y1}/${String(y1+1).slice(2)}`;}
 function kidGameName(s){const t=(s.title||'').trim();return !t||t==='Spiel'?'Spiel am '+fdate(s.date):t;}
 function kidTestTxt(t,d){const a=fnum(Math.abs(Math.round(d*100)/100));if(t.u==='s')return `${a} s schneller`;if(t.u==='cm')return `${a} cm weiter`;if(t.u==='/10')return `${a} Treffer mehr`;return `${a} ${t.u} mehr`;}
@@ -1322,8 +1323,8 @@ function kidData(pid){
   const bal=games.reduce((a,s)=>{const b=gameBal(s.live,pid);a.t+=b.tore;a.f+=b.gf;a.a+=b.ga;return a;},{t:0,f:0,a:0});
   const plusN=games.reduce((a,s)=>a+((s.live.plus||{})[pid]||0),0);
   const act={};games.forEach(s=>(s.live.actions||[]).forEach(a=>{if(a.p===pid&&a.t==='+'&&a.c)act[a.c]=(act[a.c]||0)+1;}));
-  const cats=[...RATINGS,...ATH_RATINGS];
-  const dev=cats.map(r=>{const vals=asc.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);if(!vals.length)return null;const ss=asc.filter(s=>isNum(s.ratings?.[pid]?.[r.k]));const lastN=ss.slice(-2).map(s=>s.ratings[pid][r.k]);return{k:r.k,n:KID_SHORT[r.k]||r.n,first:vals[0],last:avg(lastN),cnt:vals.length};}).filter(Boolean);
+  const cats=[...RATINGS,...ATH_RATINGS,...GK_RATINGS];
+  const dev=cats.map(r=>{const vals=asc.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);if(!vals.length)return null;const ss=asc.filter(s=>isNum(s.ratings?.[pid]?.[r.k]));const lastN=ss.slice(-2).map(s=>s.ratings[pid][r.k]);return{k:r.k,n:KID_SHORT[r.k]||r.n,gk:r.k.startsWith('tw_'),first:vals[0],last:avg(lastN),cnt:vals.length};}).filter(Boolean);
   const tests=TESTS.map(t=>{const pts=asc.map(s=>s.results?.[pid]?.[t.k]).filter(isNum);if(!pts.length)return null;const best=t.lower?Math.min(...pts):Math.max(...pts);const d=pts.length>1?best-pts[0]:0;const better=t.lower?d<0:d>0;return{t,first:pts[0],best,d,better,cnt:pts.length};}).filter(Boolean);
   // Highlights
   const hl=[];
@@ -1373,7 +1374,7 @@ function buildKidPdf(ids,src){return withSeason(src,()=>{
     tiles.forEach((t,i)=>{const x=14+i*46;doc.setFillColor(...SOFT);doc.roundedRect(x,y,42,24,3,3,'F');font('bold',20,G);T(String(t[0]),x+21,y+12,{align:'center'});font('normal',8.5,M);T(t[1],x+21,y+19,{align:'center'});});
     // Entwicklung
     y=108;head('So hast du dich entwickelt',y);
-    const rd=d.dev.filter(x=>x.cnt>1);
+    const rd=d.dev.filter(x=>x.cnt>1&&!x.gk);{const tw=d.dev.filter(x=>x.cnt>1&&x.gk);if(tw.length)rd.push({n:'Torwart',first:avg(tw.map(x=>x.first)),last:avg(tw.map(x=>x.last)),cnt:2});}
     if(rd.length>=3){
       const cx=58,cy=y+44,R=31,n=rd.length;const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/n,rr=R*Math.max(0,(v-1))/4;return[cx+rr*Math.cos(a),cy+rr*Math.sin(a)];};
       const poly=(vals,style)=>{const ps=vals.map((v,i)=>pt(i,v));doc.lines(ps.slice(1).map((q,i)=>[q[0]-ps[i][0],q[1]-ps[i][1]]),ps[0][0],ps[0][1],[1,1],style,true);};
@@ -1385,7 +1386,7 @@ function buildKidPdf(ids,src){return withSeason(src,()=>{
       const ly=cy+R+10;doc.setDrawColor(...GR);doc.setLineWidth(.9);doc.line(26,ly,32,ly);font('normal',8,M);T('Saisonende',34,ly+1);doc.setDrawColor(...GREY);doc.setLineWidth(.6);doc.setLineDashPattern([1.2,1],0);doc.line(58,ly,64,ly);doc.setLineDashPattern([],0);T('Saisonbeginn',66,ly+1);
       // gewachsen
       const gx=112;let gy=y+12;font('bold',11,G);T('Hier bist du am meisten gewachsen',gx,gy);gy+=4.5;font('normal',7.5,M);T('Grauer Strich = Saisonbeginn, grüner Balken = jetzt',gx,gy);gy+=7;
-      const gr=rd.filter(x=>x.last-x.first>=.2).sort((a,b)=>(b.last-b.first)-(a.last-a.first)).slice(0,4);
+      const gr=d.dev.filter(x=>x.cnt>1&&x.last-x.first>=.2).sort((a,b)=>(b.last-b.first)-(a.last-a.first)).slice(0,4);
       if(gr.length)gr.forEach(x=>{font('bold',10,INK);T(x.n,gx,gy);font('bold',10,GR);T('+'+fnum(r1(x.last-x.first)),196,gy,{align:'right'});
         doc.setFillColor(236,240,232);doc.roundedRect(gx,gy+2,84,3,1.5,1.5,'F');doc.setFillColor(...GR);doc.roundedRect(gx,gy+2,84*(x.last-1)/4,3,1.5,1.5,'F');doc.setFillColor(...GREY);doc.rect(gx+84*(x.first-1)/4-.4,gy+1.2,.8,4.6,'F');gy+=12;});
       else{font('normal',10,INK);T('Du hast dein starkes Niveau die ganze Saison gehalten. Klasse!',gx,gy,{maxWidth:84});gy+=12;}
