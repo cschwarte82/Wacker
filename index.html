@@ -175,7 +175,7 @@ details textarea{margin-top:8px}
 .lslot.sel,.lb.sel{border-color:var(--lime);box-shadow:0 0 0 3px #d7f25a99}
 .lslot.tw{background:#f4fbd6;max-width:130px}
 .lslot>b{display:block;font-size:12px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lslot small{display:block;font-size:9.5px;line-height:1.2;color:var(--mut);white-space:nowrap;overflow:hidden}.lslot,.slot{position:relative;margin-top:5px}.pbadge{position:absolute;top:-11px;left:-4px;font:800 9.5px/1 var(--ft);font-style:normal;background:#16241b;color:#fff;border-radius:6px;padding:3px 4px;letter-spacing:.2px;pointer-events:none}.pbadge.best{background:#d7f25a;color:#16241b}.prowl.w4 .pbadge{left:2px;font-size:8.5px;padding:3px 3px}.prowl.w4 .pbadge.r{right:2px;left:auto}.pbadge.r{left:auto;right:-4px;background:#fff;color:#1d6b3a;box-shadow:0 0 0 1.5px #1d6b3a}.pbadge.r.best{background:#d7f25a;color:#16241b;box-shadow:none}.lslot small.pab,.lb small.pab{display:block;font-size:10px;font-weight:700;color:var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lslot small{display:block;font-size:9.5px;line-height:1.2;color:var(--mut);white-space:nowrap;overflow:hidden}.lslot,.slot{position:relative;margin-top:5px}.pbadge{position:absolute;top:-11px;left:-4px;font:800 9.5px/1 var(--ft);font-style:normal;background:#16241b;color:#fff;border-radius:6px;padding:3px 4px;letter-spacing:.2px;pointer-events:none}.pbadge.best{background:#d7f25a;color:#16241b}.pbadge .pbv{font-weight:700}.prowl.w4 .pbadge{left:2px;font-size:8.5px;padding:3px 3px}.prowl.w4 .pbadge.r{right:2px;left:auto}.pbadge.r{left:auto;right:-4px;background:#fff;color:#1d6b3a;box-shadow:0 0 0 1.5px #1d6b3a}.pbadge.r.best{background:#d7f25a;color:#16241b;box-shadow:none}.lslot small.pab,.lb small.pab{display:block;font-size:10px;font-weight:700;color:var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pm{display:flex;align-items:center;justify-content:space-between;gap:2px;margin-top:3px}
 .pm .cnt{display:flex;flex-direction:column;align-items:center;line-height:1.1;font-size:12px;min-width:14px;opacity:.85}
 .pm button{flex:0 1 40px;min-width:30px;height:42px;border-radius:9px;border:0;font:700 28px/1 var(--ft);color:#fff;cursor:pointer;flex:none;padding:0}
@@ -323,7 +323,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='89';
+const APP_VERSION='90';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -769,7 +769,7 @@ const ABBR_SLOTS=['A-L','A-Z','A-R','M-L','M-Z','M-R','S-L','S-Z','S-R'];
 // Stärkste Position eines Kindes (Mix-Werte, inkl. Fuß, Spielweise, Positionstreue; Torwart, wenn der TW-Wert höher ist)
 function bestSlot(pid){const p=S.players[pid];if(!p||p.guest)return null;return withMix(()=>{const pr=profileOf(pid);let b=null;ABBR_SLOTS.forEach(k=>{const f=slotFit({...p,id:pid},pr,k);if(f.cov>0&&(!b||f.v>b.v))b={k,v:f.v};});const g=pr['a:torwart'];if(isNum(g)&&(!b||g>b.v))b={k:'TW',v:g};return b;});}
 // Schilder auf Spielerkarten (Aufstellung und Live): links jetzige Position, rechts ★ stärkste; beide gelb, wenn gleich
-function posBadges(pid,k){const b=pid?bestSlot(pid):null,same=b&&slotAbbr(b.k)===slotAbbr(k);return `<i class="pbadge ${same?'best':''}">${slotAbbr(k)}</i>${b?`<i class="pbadge r ${same?'best':''}">★${slotAbbr(b.k)}</i>`:''}`;}
+function posBadges(pid,k,v){const b=pid?bestSlot(pid):null,same=b&&slotAbbr(b.k)===slotAbbr(k);return `<i class="pbadge ${same?'best':''}">${slotAbbr(k)}${isNum(v)?` <span class="pbv">${fnum(r1(v))}</span>`:''}</i>${b?`<i class="pbadge r ${same?'best':''}">★${slotAbbr(b.k)}</i>`:''}`;}
 const catShort=c=>catName(c).replace(/\s*\/.*$/,'').replace('\u00AD','').replace('­','').replace('verhalten','');
 const catName=c=>{const[t,k]=c.split(':');if(t==='x')return 'Abschluss (aus Spielen, nur App/Mix)';return t==='a'?AREAS.find(a=>a.k===k).n:[...RATINGS,...ATH_RATINGS,...GK_RATINGS].find(r=>r.k===k).n;};
 const SRC=[['trainer','Trainer'],['app','App'],['mix','Mix']];
@@ -1173,6 +1173,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:90,items:['<b>Live: Stärke auf der Position:</b> Das Schild links oben zeigt jetzt neben der Position auch den Wert des Spielers dort, z. B. „LM 3,6“. Gleich gerechnet wie in der Aufstellung, ohne extra Platz.']},
  {v:89,items:['<b>Aufstellung wie Live:</b> Auch hier stehen links oben die jetzige Position und rechts oben mit ★ die stärkste. Die Bank zeigt „★Kürzel Wert“. So sieht alles gleich aus. Die lange Erklärung unter dem Spielfeld ist weg, sie steht im Handbuch.']},
  {v:88,items:['<b>Live:</b> Links oben auf der Karte steht die jetzige Position, rechts oben mit ★ die stärkste. Beide gelb = das Kind spielt gerade auf seiner stärksten Position.']},
  {v:87,items:['<b>Live:</b> Die Spielerkarten sind wieder luftig. Die Position steht als kleines Schild an der Kartenecke (gelb mit ★ = stärkste Position). Tippst du ein Kind an, stehen oben sein Wert auf der jetzigen und auf der stärksten Position.']},
@@ -1691,7 +1692,7 @@ function vLive(){
   const pm=pid=>`<div class="pm"><button class="lm" onclick="event.stopPropagation();A.liveAct('${pid}',-1)" aria-label="Minus">−</button><span class="cnt"><b class="pos">${L.plus[pid]||0}</b><b class="neg">${L.minus[pid]||0}</b></span><button class="lp" onclick="event.stopPropagation();A.liveAct('${pid}',1)" aria-label="Plus">+</button></div>`;
   const PF={};const curV=(pid,k)=>{const p=S.players[pid];if(!p||p.guest)return null;const c=pid+'|'+k;return c in PF?PF[c]:(PF[c]=withMix(()=>k==='TW'?profileOf(pid)['a:torwart']:slotFit({...p,id:pid},profileOf(pid),k).v));};
   const isBest=(pid,k)=>{const b=bestSlot(pid);return b&&slotAbbr(b.k)===slotAbbr(k);};
-  const badge=posBadges;
+  const badge=(pid,k)=>posBadges(pid,k,pid?curV(pid,k):null);
   const posInfo=pid=>{const p=S.players[pid];if(!p||p.guest)return '';const k=Object.keys(L.pos).find(x=>L.pos[x]===pid),b=bestSlot(pid),v=k?curV(pid,k):null;const cur=k?`${slotAbbr(k)} ${isNum(v)?fnum(r1(v)):'–'}`:'Bank';return `<b>${esc(p.name)}</b>: ${cur}${b?(k&&slotAbbr(b.k)===slotAbbr(k)?' – das ist die stärkste Position ★':` · stärkste Position ★${slotAbbr(b.k)} ${fnum(r1(b.v))}`):''}<br>`;};
   const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid))+cardBadge(L,pid):'frei'}${pid?` <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span>`:''}</b>${badge(pid,k)}${pid?'':`<small>${slotLabel(k)}</small>`}${pid?pm(pid):''}</div>`;};
   const line=pt=>FORMS[L.n][L.form].filter(k=>k[0]===pt).sort(bySide);
