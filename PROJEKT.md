@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 88, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 89, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,3 +106,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V89:** `posBadges(pid,k)` global, Legende unter dem Feld entfernt (Live + Aufstellung, Wunsch Christian); Aufstellungskarten mit denselben Schildern (Text „Abwehr links“ entfällt, Wert bleibt), Bank „★Kürzel Wert“ aus `bestSlot`.
