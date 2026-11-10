@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><title>TrainerRadar – Benutzerhandbuch</title>
 <link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="fonts/barlow.css">
 <style>
 .ph{background:var(--gd);color:#fff;padding:9mm 14mm 7mm;display:flex;justify-content:space-between;align-items:flex-end}
 .ph h2{font:800 21pt/1.1 'Inter Display'}
 .ph .k{font:600 9pt Inter;color:var(--lime);text-transform:uppercase;letter-spacing:.8px;margin-bottom:1.5mm}
 .ph img{width:12mm;height:12mm;border-radius:3mm}
-.inner{padding:6.5mm 14mm}
+.inner{padding:5.5mm 14mm}
 .cols{display:flex;gap:7mm}
 .col{flex:1;min-width:0}
 .box{background:var(--bg);border-radius:4mm;padding:4.2mm 5mm;margin-bottom:3.6mm}
@@ -31,6 +32,28 @@ ol.st li::before{content:counter(s);position:absolute;left:0;top:0;width:5.8mm;h
 table.mt{width:100%;border-collapse:collapse;font-size:9.2pt}
 table.mt td{padding:1.4mm 2mm;border-bottom:.3mm solid var(--line)}
 table.mt td:first-child{font-weight:700;color:var(--gd);white-space:nowrap}
+
+/* Stil wie der Flyer (Christian 10.11.2026): Nachtspiel-Kopf, Barlow kursiv in Großbuchstaben, schräge Nummern, Lime-Akzente.
+   Keine box-shadow oder opacity (grauer Schleier in manchen PDF-Viewern). */
+.ph{position:relative;background:#08140f;padding:6.5mm 14mm 8mm;overflow:hidden;align-items:center}
+.ph::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 58%,#102419 58%,#102419 70%,transparent 70%,transparent 76%,#14301f 76%,#14301f 80%,transparent 80%)}
+.ph::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3.2mm;background:#d6fb1a;clip-path:polygon(0 70%,100% 0,100% 100%,0 100%)}
+.ph>*{position:relative}
+.ph h2{font:900 italic 30pt/1 'Barlow Semi Condensed',sans-serif;text-transform:uppercase;letter-spacing:.4px;transform:skewX(-9deg);transform-origin:0 100%;color:#fff}
+.ph .k{font:800 italic 11pt 'Barlow Semi Condensed';color:#d6fb1a;letter-spacing:1px;margin-bottom:1.2mm}
+.ph img{width:13mm;height:13mm}
+.box h3,.card h3{font:800 italic 13.5pt/1.05 'Barlow Semi Condensed';text-transform:uppercase;letter-spacing:.3px;color:var(--gd);transform:skewX(-6deg);transform-origin:0 100%}
+.card h3{font-size:12.5pt}
+.box.lime{background:#f4fbd6;border:.5mm solid #d6fb1a}
+.box.note{border-left:1.6mm solid #d6fb1a;background:#08140f;color:#fff}
+.box.note h3{color:#d6fb1a}
+.num{width:10mm;height:7.2mm;border-radius:0;background:#173a24;color:#d6fb1a;font:900 italic 13pt/7.2mm 'Barlow Semi Condensed';clip-path:polygon(18% 0,100% 0,82% 100%,0 100%)}
+.step .tt{font:800 italic 12pt/1.1 'Barlow Semi Condensed';text-transform:uppercase;letter-spacing:.3px;color:var(--gd)}
+ol.st li::before{width:7mm;border-radius:0;background:#173a24;color:#d6fb1a;font:900 italic 9.5pt/5.8mm 'Barlow Semi Condensed';clip-path:polygon(18% 0,100% 0,82% 100%,0 100%)}
+ol.st li{padding-left:9.5mm}
+.shot{box-shadow:none;border:.6mm solid #08140f}
+.foot{left:0;right:0;bottom:0;height:10mm;padding:3.6mm 14mm 0;border:0;background:#08140f;color:#cfd8d2;clip-path:polygon(0 30%,100% 0,100% 100%,0 100%);align-items:center}
+.foot span:first-child{font:800 italic 10pt 'Barlow Semi Condensed';text-transform:uppercase;letter-spacing:.6px;color:#d6fb1a}
 </style></head>
 <body>
 
