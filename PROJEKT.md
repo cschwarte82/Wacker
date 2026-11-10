@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 69, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 70, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -87,3 +87,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V67:** Vorlage = automatisch Plus `vorl` „Torvorlage“ (ACT_MAP pass 1 + ueber 1 + spielv .5; auch pass/verp zählen .5 auf spielv), in der Auswahl ausgeblendet über `pOff`), Aktion trägt `ast:<goal-id>` (`liveAstPlus` live, `astSync` nachträglich, Neuaufbau beim Zusammenlegen).
 - **V68:** Plus/Minus-Auswahl („Was war's?“, `showSheet`) bleibt 8 s statt 5 s offen (Christian: zu wenig Zeit). Torschütze 7 s, Vorlage 6 s unverändert.
 - **V69:** Torwart fair bei Stärken: Stärkenkarte – jeder GK-Wert (Einschätzung + App-Wert je Schlüssel) tritt einzeln an, „Torwart“ höchstens einmal (vorher Schnitt aller GK-Werte → Spitzen gingen verloren). Saisonbericht (`GK_SHORT`) und Kinder-Rückblick (`KID_SHORT` tw_*) nehmen GK_RATINGS mit; Rückblick-Netz fasst GK zu einer Achse „Torwart“ zusammen, „gewachsen“/„Deine Stärken“ einzeln.
+- **V70:** Spielzeit-Ampel „knapp“ deutlich gelb (#facc15, `.lmin.warn` als Badge mit dunkler Schrift, `.adot.warn`), vorher orange #c2410c kaum von Rot zu unterscheiden.
