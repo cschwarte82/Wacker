@@ -93,15 +93,15 @@ textarea{resize:vertical;margin-bottom:8px}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .radar{width:100%;max-width:380px;display:block;margin:0 auto}
 .radar .grid{fill:none;stroke:#e3e8df;stroke-width:1}
-.radar .grid.mid{stroke:#b9c7b4;stroke-dasharray:3 3}
+.radar .grid.mid{stroke:#cfd8cb;stroke-dasharray:1 3;stroke-linecap:round}
 .radar .pc{fill:rgba(29,107,58,.22);stroke:var(--g);stroke-width:2}
-.radar .pp{fill:none;stroke:#8a958d;stroke-width:1.5;stroke-dasharray:4 3}
+.radar .pp{fill:none;stroke:#b7791f;stroke-width:2.2;stroke-dasharray:6 4}
 .radar .pd{fill:var(--g)}
 .radar .rl{font:600 12px var(--ft);fill:var(--ink)}
 .radar .rl.na{fill:#aab3ac}
-.legend{display:flex;gap:16px;justify-content:center;font-size:13px;color:var(--mut);margin:4px 0 8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:13px;color:var(--mut);margin:4px 0 8px}
 .legend i{display:inline-block;width:18px;height:0;border-top:3px solid var(--g);vertical-align:middle;margin-right:5px}
-.legend i.lp{border-top:2px dashed #8a958d}
+.legend i.lp{border-top:3px dashed #b7791f}.legend i.lm{border-top:2px dotted #b9c7b4}
 .trow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f0f2ee}
 .trow>div:first-child{flex:1;min-width:0}
 .trow:first-of-type{border-top:0}
@@ -265,7 +265,7 @@ h2{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 .rrow,.trow,.note,.rk,.ov,.crow,.goal,.focus,.gd,.tl,.archrow,.pfrow,.ptrow{border-top-color:#243029}.tourline{border-color:#2c3a31}.ptbar{background:#26332b}.ptbar s{background:#e8efe9}
 .moods button,.ex{background:#1f2a23}.moods button.on{background:#1d3a26}
 .radar .grid{stroke:#2b3830}.radar .grid.mid{stroke:#4a5b50}.radar .rl.na{fill:#66746b}.radar .pc{fill:rgba(87,199,133,.22);stroke:#57c785}
-.legend i.lp,.radar .pp{border-color:#9aa99f;stroke:#9aa99f}
+.legend i.lp,.radar .pp{border-color:#e0a84a;stroke:#e0a84a}
 .subsug button,.selhint,.lslot.tw{background:#262f14;border-color:#5f7a1f;color:var(--ink)}
 .lslot.empty,.slot.empty{background:#ffffff1f;border-color:#ffffff88}
 .slot,.lslot,.lb{box-shadow:0 2px 4px #0008}
@@ -321,7 +321,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='81';
+const APP_VERSION='82';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -627,7 +627,8 @@ function vPlayer(){
   // Zwei Netze: Potenzial (ganze Saison, gestrichelt) und Form (letzte X Wochen, gefüllt) – nach „Werte aus“
   const cur=[],prev=[];let noForm=0;
   AREAS.forEach(a=>{const c='a:'+a.k,s2=sessionsWith(c);const po=srcVal(c,pid,s2,'pot');let fo=srcVal(c,pid,s2,'form');if(!isNum(fo)&&isNum(po)){fo=po;noForm++;}cur.push(isNum(fo)?fo:null);prev.push(isNum(po)?po:null);});
-  h+=`<div class="card"><div class="lbl">Stärkenprofil <small>Werte aus: ${SRC.find(x=>x[0]===srcMode())[1]}</small></div>${radar(cur,prev)}<div class="legend"><span><i></i>Form (${formWeeks()} Wo.)</span><span><i class="lp"></i>Potenzial (Saison)</span></div><div class="sub">3 (gestrichelter Ring) = Teamschnitt. Potenzial = alle Werte der Saison (Tests: Bestwert), Form = nur die letzten ${formWeeks()} Wochen.${noForm?` Bei ${noForm} Bereich${noForm>1?'en':''} gibt es in dem Zeitraum keine neuen Werte – dort liegt Form auf Potenzial.`:''} „Werte aus“ und Wochen stellst du unter Ranglisten → Bestwerte ein. Nur für dich als Trainer – kein Ranking.</div></div>`;
+  const same=cur.every((v,i)=>!isNum(v)||!isNum(prev[i])||Math.abs(v-prev[i])<.05);
+  h+=`<div class="card"><div class="lbl">Stärkenprofil <small>Werte aus: ${SRC.find(x=>x[0]===srcMode())[1]}</small></div>${radar(cur,prev)}<div class="legend"><span><i></i>Form (${formWeeks()} Wo.)</span><span><i class="lp"></i>Potenzial (Saison)</span><span><i class="lm"></i>3 = Teamschnitt</span></div><div class="sub">${same?`<b>Form und Potenzial sind gerade gleich – die Linien liegen übereinander.</b> `:''} Potenzial = alle Werte der Saison (Tests: Bestwert), Form = nur die letzten ${formWeeks()} Wochen.${noForm?` Bei ${noForm} Bereich${noForm>1?'en':''} gibt es in dem Zeitraum keine neuen Werte – dort liegt Form auf Potenzial.`:''} „Werte aus“ und Wochen stellst du unter Ranglisten → Bestwerte ein. Nur für dich als Trainer – kein Ranking.</div></div>`;
   const rows=TESTS.map(t=>{
     const pts=ss.map(s=>s.results?.[pid]?.[t.k]).filter(isNum); if(!pts.length)return'';
     const last=pts[pts.length-1],first=pts[0]; let delta='';
@@ -1102,6 +1103,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:82,items:['Stärkenprofil: Die Potenzial-Linie ist jetzt orange gestrichelt, der Teamschnitt-Ring (3) hellgrau gepunktet. So verwechselt man sie nicht mehr. Sind Form und Potenzial gleich, steht das direkt unter dem Netz.']},
  {v:81,items:['Deine Einschätzungen zählen jetzt genau so, wie du sie eingetragen hast. Bisher wurde bei wenigen Einschätzungen der Mannschaftsschnitt mit eingerechnet (eine einzelne 5 ergab 4,0). Gute oder schwache Phasen zeigt der Formpfeil.']},
  {v:80,items:['Live-Aktionen orientieren sich jetzt an deinem eingetragenen Potenzial-Wert des Kindes statt am Mittelwert 3: Plus-Aktionen schieben ihn hoch, Minus-Aktionen korrigieren ihn nach unten, ohne Aktionen bleibt er wie eingetragen.','Hat ein Kind in einem Bereich keine Live-Aktionen, zählt im Mix nur dein Wert – es wird kein Mannschaftsschnitt mehr hineingerechnet.']},
  {v:79,items:['Profil: Die Torwart-Karte zeigt jetzt denselben Torwart-Wert wie Kader und Aufstellung (Mix aus Trainer + App, Potenzial + Form). Weicht der Schnitt deiner letzten Torwart-Einschätzungen davon ab, steht er darunter mit Erklärung.']},

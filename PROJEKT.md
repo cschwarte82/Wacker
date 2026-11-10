@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 81, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 82, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -99,3 +99,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V79:** Profil-Torwartkarte zeigt den Mix-Wert aus `overallAll` (wie Kader/Aufstellung) statt `latestVal` (nur letzte Trainer-Einschätzungen); Abweichung wird erklärt.
 - **V80:** App-Wert aus Live-Aktionen startet beim eigenen Potenzial-Wert des Kindes (`appVals` anchor: periodVal 'pot' von r:/a:-Kategorie, sonst 3) statt bei 3: (5P+M+Basis·2)/(P+M+2). Mix ohne App-Wert = Trainerwert allein (kein Team-Schnitt-App-Wert mehr).
 - **V81:** `RATE_BUF=0`: kein Zug der Einschätzungen zum Mannschaftsschnitt mehr (`shrinkPV`, `liveVal`).
+- **V82:** Radar: Potenzial `.pp` orange gestrichelt (#b7791f, dunkel #e0a84a), 3er-Ring gepunktet, Legende mit „3 = Teamschnitt“, Hinweis wenn Form = Potenzial.
