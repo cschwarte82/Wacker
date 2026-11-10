@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 94, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 95, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,6 +106,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V95:** Wechselvorschlag `subSugHtml(L)` in `#subsugw`, im Sekunden-Intervall alle 5 s neu (nicht während ein Spieler ausgewählt ist). Vorher nur beim Rendern → nach Wechseln blieb die Box leer (Christian 10.11.).
 - **V94:** Live-Übersicht „Spielzeiten“: `daySecs` wie die Karten (vorher `liveSecs`, im Turnier ohne Vorspiele) und sekündlich aktualisiert (`.lmin2`).
 - **V93:** `pitchPick(L,pids,btn)`: Torschützen-/Vorlagen-Auswahl wie das Feld (Reihen S, M, A, TW, je Reihe `bySide`; Ausgewechselte in einer Zusatzreihe, „Eigentor Gegner“ breit darunter).
 - **V92:** `S.lu.opp` (Feld „Nächster Gegner“ in der Aufstellung) → `L.opp`; Live-Kopf `.lmatch` „Team Tore:Tore Gegner“ (Gegner antippen = `A.oppAsk`), Uhr + Start darunter. Spielende fragt nur noch nach dem Gegner, wenn keiner eingetragen ist; Titel „Spiel gegen X“, Ergebnis aus `score(L)`, `doc.opp`. `.slot.tw` wie `.lslot.tw` (#f4fbd6, dunkel #262f14).
