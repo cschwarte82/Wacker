@@ -140,7 +140,7 @@ details textarea{margin-top:8px}
 .slot b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .slot small{display:block;font-size:11px;color:var(--mut)}
 .slot .fit{font:700 15px var(--fc);color:var(--g)}
-.slot.tw{background:var(--lime)}
+.slot.tw{background:#f4fbd6}
 .slot.est{outline:2px dashed #c2410c}
 .bench{display:flex;flex-wrap:wrap;gap:6px}
 .lutop{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 8px}.lutop .sel{width:auto;flex:1 1 40%;margin:0;padding:9px 6px;font-size:15px}.lutop .seg{flex:1 1 100%;margin:0}.lutop .seg.fun button{font-weight:700}
@@ -155,6 +155,8 @@ details textarea{margin-top:8px}
 .tsel{flex:1;background:none;border:0;text-align:left;font:600 15px var(--ft);color:var(--ink);cursor:pointer;padding:8px 0;min-width:0}
 .tsel small{font-weight:400;color:var(--mut)}
 .lhead{display:flex;gap:8px;align-items:stretch;margin:6px 0}
+.lmatch{display:flex;align-items:center;gap:8px;margin:4px 0 2px}.lmatch .lt{flex:1;min-width:0;font:700 16px/1.2 var(--ft);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lmatch .lt.own{text-align:right}.lmatch .lt.opp{text-align:left;background:none;border:0;padding:0;cursor:pointer}.lmatch .lt.opp.none{color:var(--mut);font-weight:600;text-decoration:underline dotted}.lmatch .lsc{padding:0 6px}
+.oppin{width:100%;font:16px var(--ft);padding:10px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:var(--card);margin-top:4px}
 .lclock{flex:1;font:700 36px/1 var(--fc);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;color:var(--gd);font-variant-numeric:tabular-nums;cursor:pointer}
 .lclock.run{color:#c2410c}
 .lctl{display:flex;flex-direction:column;gap:6px}
@@ -266,7 +268,7 @@ h2{-webkit-hyphens:auto;hyphens:auto;overflow-wrap:anywhere}
 .moods button,.ex{background:#1f2a23}.moods button.on{background:#1d3a26}
 .radar .grid{stroke:#2b3830}.radar .grid.mid{stroke:#4a5b50}.radar .rl.na{fill:#66746b}.radar .pc{fill:rgba(87,199,133,.22);stroke:#57c785}
 .legend i.lp,.radar .pp{border-color:#e0a84a;stroke:#e0a84a}
-.subsug button,.selhint,.lslot.tw{background:#262f14;border-color:#5f7a1f;color:var(--ink)}
+.subsug button,.selhint,.lslot.tw,.slot.tw{background:#262f14;border-color:#5f7a1f;color:var(--ink)}
 .lslot.empty,.slot.empty{background:#ffffff1f;border-color:#ffffff88}
 .slot,.lslot,.lb{box-shadow:0 2px 4px #0008}
 .gst button.on.besser{background:#3a2c10;color:#f0c060;border-color:#5a4a1c}
@@ -323,7 +325,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='91';
+const APP_VERSION='92';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1002,6 +1004,7 @@ function vLineupInner(){
       return `<div class="whyr"><div class="row between"><b>${esc(p.name)} <small class="sub">${POS[pt].n} ${SIDE[sd]}</small></b><b>${fnum(r1(f.v))}</b></div><div class="sub">${parts.join(' · ')}${adj.length?` · <b>${adj.join(' · ')}</b>`:''}</div></div>`;}).join('')}<div class="sub" style="margin-top:6px">Wert = gewichteter Schnitt der Teilwerte (immer Mix: Trainer- und App-Werte, Potenzial und Form) plus Zu-/Abschläge. – = noch kein Wert, zählt dann nicht mit.</div></details>`;
   S.luRes={res:filled.map(k=>({p:{id:cur[k]},slot:k})),keeper:cur.TW||null,bench:bench.map(p=>p.id),n:L.n,form:L.form};
   h+=fmtPicker('A.cfgFmt');
+  h+=`<label class="lbl2" style="display:block;margin:12px 0 0">Nächster Gegner<input id="lu_opp" class="oppin" value="${esc(S.lu.opp||'')}" placeholder="z. B. SV Musterstadt" autocomplete="off" onchange="S.lu.opp=this.value.trim();saveLocal()"></label>`;
   h+=`<button class="btn pri" style="width:100%;margin:10px 0 0" onclick="A.liveFromLineup()">▶ Live mit dieser Aufstellung</button>`;
   const est=filled.filter(k=>fitOf(cur[k],k).cov<.5).map(k=>esc(S.players[cur[k]].name));
   if(est.length)h+=`<div class="banner">Gestrichelt = wenig Daten, Wert teilweise geschätzt: ${est.join(', ')}. Fehlende Bereiche zählen mit dem Mannschaftsschnitt.</div>`;
@@ -1177,6 +1180,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:92,items:['<b>Nächster Gegner:</b> Unter „Aufstellung“ trägst du über „Live mit dieser Aufstellung“ den Gegner ein. Live steht dann oben „Deine Mannschaft 2:1 Gegner“. Antippen des Gegnernamens ändert ihn.','Beim Speichern fragt die App nicht mehr nach Gegner und Ergebnis, sie übernimmt beides selbst.','Die Torwartkarte in der Aufstellung hat jetzt dieselbe Farbe wie auf der Live-Seite.']},
  {v:91,items:['<b>Spielbewertungen zählen zur Form:</b> Deine Bewertung nach einem Spiel fließt jetzt in die Form der letzten 6 Wochen ein, zusammen mit den Live-Aktionen. Ist der 6-Wochen-Block vorbei, wandert sie ins Potenzial. Das Potenzial selbst kommt aus Messwerten und Trainereinschätzungen.']},
  {v:90,items:['<b>Live: Stärke auf der Position:</b> Das Schild links oben zeigt jetzt neben der Position auch den Wert des Spielers dort, z. B. „LM 3,6“. Gleich gerechnet wie in der Aufstellung, ohne extra Platz.']},
  {v:89,items:['<b>Aufstellung wie Live:</b> Auch hier stehen links oben die jetzige Position und rechts oben mit ★ die stärkste. Die Bank zeigt „★Kürzel Wert“. So sieht alles gleich aus. Die lange Erklärung unter dem Spielfeld ist weg, sie steht im Handbuch.']},
@@ -1705,7 +1709,8 @@ function vLive(){
   const PI=partInfo(L);const pn=PART_N(PI.F.parts);
   const startLbl=PI.done?'Abgepfiffen':L.clock.running?'Pause':(L.clock.elapsed===0?'Anpfiff':(L.part>1&&liveSecs(L)===L.partStart)?`${L.part}. ${pn} anpfeifen`:'Weiter');
   const sc=score(L);
-  let h=`<div class="lhead"><button id="lclock" class="lclock ${L.clock.running?'run':''} ${PI.over>0?'over':''}" onclick="A.liveClock()">${clockTxt(L)}</button><div class="lsc">${sc.gf}:${sc.ga}</div><button class="btn lstart ${L.clock.running?'':'pri'}" onclick="A.liveClock()" ${PI.done?'disabled':''}>${startLbl}</button></div>`;
+  let h=`<div class="lmatch"><span class="lt own">${esc(TEAMS[CUR].name||'Wir')}</span><div class="lsc">${sc.gf}:${sc.ga}</div><button class="lt opp ${L.opp?'':'none'}" onclick="A.oppAsk()">${L.opp?esc(L.opp):'Gegner eintragen'}</button></div>`;
+  h+=`<div class="lhead"><button id="lclock" class="lclock ${L.clock.running?'run':''} ${PI.over>0?'over':''}" onclick="A.liveClock()">${clockTxt(L)}</button><button class="btn lstart ${L.clock.running?'':'pri'}" onclick="A.liveClock()" ${PI.done?'disabled':''}>${startLbl}</button></div>`;
   h+=`<div class="partline"><span id="lpart">${partTxt(L)}</span><span class="row gap" style="flex:none">${PI.done?'':`<button class="btn sm2 ${PI.over>=0&&liveSecs(L)>0?'pri':''}" onclick="A.partEnd()" ${liveSecs(L)>0?'':'disabled'}>${PI.last?'Abpfiff':pn+' beenden'}</button>`}<button class="btn sm2" onclick="A.liveUndo()" ${L.log.length?'':'disabled'} aria-label="Zurück">↶</button></span></div>`;
   if(L.tour){const tp=tourPrev(L);h+=`<div class="tourline">🏆 <b>${esc(L.tour.name)}</b> · Spiel ${tp.n+1} · Minuten zählen über den ganzen Tag</div>`;}
   if(liveSecs(L)===0&&!L.clock.running)h+=fmtPicker('A.liveFmt')+`<label class="chk2 card" style="margin-top:0">${tourChk(L)}</label>`;
@@ -1756,7 +1761,8 @@ const A={
     const R=S.luRes;if(!R){toast('Keine Aufstellung berechnet.');return;}
     if(S.live&&!force){showModal(`<h3>Laufendes Live-Spiel ersetzen?</h3><p>Plus/Minus und Spielzeiten des aktuellen Live-Spiels gehen verloren, wenn du es nicht vorher beendest.</p><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn danger" onclick="A.liveFromLineup(true)">Ersetzen</button></div>`);return;}
     closeModal();const pos={};FORMS[R.n][R.form].forEach(k=>pos[k]=null);R.res.forEach(r=>pos[r.slot]=r.p.id);if(!noGK(R.n))pos.TW=R.keeper||null;
-    S.live=newLive(R.n,R.form,pos,R.bench.slice());S.liveSel=null;liveSave();A.go('live');
+    {const oi=$('#lu_opp');if(oi)S.lu.opp=oi.value.trim();}
+    S.live=newLive(R.n,R.form,pos,R.bench.slice());if(S.lu.opp)S.live.opp=S.lu.opp;S.liveSel=null;liveSave();A.go('live');
   },
   liveEmpty(){const n=S.lu.n,form=FORMS[n][S.lu.form]?S.lu.form:Object.keys(FORMS[n])[0];const pos={};FORMS[n][form].forEach(k=>pos[k]=null);if(!noGK(n))pos.TW=null;S.live=newLive(n,form,pos,plist().map(p=>p.id));S.liveSel=null;liveSave();render(true);},
   liveTour(on){const L=S.live;if(!L)return;if(!on)L.tour=null;else{const t=slist().find(s=>s.date===today()&&s.live&&s.live.tour);L.tour=t?{id:t.live.tour,name:t.live.tourName||'Turnier'}:{id:uid('tr'),name:'Turnier '+fdate(today())};}liveSave();render(true);toast(on?`🏆 ${L.tour.name}${t0n(L)}`:'Kein Turnierspiel');},
@@ -1841,7 +1847,9 @@ const A={
   liveForm(f){const L=S.live;accrue(L);remap(L,L.n,f);syncLu(L.n,L.form);S.liveSel=null;liveSave();render(true);},
   liveN(n){const L=S.live;n=normN(n);if(String(L.n)===String(n))return;accrue(L);remap(L,n,Object.keys(FORMS[n])[0]);syncLu(L.n,L.form);S.liveSel=null;liveSave();render(true);},
   liveAddBench(pid){const L=S.live;if(!L.bench.includes(pid))L.bench.push(pid);liveSave();render(true);},
-  liveEndModal(){showModal(`<h3>Spiel beenden</h3><label>Gegner / Titel<input id="m_title" value="Spiel gegen " autocomplete="off"></label><label>Ergebnis (optional)<input id="m_result" placeholder="z. B. 3:2" value="${(S.live&&S.live.goals&&S.live.goals.length)?score(S.live).gf+':'+score(S.live).ga:''}" autocomplete="off"></label><div class="sub" style="margin:0 0 14px">Plus/Minus und Spielminuten werden als Spiel unter „Bewertung“ gespeichert. Danach kannst du die Kinder direkt bewerten.</div>${S.live&&S.live.tour?`<button class="btn pri" style="width:100%;margin-bottom:8px" onclick="A.liveEnd(true)">🏆 Speichern &amp; nächstes Turnierspiel</button>`:''}<div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn ${S.live&&S.live.tour?'':'pri'}" onclick="A.liveEnd()">Speichern</button></div>`);},
+  oppAsk(){const L=S.live;if(!L)return;showModal(`<h3>Gegner</h3><label>Name des Gegners<input id="m_opp" value="${esc(L.opp||'')}" placeholder="z. B. SV Musterstadt" autocomplete="off"></label><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" onclick="A.oppSet()">Übernehmen</button></div>`);setTimeout(()=>{const e=$('#m_opp');if(e)e.focus();},50);},
+  oppSet(){const L=S.live;if(!L)return;L.opp=($('#m_opp').value||'').trim();liveSave();closeModal();render(true);},
+  liveEndModal(){const L=S.live;if(!L)return;const sc=score(L);showModal(`<h3>Spiel beenden</h3>${L.opp?`<p style="font-size:18px;margin:0 0 10px"><b>${esc(TEAMS[CUR].name||'Wir')} ${sc.gf}:${sc.ga} ${esc(L.opp)}</b></p>`:`<label>Gegner<input id="m_opp" placeholder="z. B. SV Musterstadt" autocomplete="off"></label>`}<div class="sub" style="margin:0 0 14px">Ergebnis, Plus/Minus und Spielminuten werden als Spiel unter „Bewertung“ gespeichert. Danach kannst du die Kinder direkt bewerten.</div>${S.live&&S.live.tour?`<button class="btn pri" style="width:100%;margin-bottom:8px" onclick="A.liveEnd(true)">🏆 Speichern &amp; nächstes Turnierspiel</button>`:''}<div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn ${S.live&&S.live.tour?'':'pri'}" onclick="A.liveEnd()">Speichern</button></div>`);},
   partEnd(){const L=S.live;if(!L)return;accrue(L);L.clock.running=false;const PI=partInfo(L);
     L.log.push({t:'part',fin:PI.last,prevPart:L.part||1,prevStart:L.partStart||0});
     if(PI.last){L.finished=true;liveSave();render(true);toast('Abpfiff! Jetzt „Spiel beenden & speichern“.');return;}
@@ -1853,11 +1861,11 @@ const A={
     syncOn(L);Object.keys(L.on||{}).forEach(p=>{const a=L.on[p];const b=Math.round(L.clock.elapsed);if(b>a)(L.per[p]=L.per[p]||[]).push([a,b]);});L.on={};
     const mins={};Object.entries(L.mins).forEach(([p,s])=>{if(s>=1)mins[p]=Math.round(s/60);});
     const periods={};Object.entries(L.per||{}).forEach(([p,ps])=>{const v=ps.filter(([a,b])=>b-a>=10);if(v.length)periods[p]=v;});
-    const id=uid('s');let title=($('#m_title').value||'').trim()||'Spiel';if(/^Spiel gegen$/i.test(title))title='Spiel';
-    const doc={type:'game',by:META.dev,date:today(),title,result:($('#m_result').value||'').trim(),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{t0:L.t0||null,plus:L.plus,minus:L.minus,mins,periods,fmt:liveFmt(L),n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({id:g.id,t:g.t,p:g.p||null,a:g.a||null,og:!!g.og,at:g.at,ml:g.ml,sec:g.sec,on:g.on||[],ts:g.ts||0})),cards:(L.cards||[]).map(c=>({c:c.c,p:c.p,at:c.at,ml:c.ml,sec:c.sec,ts:c.ts||0})),subs:L.log.filter(e=>e.t==='sub').map(e=>({at:isNum(e.at)?e.at:0,ml:e.ml,sec:e.sec,in:e.inP,out:e.outP||null,ts:e.ts||0})),partStarts:L.partStarts||[0],squad:[...new Set([...liveField(L),...L.bench,...(L.sentOff||[]),...Object.keys(L.mins||{})])],...(L.tour?{tour:L.tour.id,tourName:L.tour.name}:{}),actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,ml:e.ml,gk:!!e.gk,...(e.goal?{goal:e.goal}:{}),...(e.ast?{ast:e.ast}:{})}))}};
+    const id=uid('s');const opp=(L.opp||($('#m_opp')?$('#m_opp').value:'')||'').trim(),title=opp?'Spiel gegen '+opp:'Spiel',sc0=score(L);
+    const doc={type:'game',by:META.dev,date:today(),title,result:L.clock.elapsed>0||(L.goals||[]).length?sc0.gf+':'+sc0.ga:'',...(opp?{opp}:{}),tests:[],results:{},ratings:{},mood:{},notes:{},created:Date.now(),live:{t0:L.t0||null,plus:L.plus,minus:L.minus,mins,periods,fmt:liveFmt(L),n:L.n,form:L.form,duration:Math.round(L.clock.elapsed/60),goals:(L.goals||[]).map(g=>({id:g.id,t:g.t,p:g.p||null,a:g.a||null,og:!!g.og,at:g.at,ml:g.ml,sec:g.sec,on:g.on||[],ts:g.ts||0})),cards:(L.cards||[]).map(c=>({c:c.c,p:c.p,at:c.at,ml:c.ml,sec:c.sec,ts:c.ts||0})),subs:L.log.filter(e=>e.t==='sub').map(e=>({at:isNum(e.at)?e.at:0,ml:e.ml,sec:e.sec,in:e.inP,out:e.outP||null,ts:e.ts||0})),partStarts:L.partStarts||[0],squad:[...new Set([...liveField(L),...L.bench,...(L.sentOff||[]),...Object.keys(L.mins||{})])],...(L.tour?{tour:L.tour.id,tourName:L.tour.name}:{}),actions:L.log.filter(e=>e.t==='+'||e.t==='-').map(e=>({t:e.t,p:e.p,c:e.c||null,at:isNum(e.at)?e.at:null,ml:e.ml,gk:!!e.gk,...(e.goal?{goal:e.goal}:{}),...(e.ast?{ast:e.ast}:{})}))}};
     A.sheetHide();
     if(next&&L.tour){const pos={...L.pos};const bench=[...new Set([...L.bench,...(L.sentOff||[])])];const nl=newLive(L.n,L.form,pos,bench);nl.tour={...L.tour};nl.fmt={...liveFmt(L)};S.live=null;saveDoc('sessions',id,doc);S.live=nl;S.liveSel=null;liveSave();closeModal();S.view='live';render(true);scrollTo(0,0);const o=openActs(doc);toast(`✅ Spiel gespeichert – Spiel ${tourPrev(nl).n+1} ist bereit${o?` (${o} offene Aktion${o===1?'':'en'} später zuordnen)`:''}`,5000);return;}
-    S.live=null;S.liveSel=null;saveDoc('sessions',id,doc);wakeSync();closeModal();A.openSession(id);{const o=openActs(doc);if(o){S.sessTab='acts';S.actsAll=false;render(true);}A.backupAsk(o);}
+    if(S.lu&&S.lu.opp&&S.lu.opp===opp)S.lu.opp='';S.live=null;S.liveSel=null;saveDoc('sessions',id,doc);wakeSync();closeModal();A.openSession(id);{const o=openActs(doc);if(o){S.sessTab='acts';S.actsAll=false;render(true);}A.backupAsk(o);}
   },
   backupAsk(o){showModal(`<h3>✅ Spiel gespeichert</h3>${o?`<p><b>${o} Aktion${o===1?'':'en'} oder Tor${o===1?'':'e'} ohne Zuordnung.</b> Ordne sie gleich unter „Aktionen“ zu, sonst zählen sie nicht für die Werte.</p>`:''}<p>Jetzt gleich eine Sicherung speichern? Dann geht nach dem Spieltag nichts verloren – z. B. in iCloud Drive.</p><div class="row end gap"><button class="btn" onclick="A.closeModal();toast('Danach kurz die Kinder bewerten')">Später</button><button class="btn pri" onclick="A.closeModal();A.backup()">Jetzt sichern</button></div>`);},
   liveAskDiscard(){showModal(`<h3>Live-Spiel verwerfen?</h3><p>Plus/Minus und Spielminuten dieses Spiels werden nicht gespeichert.</p><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn danger" onclick="A.liveDiscard()">Verwerfen</button></div>`);},

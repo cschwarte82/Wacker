@@ -11,7 +11,7 @@ async function shot(js,out,find,box){out=out.replace('.png',sfx+'.png');const pg
  await pg.addStyleTag({content:'#sheet,#toast{display:none!important}'});await pg.evaluate(()=>window.scrollTo(0,0));
  const r=await pg.evaluate(f=>{const e=eval(f);const q=e.getBoundingClientRect();return {x:q.left,y:q.top+scrollY,w:q.width,h:q.height};},find);
  const c=box?box(r):{x:0,y:0,w:375,h:800};await pg.screenshot({path:out,clip:{x:c.x,y:c.y,width:c.w,height:c.h},fullPage:true});if(errs.length)console.log(out,errs);await pg.close();}
-const L=LIVE+"render(true);";
+const L=LIVE+"S.live.opp='SV Blau-Weiß';render(true);";
 await shot(L,'z_live.png',"document.querySelectorAll('.lslot')[1]",r=>({x:r.x-10,y:r.y-13,w:345,h:165}));
 await shot(L,'z_sub.png',"document.querySelector('.subsug')",r=>({x:r.x-4,y:r.y-4,w:215,h:r.h+8}));
 await shot("A.go('lineup');",'z_lineup.png',"document.querySelector('.pitch')",r=>({x:r.x+r.w/2-150,y:r.y+2,w:300,h:232}));
