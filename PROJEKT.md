@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 65, 09.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 66, 09.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -76,7 +76,6 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - Daten bleiben auf dem Gerät; nur fiktive Namen in Flyer, Handbuch und Repo
 
 ## Offene Ideen (noch nicht umgesetzt)
-- Automatischer Hinweis kurz vor Spielende, wer unter dem Spielzeit-Ziel liegt
 - Trainings-Anwesenheit, Gegner-Notizen (Ideen vom 08.11.2026; Wechselvorschlag, Saisonbericht und Sicherung nach Spielende sind seit V31 umgesetzt)
 - Echte Synchronisierung mit dem Co-Trainer (bräuchte Server, Datenschutz klären)
 - Saisonauswertung durch Claude aus der Sicherungsdatei
@@ -84,3 +83,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 ## Materialien
 - Werbeflyer (1 Seite) und Benutzerhandbuch (5 Seiten) als PDF; Quellen in `materialien/`
 - **Gerechtigkeit (V64):** Fehlende Werte = Mannschaftsschnitt (`teamMean`, in `srcVal0` Mix je fehlender Hälfte und in `posFit` über `pr._tm`); Einschätzungen mit Puffer `RATE_BUF=1` (Mannschaftsschnitt zählt wie eine weitere Bewertung, `liveVal`/`shrinkPV`); Testanteile der App-Werte nach Zeitraum (`testPick`/`periodVal`: Potenzial bester, Form letzter Wert im Zeitraum, sonst letzter älterer Test – V65); Gesamtstärke/beste Position (`bestField`) ohne Spielweise/Treue, Fuß einheitlich +0,1; alle Positionswerte auf 1–5 begrenzt (`clamp15`).
+- **V66:** Turniermodus (`L.tour`, gespeicherte Spiele mit `live.tour/tourName`, `tourPrev`/`daySecs`/`dayEl` für Ampel, Badges, Wechselvorschlag; `liveEnd(true)` startet nächstes Turnierspiel; `tourCard` im Spiel), Vorlagen (`g.a`, `astAsk`, `goalAst`, `astSet`, `gameBal().vorl`, Rangliste `g:vorl`), Unter-Ziel-Hinweis (`underTarget`), Spielzeit der Saison (`playtimeCard`, `live.squad` = alle Kinder im Spiel), Bildschirm an (`S.cfg.wake`, `wakeSync`).
