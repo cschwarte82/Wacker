@@ -1,67 +1,75 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><title>TrainerRadar – Flyer</title>
 <link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="fonts/barlow.css">
 <style>
-/* Flyer für alle Trainerinnen und Trainer. Detail-Ausschnitte: node shots_zoom.js
+/* Flyer für alle Trainerinnen und Trainer (Entwurf A „Nachtspiel“, gewählt 10.11.2026).
+   Bilder: node shots_zoom.js (p_live_d.png, z_radar_d.png). Schrift: Barlow Condensed lokal in fonts/.
    Keine box-shadow, transform oder opacity: manche PDF-Viewer zeigen das als grauen Schleier. */
-.page{background:#f3f1e8}
-.hero{position:absolute;left:0;right:0;top:0;height:80mm;background:#0d2c19;color:#fff}
-.brand{position:absolute;left:12mm;top:11mm;display:flex;align-items:center;gap:3mm}
+.page{background:#0b130e;color:#fff}
+.bg{position:absolute;inset:0}
+.bc{font-family:'Barlow Condensed',sans-serif;font-style:italic;text-transform:uppercase}
+.brand{position:absolute;left:12mm;top:12mm;display:flex;align-items:center;gap:3mm}
 .brand img{width:10mm;height:10mm;border-radius:2.4mm}
-.brand b{font:800 14pt/1 'Inter Display';letter-spacing:-.2px}
-h1{position:absolute;left:12mm;top:26mm;width:125mm;hyphens:manual;font:800 31pt/1.02 'Inter Display';letter-spacing:-1.3px}
-h1 em{font-style:normal;color:var(--lime)}
-.lead{position:absolute;left:12mm;top:52mm;width:115mm;font:500 10.6pt/1.42 Inter;color:#cfe2d4}
-.tag{display:inline-block;margin-top:2.6mm;background:var(--lime);color:var(--gd);font:800 8.4pt Inter;border-radius:10mm;padding:1.3mm 3.4mm}
-.clock{position:absolute;right:12mm;top:27mm;width:64mm;border-radius:4mm;overflow:hidden;border:.8mm solid var(--lime)}
-.clock img,.t .im img{display:block;width:100%}
-.clock2{position:absolute;right:12mm;top:36mm;width:62mm;border-radius:4mm;overflow:hidden;border:.8mm solid #2c5a3c;background:#fff}
-.clock2 img{display:block;width:100%}
-.grid{position:absolute;left:12mm;right:12mm;top:86mm;display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
-.t{background:#fff;border-radius:4mm;overflow:hidden;border:.3mm solid #e0e3d6}
-.t.w2{grid-column:span 2}
-.t .im{height:54mm;overflow:hidden;background:#fff;border-bottom:.3mm solid #e8ebe0}
-.t .im img{height:100%;object-fit:cover;object-position:center top}
-.t.b .im{height:46mm}
-.t .tx{padding:3mm 3.6mm 3.4mm}
-.t b{display:block;font:800 11pt/1.2 'Inter Display';color:var(--gd)}
-.t span{display:flex;flex-wrap:wrap;gap:1.1mm;margin-top:1.6mm}
-.t i{font:600 7.9pt/1 Inter;font-style:normal;color:var(--gd);background:#e9f6c2;border-radius:10mm;padding:1.1mm 2.2mm;white-space:nowrap}
-.bot{position:absolute;left:0;right:0;bottom:0;height:38mm;background:#0d2c19;display:flex;align-items:center;gap:8mm;padding:0 12mm;color:#fff}
+.brand b{font:800 14pt 'Inter Display';letter-spacing:-.2px}
+h1{position:absolute;left:11mm;top:27mm;width:110mm;font-weight:900;font-size:50pt;line-height:.9;letter-spacing:.2px}
+h1 em{font-style:italic;color:var(--lime)}
+.lead{position:absolute;left:12mm;top:97mm;width:106mm;font:500 10.6pt/1.45 Inter;color:#c4d6c9}
+.lead span{white-space:nowrap}
+.list{position:absolute;left:12mm;top:116mm;width:109mm}
+.it{display:flex;gap:3.5mm;align-items:baseline;padding:3.6mm 0;border-top:.3mm solid #23382a}
+.it:last-child{border-bottom:.3mm solid #23382a}
+.it .n{flex:none;width:9mm;font-weight:900;font-size:19pt;line-height:1;color:#2f5a3d}
+.it b{display:block;font-weight:800;font-size:15.5pt;line-height:1;color:var(--lime);letter-spacing:.3px}
+.kw{display:block;margin-top:1.4mm;font:500 9.4pt/1.5 Inter;color:#e3ece5;text-transform:none;font-style:normal}
+.kw s{text-decoration:none;white-space:nowrap;display:inline-block}
+.kw s+s:before{content:"·";margin:0 1.6mm;color:var(--lime)}
+.ph{position:absolute;right:13mm;top:15mm;width:72mm;border:1.6mm solid #000;border-radius:8mm;overflow:hidden;background:#000}
+.ph img,.radar img{display:block;width:100%}
+.radar{position:absolute;right:13mm;top:181mm;width:72mm;border-radius:4mm;overflow:hidden;border:.5mm solid var(--lime)}
+.bot{position:absolute;left:0;right:0;bottom:0;height:42mm;display:flex;align-items:center;gap:8mm;padding:0 12mm;color:#0b130e}
 .bot .s{flex:1}
-.bot h3{font:800 14pt 'Inter Display'}
-.bot h3 em{font-style:normal;color:var(--lime)}
-.steps{display:flex;gap:2.5mm;margin-top:2.4mm}
-.steps div{flex:1;background:#173d26;border:.3mm solid #2c5a3c;border-radius:3mm;padding:2.2mm 3mm;font:500 8.6pt/1.3 Inter}
-.steps i{font:800 11pt 'Inter Display';font-style:normal;color:var(--lime);margin-right:1.4mm}
-.chk{margin-top:2.4mm;font:600 8.2pt Inter;color:#cfe3d4}
-.chk b{color:var(--lime)}
-.qr{flex:none;background:#fff;border-radius:4mm;padding:2.6mm;text-align:center}
-.qr img{width:24mm;height:24mm;display:block}
-.qr div{font:700 7.2pt Inter;color:var(--gd);margin-top:1mm}
+.bot h3{font-weight:900;font-size:24pt;line-height:1}
+.steps{display:flex;gap:2.4mm;margin-top:2.6mm}
+.steps div{background:#0b130e;color:#fff;border-radius:2.5mm;padding:1.8mm 3mm;font:600 8.8pt/1.2 Inter;white-space:nowrap}
+.steps i{font:900 italic 12pt 'Barlow Condensed';color:var(--lime);margin-right:1.4mm}
+.chk{margin-top:2.4mm;font:700 8.6pt Inter}
+.qr{flex:none;background:#fff;border-radius:3.5mm;padding:2.4mm;text-align:center;border:.6mm solid #0b130e}
+.qr img{width:25mm;height:25mm;display:block}
+.qr div{font:700 7pt Inter;color:#0f3d22;margin-top:1mm}
 </style></head>
 <body>
 <section class="page">
-  <div class="hero">
-    <div class="brand"><img src="../icon-512.png" alt=""><b>TrainerRadar</b></div>
-    <h1>Weniger Bauchgefühl.<br><em>Mehr Überblick.</em></h1>
-    <div class="lead">Die Trainer-App für deine Mannschaft – von der Jugend bis zu den Senioren.<br><span class="tag">Kostenlos · für jede Mannschaft</span></div>
-    <div class="clock"><img src="z_clock.png" alt=""></div>
+  <!-- Dynamik: schräge Streifen wie Trikot/Rasen, Fußleiste mit schräger Kante -->
+  <svg class="bg" viewBox="0 0 210 297" preserveAspectRatio="none">
+    <polygon points="118,297 210,120 210,175 146,297" fill="#102419"/>
+    <polygon points="150,297 210,182 210,206 163,297" fill="#14301f"/>
+    <polygon points="150,0 178,0 120,112 92,112" fill="#0f1f15"/>
+    <polygon points="207,48 210,48 210,52 115,236 111,236" fill="#d7f25a"/>
+    <polygon points="0,262 210,246 210,297 0,297" fill="#d7f25a"/>
+  </svg>
+
+  <div class="brand"><img src="../icon-512.png" alt=""><b>TrainerRadar</b></div>
+  <h1 class="bc">Weniger<br>Bauchgefühl.<br><em>Mehr<br>Überblick.</em></h1>
+  <div class="lead">Die kostenlose Trainer-App für jede Mannschaft –<br><span>von der Jugend bis zu den Senioren.</span></div>
+
+  <div class="list bc">
+    <div class="it"><span class="n">01</span><div><b>Live am Spielfeldrand</b><span class="kw"><s>Plus &amp; Minus</s><s>Tore &amp; Vorlagen</s><s>Karten</s></span></div></div>
+    <div class="it"><span class="n">02</span><div><b>Faire Spielzeit</b><span class="kw"><s>Spielzeit-Ampel</s><s>Wechselvorschläge</s><s>Turniermodus</s></span></div></div>
+    <div class="it"><span class="n">03</span><div><b>Gerechtes Stärkenprofil</b><span class="kw"><s>Trainerbeobachtung</s><s>Leistungsmessung</s><s>Live-Erfassung</s></span></div></div>
+    <div class="it"><span class="n">04</span><div><b>Beste Aufstellung</b><span class="kw"><s>Stärkste Elf</s><s>★ beste Position</s><s>Funino bis 11 gegen 11</s></span></div></div>
+    <div class="it"><span class="n">05</span><div><b>Entwicklung im Blick</b><span class="kw"><s>Potenzial &amp; Form</s><s>Ziele</s><s>Saisonbericht</s></span></div></div>
+    <div class="it"><span class="n">06</span><div><b>Fürs ganze Trainerteam</b><span class="kw"><s>Mehrere Mannschaften</s><s>Co-Trainer</s><s>Offline</s></span></div></div>
   </div>
 
-  <div class="grid">
-    <div class="t w2"><div class="im"><img src="z_live.png" alt=""></div><div class="tx"><b>Live am Spielfeldrand</b><span><i>Plus &amp; Minus</i><i>Tore &amp; Vorlagen</i><i>Karten</i><i>Spielminute</i></span></div></div>
-    <div class="t"><div class="im"><img src="z_radar.png" alt="" style="object-fit:contain;object-position:center"></div><div class="tx"><b>Gerechtes Stärkenprofil</b><span><i>Trainerbeobachtung</i><i>Leistungsmessung</i><i>Live-Erfassung</i></span></div></div>
-    <div class="t b"><div class="im"><img src="z_lineup.png" alt=""></div><div class="tx"><b>Beste Aufstellung</b><span><i>Stärkste Elf</i><i>★ beste Position</i><i>Funino bis 11 gegen 11</i></span></div></div>
-    <div class="t b"><div class="im"><img src="z_sub.png" alt="" style="object-position:left center"></div><div class="tx"><b>Faire Spielzeit</b><span><i>Spielzeit-Ampel</i><i>Wechselvorschläge</i><i>Turniermodus</i></span></div></div>
-    <div class="t b"><div class="im"><img src="z_mess.png" alt="" style="object-fit:contain;object-position:center top"></div><div class="tx"><b>Entwicklung im Blick</b><span><i>Potenzial &amp; Form</i><i>Ziele</i><i>Saisonbericht</i></span></div></div>
-  </div>
+  <div class="ph"><img src="p_live_d.png" alt=""></div>
+  <div class="radar"><img src="z_radar_d.png" alt=""></div>
 
   <div class="bot">
     <div class="s">
-      <h3>In 3 Schritten <em>startklar</em></h3>
+      <h3 class="bc">In 3 Schritten startklar</h3>
       <div class="steps"><div><i>1</i>QR-Code scannen</div><div><i>2</i>Zum Home-Bildschirm</div><div><i>3</i>Kader anlegen</div></div>
-      <div class="chk"><b>✓</b> kostenlos &nbsp; <b>✓</b> ohne Anmeldung &nbsp; <b>✓</b> offline &nbsp; <b>✓</b> mehrere Mannschaften &nbsp; <b>✓</b> mit Co-Trainer teilen</div>
+      <div class="chk">Kostenlos · ohne Anmeldung · Daten bleiben auf deinem Handy</div>
     </div>
     <div class="qr"><img src="qr.png" alt="QR-Code"><div>cschwarte82.github.io/Wacker</div></div>
   </div>
