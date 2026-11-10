@@ -326,7 +326,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='94';
+const APP_VERSION='95';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1181,6 +1181,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:95,items:['<b>Wechselvorschläge kommen wieder:</b> Nach einem Wechsel rechnet die App die Vorschläge jetzt laufend neu, während die Uhr läuft. Vorher erschienen neue Vorschläge erst, wenn du wieder etwas angetippt hast.']},
  {v:94,items:['<b>Spielzeiten stimmen überein:</b> Die Übersicht „Spielzeiten“ im Live-Spiel zählt jetzt sekündlich mit und zeigt dieselben Minuten wie die Karten auf dem Feld (im Turnier: den ganzen Tag).']},
  {v:93,items:['<b>Tor und Vorlage schneller antippen:</b> Die Auswahl nach einem Tor ist jetzt wie das Spielfeld angeordnet: Sturm oben, Abwehr unten, Torwart ganz unten, wer links spielt, steht links.']},
  {v:92,items:['<b>Nächster Gegner:</b> Unter „Aufstellung“ trägst du über „Live mit dieser Aufstellung“ den Gegner ein. Live steht dann oben „Deine Mannschaft 2:1 Gegner“. Antippen des Gegnernamens ändert ihn.','Beim Speichern fragt die App nicht mehr nach Gegner und Ergebnis, sie übernimmt beides selbst.','Die Torwartkarte in der Aufstellung hat jetzt dieselbe Farbe wie auf der Live-Seite.']},
@@ -1670,6 +1671,8 @@ function posBan(pid,k){const p=S.players[pid];if(!p||p.guest||!k)return false;co
 // Wechselvorschlag: wer am wenigsten gespielt hat, kommt rein (Spielzeit = Gerechtigkeit). Raus darf nur, wer mind. 2 Min. mehr hat.
 // Der Einwechselspieler kommt auf eine seiner starken Positionen (höchstens 0,3 unter seiner besten); notfalls rückt ein Feldspieler auf den frei werdenden Platz (Rochade).
 function subSuggest(L){return withMix(()=>subSuggestInner(L));}
+// Vorschlag als HTML; wird auch während des Spiels alle 5 s neu berechnet (Minuten laufen weiter, ohne dass jemand tippt)
+function subSugHtml(L){const sg=subSuggest(L);return sg.length?`<div class="subsug"><div class="lbl2" style="margin:0 0 4px">💡 Wechselvorschlag</div>${sg.map(x=>`<button onclick="A.liveSub('${x.slot}','${x.pin}','${x.to||''}')"><b>${esc(short(x.pin))}</b> <small>${Math.floor(daySecs(L,x.pin)/60)}'</small> ⇄ <b>${esc(short(x.pout))}</b> <small>${Math.floor(daySecs(L,x.pout)/60)}' · ${slotLabel(x.to||x.slot)}</small>${x.to?`<br><small>${esc(short(x.mv))} rückt nach ${slotLabel(x.slot)}</small>`:''}</button>`).join('')}</div>`:'';}
 function subSuggestInner(L){
   const el=liveSecs(L);if(el<180||!L.bench.length||L.finished)return[];
   const sent=new Set(L.sentOff||[]);const fc={};
@@ -1726,7 +1729,7 @@ function vLive(){
   if(sel)h+=`<div class="selhint">${posInfo(sel.kind==='slot'?L.pos[sel.key]:sel.key)}Ziel antippen: Feldspieler = tauschen, Bankspieler = Wechsel. Nochmal = abbrechen.</div>`;
   h+=`<div class="pitch live">${['S','M','A'].map(pt=>{const l=line(pt);return l.length?`<div class="prowl${l.length>=4?' w4':''}">${l.map(card).join('')}</div>`:'';}).join('')}${noGK(L.n)?'':`<div class="prowl">${card('TW')}</div>`}</div>`;
   {const PI2=partInfo(L);if(!PI2.done&&PI2.last&&PI2.F.len>=6&&PI2.over>=-180){const u=underTxt(L);if(u)h+=`<div class="banner">⏱ <b>Unter dem Spielzeit-Ziel:</b> ${esc(u)}</div>`;}}
-  {const sg=subSuggest(L);if(sg.length)h+=`<div class="subsug"><div class="lbl2" style="margin:0 0 4px">💡 Wechselvorschlag</div>${sg.map(x=>`<button onclick="A.liveSub('${x.slot}','${x.pin}','${x.to||''}')"><b>${esc(short(x.pin))}</b> <small>${Math.floor(daySecs(L,x.pin)/60)}'</small> ⇄ <b>${esc(short(x.pout))}</b> <small>${Math.floor(daySecs(L,x.pout)/60)}' · ${slotLabel(x.to||x.slot)}</small>${x.to?`<br><small>${esc(short(x.mv))} rückt nach ${slotLabel(x.slot)}</small>`:''}</button>`).join('')}</div>`;}
+  h+=`<div id="subsugw">${subSugHtml(L)}</div>`;
   h+=`<div class="row between" style="margin-top:6px"><div class="lbl2" style="margin:0">Bank</div><div class="pill">Team <b class="pos">+${tp}</b> <b class="neg">−${tm}</b></div></div>`;
   const bsort=L.bench.slice().sort((a,b)=>daySecs(L,a)-daySecs(L,b));
   h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}${cardBadge(L,pid)}</b>${(()=>{const b=bestSlot(pid);return b?`<small class="pab">★${slotAbbr(b.k)} ${fnum(r1(b.v))}</small>`:'';})()}<small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
@@ -1739,7 +1742,7 @@ function vLive(){
   h+=`<div class="row gap" style="margin-top:14px"><button class="btn pri grow" onclick="A.liveEndModal()">Spiel beenden &amp; speichern</button><button class="btn danger" onclick="A.liveAskDiscard()">Verwerfen</button></div>`;
   return h;
 }
-setInterval(()=>{const L=S.live;if(!L||!L.clock.running)return;const PI=partInfo(L);L.alerted=L.alerted||{};if(PI.over>=-120&&PI.over<-100&&PI.F.len>=6&&!L.alerted['w'+PI.part]){L.alerted['w'+PI.part]=1;saveLocal();{const u=PI.last?underTxt(L):'';toast(PI.last?'⏱ Noch 2 Minuten bis zum Abpfiff – letzte Wechsel?'+(u?' Unter dem Spielzeit-Ziel: '+u:''):`⏱ Noch 2 Minuten in dieser ${PART_N(PI.F.parts)} – noch wechseln?`,u?8000:5000);}try{navigator.vibrate&&navigator.vibrate(300);}catch(e){}}if(PI.over>=0&&!L.alerted[PI.part]){L.alerted[PI.part]=1;saveLocal();toast(PI.last?'⏱ Spielzeit erreicht – Abpfiff?':`⏱ ${PART_N(PI.F.parts)} vorbei – ${PART_N(PI.F.parts)} beenden?`);try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}if(S.view==='live')render();}if(S.view!=='live')return;const c=$('#lclock');if(c){c.innerHTML=clockTxt(L);c.classList.toggle('over',PI.over>0);}const lp=$('#lpart');if(lp)lp.innerHTML=partTxt(L);document.querySelectorAll('.lmin').forEach(e=>{e.textContent=Math.floor(daySecs(L,e.dataset.p)/60)+"'";e.className='lmin '+ampel(L,e.dataset.p);});document.querySelectorAll('.lmin2').forEach(e=>{e.textContent=Math.floor(daySecs(L,e.dataset.p)/60)+"'";});},1000);
+setInterval(()=>{const L=S.live;if(!L||!L.clock.running)return;const PI=partInfo(L);L.alerted=L.alerted||{};if(PI.over>=-120&&PI.over<-100&&PI.F.len>=6&&!L.alerted['w'+PI.part]){L.alerted['w'+PI.part]=1;saveLocal();{const u=PI.last?underTxt(L):'';toast(PI.last?'⏱ Noch 2 Minuten bis zum Abpfiff – letzte Wechsel?'+(u?' Unter dem Spielzeit-Ziel: '+u:''):`⏱ Noch 2 Minuten in dieser ${PART_N(PI.F.parts)} – noch wechseln?`,u?8000:5000);}try{navigator.vibrate&&navigator.vibrate(300);}catch(e){}}if(PI.over>=0&&!L.alerted[PI.part]){L.alerted[PI.part]=1;saveLocal();toast(PI.last?'⏱ Spielzeit erreicht – Abpfiff?':`⏱ ${PART_N(PI.F.parts)} vorbei – ${PART_N(PI.F.parts)} beenden?`);try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}if(S.view==='live')render();}if(S.view!=='live')return;const c=$('#lclock');if(c){c.innerHTML=clockTxt(L);c.classList.toggle('over',PI.over>0);}const lp=$('#lpart');if(lp)lp.innerHTML=partTxt(L);document.querySelectorAll('.lmin').forEach(e=>{e.textContent=Math.floor(daySecs(L,e.dataset.p)/60)+"'";e.className='lmin '+ampel(L,e.dataset.p);});document.querySelectorAll('.lmin2').forEach(e=>{e.textContent=Math.floor(daySecs(L,e.dataset.p)/60)+"'";});{const w=$('#subsugw');if(w&&!S.liveSel&&Math.floor(liveSecs(L))%5===0){const x=subSugHtml(L);if(w.innerHTML!==x)w.innerHTML=x;}}},1000);
 
 // ---------- Stoppuhr ----------
 const sw={running:false,t0:0,elapsed:0};
