@@ -196,7 +196,8 @@ button{touch-action:manipulation}
 #sheet.open{transform:none}
 .sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 .sgrid button{min-height:46px;border-radius:10px;border:0;font:600 13px/1.2 var(--ft);color:#fff;padding:6px;cursor:pointer}
-.sgrid.p button{background:#1d7a3e}.sgrid.m button{background:#b4442c}
+.sgrid.p button,.spitch button{background:#1d7a3e}
+.spitch{display:flex;flex-direction:column;gap:6px}.sprow{display:flex;justify-content:center;gap:6px}.spitch button{flex:1;max-width:120px;min-width:0;min-height:46px;border-radius:10px;border:0;font:600 13px/1.2 var(--ft);color:#fff;padding:6px 4px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.spitch .sprow.og button{max-width:none;background:#5f6f64}.spgap{flex:1;max-width:120px}.sgrid.m button{background:#b4442c}
 .sbarw{height:4px;background:#eef1ea;border-radius:2px;margin-top:10px;overflow:hidden}
 .sbar{height:100%;width:100%;background:var(--lime)}
 .chip.onp{background:#1d7a3e;border-color:#1d7a3e;color:#fff}.chip.onm{background:#b4442c;border-color:#b4442c;color:#fff}
@@ -325,7 +326,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='92';
+const APP_VERSION='93';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1180,6 +1181,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:93,items:['<b>Tor und Vorlage schneller antippen:</b> Die Auswahl nach einem Tor ist jetzt wie das Spielfeld angeordnet: Sturm oben, Abwehr unten, Torwart ganz unten, wer links spielt, steht links.']},
  {v:92,items:['<b>Nächster Gegner:</b> Unter „Aufstellung“ trägst du über „Live mit dieser Aufstellung“ den Gegner ein. Live steht dann oben „Deine Mannschaft 2:1 Gegner“. Antippen des Gegnernamens ändert ihn.','Beim Speichern fragt die App nicht mehr nach Gegner und Ergebnis, sie übernimmt beides selbst.','Die Torwartkarte in der Aufstellung hat jetzt dieselbe Farbe wie auf der Live-Seite.']},
  {v:91,items:['<b>Spielbewertungen zählen zur Form:</b> Deine Bewertung nach einem Spiel fließt jetzt in die Form der letzten 6 Wochen ein, zusammen mit den Live-Aktionen. Ist der 6-Wochen-Block vorbei, wandert sie ins Potenzial. Das Potenzial selbst kommt aus Messwerten und Trainereinschätzungen.']},
  {v:90,items:['<b>Live: Stärke auf der Position:</b> Das Schild links oben zeigt jetzt neben der Position auch den Wert des Spielers dort, z. B. „LM 3,6“. Gleich gerechnet wie in der Aufstellung, ohne extra Platz.']},
@@ -1691,8 +1693,13 @@ function subSuggestInner(L){
 }
 const t0n=L=>{const n=tourPrev(L).n;return n?` – ${n} Spiel${n===1?'':'e'} schon gespeichert`:'';};
 function tourChk(L){return `<input type="checkbox" ${L.tour?'checked':''} onchange="A.liveTour(this.checked)"> 🏆 Turnierspiel – Spielzeit zählt über alle Spiele des Tages`;}
+// Auswahl nach dem Tor wie auf dem Feld: Sturm oben, Abwehr unten, Torwart ganz unten; links steht links (Christian 10.11.2026)
+function pitchPick(L,pids,btn){const on=new Set(pids),used=new Set();const row=pt=>{const ks=Object.keys(L.pos).filter(k=>k[0]===pt&&L.pos[k]).sort(bySide);if(!ks.some(k=>on.has(L.pos[k])))return '';return ks.map(k=>{if(!on.has(L.pos[k]))return '<span class="spgap"></span>';used.add(L.pos[k]);return btn(L.pos[k]);}).join('');};
+  let h=['S','M','A'].map(row).filter(Boolean).map(r=>`<div class="sprow">${r}</div>`).join('');
+  if(L.pos.TW&&on.has(L.pos.TW)){used.add(L.pos.TW);h+=`<div class="sprow">${btn(L.pos.TW)}</div>`;}
+  const rest=pids.filter(p=>!used.has(p));if(rest.length)h+=`<div class="sprow">${rest.map(btn).join('')}</div>`;return `<div class="spitch">${h}`;}
 // Nach dem Torschützen: wer hat vorbereitet? (optional)
-function astAsk(L,g){const ps=(g.on||liveField(L)).filter(p=>p&&p!==g.p);if(!ps.length){A.sheetHide();return;}sheetOpen(`<div class="row between" style="margin-bottom:8px"><b>🅰 Vorlage von?</b><button class="btn sm2" onclick="A.goalAst('${g.id}','')">Keine</button></div><div class="sgrid p">${ps.map(pid=>`<button onclick="A.goalAst('${g.id}','${pid}')">${esc(short(pid))}</button>`).join('')}</div>`,10000);}
+function astAsk(L,g){const ps=(g.on||liveField(L)).filter(p=>p&&p!==g.p);if(!ps.length){A.sheetHide();return;}sheetOpen(`<div class="row between" style="margin-bottom:8px"><b>🅰 Vorlage von?</b><button class="btn sm2" onclick="A.goalAst('${g.id}','')">Keine</button></div>${pitchPick(L,ps,pid=>`<button onclick="A.goalAst('${g.id}','${pid}')">${esc(short(pid))}</button>`)}</div>`,10000);}
 function vLive(){
   const L=S.live;wakeSync();
   if(!L)return `<h2>Live</h2><div class="card hint">Stelle unter <b>Aufstellung</b> die Startformation zusammen und tippe dort auf „▶ Live mit dieser Aufstellung“.</div><div class="row gap"><button class="btn pri grow" onclick="A.go('lineup')">Zur Aufstellung</button><button class="btn grow" onclick="A.liveEmpty()">Leer starten</button></div><div class="sub" style="margin-top:8px">„Leer starten“ setzt alle Spieler auf die Bank – du stellst dann per Antippen auf.</div>`;
@@ -1813,7 +1820,7 @@ const A={
     const L=S.live;if(!L)return;accrue(L);L.goals=L.goals||[];
     const e={t:'goal',p:null,...gameMin(L),on:liveField(L),id:uid('g'),ts:Date.now()};L.goals.push(e);L.log.push({t:'goal',id:e.id});liveSave();render(true);
     const sc=score(L);const rank=k=>k==='TW'?9:({S:0,M:1,A:2}[k[0]]*5+(SIDE_ORD[sideOf(k)]||0));const ps=Object.keys(L.pos).filter(k=>L.pos[k]).sort((a,b)=>rank(a)-rank(b)).map(k=>L.pos[k]);
-    sheetOpen(`<div class="row between" style="margin-bottom:8px"><b>⚽ Tor! ${sc.gf}:${sc.ga} · Wer hat getroffen?</b><button class="btn sm2" onclick="A.sheetHide()">Später</button></div><div class="sgrid p">${ps.map(pid=>`<button onclick="A.goalScorer('${e.id}','${pid}')">${esc(short(pid))}</button>`).join('')}<button onclick="A.goalScorer('${e.id}','og')" style="background:#5f6f64">Eigentor Gegner</button></div>`,10000);
+    sheetOpen(`<div class="row between" style="margin-bottom:8px"><b>⚽ Tor! ${sc.gf}:${sc.ga} · Wer hat getroffen?</b><button class="btn sm2" onclick="A.sheetHide()">Später</button></div>${pitchPick(L,ps,pid=>`<button onclick="A.goalScorer('${e.id}','${pid}')">${esc(short(pid))}</button>`)}<div class="sprow og"><button onclick="A.goalScorer('${e.id}','og')">Eigentor Gegner</button></div></div>`,10000);
   },
   goalScorer(gid,pid){const L=S.live;const g=L&&(L.goals||[]).find(x=>x.id===gid);if(g){g.p=pid==='og'?null:pid;g.og=pid==='og';liveGoalPlus(L,g,g.p);if(g.a&&(g.og||g.a===g.p)){g.a=null;liveAstPlus(L,g,null);}liveSave();render(true);toast(pid==='og'?'Eigentor des Gegners':`⚽ ${short(pid)}`);if(pid!=='og'){astAsk(L,g);return;}}A.sheetHide();},
   goalAst(gid,pid){const L=S.live;const g=L&&(L.goals||[]).find(x=>x.id===gid);if(g){g.a=pid||null;liveAstPlus(L,g,g.a);liveSave();render(true);if(pid)toast(`🅰 Vorlage ${short(pid)}`);}A.sheetHide();},
