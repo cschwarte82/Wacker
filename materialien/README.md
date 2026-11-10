@@ -2,7 +2,8 @@
 
 - `werbeflyer.html`, `handbuch.html`, `common.css` – Quellen der PDFs
 - `shots_live.js` – Screenshots der Live-Seite (`c_live.png`, `c_sheet.png`) mit Playwright
-- `shots_zoom.js` – Detail-Ausschnitte für den Flyer (`z_*.png`) mit Playwright und Demodaten
+- `shots_zoom.js` – Bilder für den Flyer (`p_live_d.png` = Live-Ansicht im dunklen Modus, `z_*.png` Detail-Ausschnitte, `_d` = dunkel) mit Playwright und Demodaten
+- `fonts/` – Barlow Condensed (SIL OFL) lokal für die Flyer-Überschriften
 - `shots2.py` – erzeugt die Screenshots mit fiktiven Demodaten (`demo.json`) aus `../index.html` (benötigt Google Chrome + Pillow)
 - PDF erzeugen: `google-chrome --headless=new --no-pdf-header-footer --print-to-pdf=Handbuch.pdf handbuch.html`
 - Das Handbuch-PDF wird als `../TrainerRadar-Anleitung.pdf` in die App gelegt (Einstellungen → Anleitung).
