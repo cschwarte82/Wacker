@@ -321,7 +321,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='80';
+const APP_VERSION='81';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -761,7 +761,7 @@ function formSince(){const d=new Date();d.setDate(d.getDate()-formWeeks()*7);ret
 const isMulti=cat=>cat.startsWith('r:')||cat==='a:spiel'||cat==='a:torwart';
 // Mannschaftsschnitt einer Größe (aktive Kinder, gecacht): Ersatz für fehlende Werte, damit Fehlen weder Vor- noch Nachteil ist
 function teamMean(key,f){const C=calcCache();C.tm=C.tm||{};if(key in C.tm)return C.tm[key];const v=plist().map(p=>f(p.id)).filter(isNum);return C.tm[key]=v.length?avg(v):null;}
-const RATE_BUF=1; // Mannschaftsschnitt zählt wie eine zusätzliche Einschätzung: erst ab 2–3 Einschätzungen zählt ein Kind (fast) voll
+const RATE_BUF=0; // seit V81 aus: deine Einschätzungen zählen genau so, wie eingetragen (kein Zug zum Mannschaftsschnitt)
 const tmRaw=(cat,per)=>teamMean('raw|'+cat+'|'+per,pid=>periodVal(cat,pid,sessionsWith(cat),per));
 function shrinkPV(cat,pid,ss,per){if(per==='mix')return mix2(shrinkPV(cat,pid,ss,'pot'),shrinkPV(cat,pid,ss,'form'));const b=baseN(cat,pid,ss,per);if(!isMulti(cat)||!isNum(b.v)||!b.n)return b.v;const tm=tmRaw(cat,per);return isNum(tm)?(b.v*b.n+RATE_BUF*tm)/(b.n+RATE_BUF):b.v;}
 const mix2=(a,b)=>isNum(a)&&isNum(b)?(a+b)/2:(isNum(a)?a:b);
@@ -952,7 +952,7 @@ function appVals(pid,since){
   const agg={};
   games.forEach(s=>s.live.actions.forEach(a=>{if(a.p!==pid||!a.c)return;const m=ACT_MAP[a.c];if(!m)return;for(const[k,w]of Object.entries(m)){const g=agg[k]||(agg[k]={p:0,m:0,n:0});if(a.t==='+')g.p+=w;else g.m+=w;g.n++;}}));
   const out={};
-  // Aktionen wie Zusatzbewertungen: Plus = 5, Minus = 1, Start bei 3 mit Puffer APP_BUF (2 = doppelt so stark wie früher 4: 2 Aktionen wirken wie früher 4).
+  // Aktionen wie Zusatzbewertungen: Plus = 5, Minus = 1, Start beim eigenen Potenzial-Wert (sonst 3) mit Puffer APP_BUF (2 = doppelt so stark wie früher 4: 2 Aktionen wirken wie früher 4).
   // w = Gewicht im Mix: 2 Aktionen = halbes, 6 Aktionen = 75 % Gewicht.
   // Startwert = dein unter Potenzial eingetragener Wert des Kindes (ganze Saison); nur ohne Eintrag 3. Live-Aktionen bestätigen ihn, schieben ihn hoch oder korrigieren ihn nach unten.
   const anchor=k=>{const c=(RATINGS.some(r=>r.k===k)||GK_RATINGS.some(r=>r.k===k)||ATH_RATINGS.some(r=>r.k===k)?'r:':'a:')+k;const v=periodVal(c,pid,sessionsWith(c),'pot');return isNum(v)?v:3;};
@@ -1102,6 +1102,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:81,items:['Deine Einschätzungen zählen jetzt genau so, wie du sie eingetragen hast. Bisher wurde bei wenigen Einschätzungen der Mannschaftsschnitt mit eingerechnet (eine einzelne 5 ergab 4,0). Gute oder schwache Phasen zeigt der Formpfeil.']},
  {v:80,items:['Live-Aktionen orientieren sich jetzt an deinem eingetragenen Potenzial-Wert des Kindes statt am Mittelwert 3: Plus-Aktionen schieben ihn hoch, Minus-Aktionen korrigieren ihn nach unten, ohne Aktionen bleibt er wie eingetragen.','Hat ein Kind in einem Bereich keine Live-Aktionen, zählt im Mix nur dein Wert – es wird kein Mannschaftsschnitt mehr hineingerechnet.']},
  {v:79,items:['Profil: Die Torwart-Karte zeigt jetzt denselben Torwart-Wert wie Kader und Aufstellung (Mix aus Trainer + App, Potenzial + Form). Weicht der Schnitt deiner letzten Torwart-Einschätzungen davon ab, steht er darunter mit Erklärung.']},
  {v:78,items:['Lange Namen werden auf den Spielfeld-Karten und auf der Bank wieder mit „…“ gekürzt statt umgebrochen – das Spielfeld bleibt ruhiger.']},

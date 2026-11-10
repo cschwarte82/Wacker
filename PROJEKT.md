@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 80, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 81, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -82,7 +82,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 
 ## Materialien
 - Werbeflyer (1 Seite) und Benutzerhandbuch (5 Seiten) als PDF; Quellen in `materialien/`
-- **Gerechtigkeit (V64):** Fehlende Werte = Mannschaftsschnitt (`teamMean`, in `srcVal0` Mix je fehlender Hälfte und in `posFit` über `pr._tm`); Einschätzungen mit Puffer `RATE_BUF=1` (Mannschaftsschnitt zählt wie eine weitere Bewertung, `liveVal`/`shrinkPV`); Testanteile der App-Werte nach Zeitraum (`testPick`/`periodVal`: Potenzial bester, Form letzter Wert im Zeitraum, sonst letzter älterer Test – V65); Gesamtstärke/beste Position (`bestField`) ohne Spielweise/Treue, Fuß einheitlich +0,1; alle Positionswerte auf 1–5 begrenzt (`clamp15`).
+- **Gerechtigkeit (V64):** Fehlende Werte = Mannschaftsschnitt (`teamMean`, in `srcVal0` Mix je fehlender Hälfte und in `posFit` über `pr._tm`); Einschätzungen ohne Puffer (`RATE_BUF=0` seit V81, Christian: eingetragene Werte zählen wie eingetragen, Ausreißer zeigt der Formpfeil); Testanteile der App-Werte nach Zeitraum (`testPick`/`periodVal`: Potenzial bester, Form letzter Wert im Zeitraum, sonst letzter älterer Test – V65); Gesamtstärke/beste Position (`bestField`) ohne Spielweise/Treue, Fuß einheitlich +0,1; alle Positionswerte auf 1–5 begrenzt (`clamp15`).
 - **V66:** Turniermodus (`L.tour`, gespeicherte Spiele mit `live.tour/tourName`, `tourPrev`/`daySecs`/`dayEl` für Ampel, Badges, Wechselvorschlag; `liveEnd(true)` startet nächstes Turnierspiel; `tourCard` im Spiel), Vorlagen (`g.a`, `astAsk`, `goalAst`, `astSet`, `gameBal().vorl`, Rangliste `g:vorl`), Unter-Ziel-Hinweis (`underTarget`), Spielzeit der Saison (`playtimeCard`, `live.squad` = alle Kinder im Spiel), Bildschirm an (`S.cfg.wake`, `wakeSync`).
 - **V67:** Vorlage = automatisch Plus `vorl` „Torvorlage“ (ACT_MAP pass 1 + ueber 1 + spielv .5; auch pass/verp zählen .5 auf spielv), in der Auswahl ausgeblendet über `pOff`), Aktion trägt `ast:<goal-id>` (`liveAstPlus` live, `astSync` nachträglich, Neuaufbau beim Zusammenlegen).
 - **V68:** Plus/Minus-Auswahl („Was war's?“, `showSheet`) bleibt 8 s statt 5 s offen (Christian: zu wenig Zeit). Torschütze 7 s, Vorlage 6 s unverändert.
@@ -98,3 +98,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V78:** Namen auf Spielfeld-Karten (`.slot b`, auch `.w4`) und Bank wieder einzeilig mit Ellipse (Christian: Umbrüche sehen nicht gut aus).
 - **V79:** Profil-Torwartkarte zeigt den Mix-Wert aus `overallAll` (wie Kader/Aufstellung) statt `latestVal` (nur letzte Trainer-Einschätzungen); Abweichung wird erklärt.
 - **V80:** App-Wert aus Live-Aktionen startet beim eigenen Potenzial-Wert des Kindes (`appVals` anchor: periodVal 'pot' von r:/a:-Kategorie, sonst 3) statt bei 3: (5P+M+Basis·2)/(P+M+2). Mix ohne App-Wert = Trainerwert allein (kein Team-Schnitt-App-Wert mehr).
+- **V81:** `RATE_BUF=0`: kein Zug der Einschätzungen zum Mannschaftsschnitt mehr (`shrinkPV`, `liveVal`).
