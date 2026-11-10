@@ -321,7 +321,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='83';
+const APP_VERSION='84';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -842,10 +842,13 @@ function pfCalc(cat,pid){const C=calcCache();C.pf=C.pf||{};const ck=cat+'|'+pid;
   if(t==='a'&&(k==='spiel'||k==='torwart')){const subs=(k==='spiel'?RATINGS:GK_RATINGS).map(r=>pfCalc('r:'+r.k,pid));const P=subs.map(x=>x.pot).filter(isNum),F=subs.map(x=>x.form).filter(isNum);res={pot:P.length?avg(P):null,form:F.length?avg(F):null,blocks:subs.reduce((a,x)=>a+x.blocks,0)};}
   else{const R=pfRatings(cat,pid),T=pfTest(cat,pid),ks=pfLiveKeys(cat);
     const base=mix2(R.length?avg(R):null,T);const anch=isNum(base)?base:3;
-    const bl=ks.length?pfBlocks().map(([a,b])=>pfLive(liveAggR(pid,a,b),ks)).filter(L=>L.n>=BLOCK_MIN).map(L=>pfAnch(anch,L)):[];
+    const fs0=formSince();
+    const blk=ks.length?pfBlocks().map(([a,b])=>({b,L:pfLive(liveAggR(pid,a,b),ks)})).filter(x=>x.L.n>=BLOCK_MIN).map(x=>({b:x.b,v:pfAnch(anch,x.L)})):[];const bl=blk.map(x=>x.v);
     const E=[...R,...bl];const pot=E.length?mix2(avg(E),T):T;
-    const L=ks.length?pfLive(liveAggR(pid,formSince(),''),ks):{p:0,m:0,n:0};
-    const form=L.n?pfAnch(isNum(pot)?pot:3,L):pot;
+    // Form zählt jede Aktion nur einmal: Blöcke, deren Spiele noch im Form-Fenster liegen, bleiben beim Startwert der Form außen vor
+    const Ef=[...R,...blk.filter(x=>x.b<=fs0).map(x=>x.v)];const fAnch=Ef.length?mix2(avg(Ef),T):T;
+    const L=ks.length?pfLive(liveAggR(pid,fs0,''),ks):{p:0,m:0,n:0};
+    const form=L.n?pfAnch(isNum(fAnch)?fAnch:3,L):pot;
     res={pot,form,base,blocks:bl.length};}
   return C.pf[ck]=res;}
 // Wert je Kategorie nach gewählter Quelle: Trainer (Einschätzung + Live-Aktionen als Zusatzbewertungen), App (Live-Aktionen + Tests) oder Mix (Mittelwert).
@@ -1141,6 +1144,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:84,items:['Form ohne Doppelzählung: Liegen die Spiele eines gerade abgeschlossenen Blocks noch in den letzten Form-Wochen, zählen sie nur in der Form und erst danach ins Potenzial. Die Form springt dadurch nicht mehr, wenn ein Block endet.']},
  {v:83,items:['<b>Neues Modell für Potenzial und Form:</b> Das Potenzial ist der Mittelwert aus deinen Einschätzungen und den Messwerten. Live-Aktionen zählen nicht mehr direkt ins Potenzial.','Die Form ist dein Potenzial, durch die Live-Aktionen der letzten Wochen bestätigt, hochgeschoben oder nach unten korrigiert. Ohne Aktionen ist Form gleich Potenzial.','Nach jedem abgeschlossenen Form-Block (z. B. 6 Wochen ab Saisonstart) zählt die Form dieses Blocks wie eine weitere Einschätzung ins Potenzial, wenn das Kind darin mindestens 4 Aktionen im Bereich hatte. So wächst das Potenzial mit, wenn ein Kind dauerhaft besser oder schwächer spielt.']},
  {v:82,items:['Stärkenprofil: Die Potenzial-Linie ist jetzt orange gestrichelt, der Teamschnitt-Ring (3) hellgrau gepunktet. So verwechselt man sie nicht mehr. Sind Form und Potenzial gleich, steht das direkt unter dem Netz.']},
  {v:81,items:['Deine Einschätzungen zählen jetzt genau so, wie du sie eingetragen hast. Bisher wurde bei wenigen Einschätzungen der Mannschaftsschnitt mit eingerechnet (eine einzelne 5 ergab 4,0). Gute oder schwache Phasen zeigt der Formpfeil.']},
