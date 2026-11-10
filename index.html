@@ -321,7 +321,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='82';
+const APP_VERSION='83';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -628,7 +628,7 @@ function vPlayer(){
   const cur=[],prev=[];let noForm=0;
   AREAS.forEach(a=>{const c='a:'+a.k,s2=sessionsWith(c);const po=srcVal(c,pid,s2,'pot');let fo=srcVal(c,pid,s2,'form');if(!isNum(fo)&&isNum(po)){fo=po;noForm++;}cur.push(isNum(fo)?fo:null);prev.push(isNum(po)?po:null);});
   const same=cur.every((v,i)=>!isNum(v)||!isNum(prev[i])||Math.abs(v-prev[i])<.05);
-  h+=`<div class="card"><div class="lbl">Stärkenprofil <small>Werte aus: ${SRC.find(x=>x[0]===srcMode())[1]}</small></div>${radar(cur,prev)}<div class="legend"><span><i></i>Form (${formWeeks()} Wo.)</span><span><i class="lp"></i>Potenzial (Saison)</span><span><i class="lm"></i>3 = Teamschnitt</span></div><div class="sub">${same?`<b>Form und Potenzial sind gerade gleich – die Linien liegen übereinander.</b> `:''} Potenzial = alle Werte der Saison (Tests: Bestwert), Form = nur die letzten ${formWeeks()} Wochen.${noForm?` Bei ${noForm} Bereich${noForm>1?'en':''} gibt es in dem Zeitraum keine neuen Werte – dort liegt Form auf Potenzial.`:''} „Werte aus“ und Wochen stellst du unter Ranglisten → Bestwerte ein. Nur für dich als Trainer – kein Ranking.</div></div>`;
+  h+=`<div class="card"><div class="lbl">Stärkenprofil <small>Werte aus: ${SRC.find(x=>x[0]===srcMode())[1]}</small></div>${radar(cur,prev)}<div class="legend"><span><i></i>Form (${formWeeks()} Wo.)</span><span><i class="lp"></i>Potenzial (Saison)</span><span><i class="lm"></i>3 = Teamschnitt</span></div><div class="sub">${same?`<b>Form und Potenzial sind gerade gleich – die Linien liegen übereinander.</b> `:''}${srcMode()==='mix'?`Potenzial = deine Einschätzungen + Messwerte (Tests: Bestwert), dazu abgeschlossene ${formWeeks()}-Wochen-Blöcke. Form = Potenzial, durch die Live-Aktionen der letzten ${formWeeks()} Wochen bestätigt oder korrigiert – ohne Aktionen liegt sie auf dem Potenzial.`:`Potenzial = alle Werte der Saison (Tests: Bestwert), Form = nur die letzten ${formWeeks()} Wochen.${noForm?` Bei ${noForm} Bereich${noForm>1?'en':''} gibt es in dem Zeitraum keine neuen Werte – dort liegt Form auf Potenzial.`:''}`} „Werte aus“ und Wochen stellst du unter Ranglisten → Bestwerte ein. Nur für dich als Trainer – kein Ranking.</div></div>`;
   const rows=TESTS.map(t=>{
     const pts=ss.map(s=>s.results?.[pid]?.[t.k]).filter(isNum); if(!pts.length)return'';
     const last=pts[pts.length-1],first=pts[0]; let delta='';
@@ -811,10 +811,48 @@ const TR_AREA={tempo:['schnell'],gewandt:['dyn'],kraft:['dyn'],ausdauer:['ausd']
 function trainerVal(cat,pid,ss,per){const[t,k]=cat.split(':');
   if(t==='a'&&TR_AREA[k]){const vs=TR_AREA[k].map(x=>liveVal('r:'+x,pid,sessionsWith('r:'+x),per)).filter(isNum);return vs.length?avg(vs):null;}
   return liveVal(cat,pid,ss,per);}
+// ---------- Potenzial & Form (Werte aus „Mix“, seit V83) ----------
+// Potenzial = deine Einschätzungen + Messwerte (Bestwert) als Mittelwert, dazu jeder abgeschlossene Form-Block (Länge = Form-Wochen, ab Saisonstart)
+// mit mindestens BLOCK_MIN Aktionen wie eine weitere Einschätzung. Form = Potenzial, durch die Live-Aktionen der letzten Form-Wochen bestätigt,
+// hochgeschoben oder nach unten korrigiert: (5·Plus + 1·Minus + Potenzial·APP_BUF) / (Plus + Minus + APP_BUF). Ohne Aktionen: Form = Potenzial.
+const BLOCK_MIN=4;
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const addDays=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return ymd(x);};
+function pfBlocks(){const C=calcCache();if(C.blk)return C.blk;const ds=slist().map(s=>s.date||'').filter(Boolean).sort(),L=formWeeks()*7,t=ymd(new Date()),out=[];
+  if(ds.length){let a=ds[0];for(let i=0;i<60;i++){const b=addDays(a,L);if(b>t)break;out.push([a,b]);a=b;}}return C.blk=out;}
+function liveAggR(pid,from,to){const ck=CUR+'|'+META.lastChange+'|'+(S.archView||'');if(LAC.k!==ck)LAC={k:ck,m:{}};const mk='R|'+pid+'|'+from+'|'+to;if(LAC.m[mk])return LAC.m[mk];const agg=LAC.m[mk]={};
+  slist().filter(s=>s.live&&Array.isArray(s.live.actions)&&(!from||(s.date||'')>=from)&&(!to||(s.date||'')<to)).forEach(s=>s.live.actions.forEach(a=>{if(a.p!==pid||!a.c)return;const m=ACT_MAP[a.c];if(!m)return;for(const[k,w]of Object.entries(m)){const g=agg[k]||(agg[k]={p:0,m:0,n:0});if(a.t==='+')g.p+=w;else g.m+=w;g.n++;}}));return agg;}
+const PF_ATH={schnell:['a:tempo'],dyn:['a:gewandt','a:kraft'],ausd:['a:ausdauer']};
+const gkTestByR=k=>(Object.entries(GK_TEST_MAP).find(([t,r])=>r===k)||[])[0];
+// Messwert (Bestwert der Saison) passend zu einer Kategorie, auf 1–5 umgerechnet
+function pfTest(cat,pid){const[t,k]=cat.split(':');const best=c=>testPick(c,pid,'');
+  if(t==='a'&&k==='technik')return best('a:technik');
+  if(t!=='r')return null;
+  if(PF_ATH[k]){const v=PF_ATH[k].map(best).filter(isNum);return v.length?avg(v):null;}
+  if(k==='pass'){const v=PASS_TESTS.map(tk=>best('t:'+tk)).filter(isNum).map(raw=>1+Math.min(10,raw)/10*4);return v.length?avg(v):null;}
+  if(gkTestByR(k)){const raw=best('t:'+gkTestByR(k));return isNum(raw)?1+Math.min(10,raw)/10*4:null;}
+  return null;}
+function pfRatings(cat,pid){const[t,k]=cat.split(':');const ks=t==='a'&&k==='technik'?['dribb','pass']:t==='r'?[k]:[];const v=[];ks.forEach(x=>sessionsWith('r:'+x).forEach(s=>{const y=catVal(s,'r:'+x,pid);if(isNum(y))v.push(y);}));return v;}
+const pfLiveKeys=cat=>{const[t,k]=cat.split(':');return t==='a'&&k==='technik'?['technik']:t==='r'?[k]:[];};
+const pfLive=(agg,ks)=>{let p=0,m=0,n=0;ks.forEach(k=>{const g=agg[k];if(g){p+=g.p;m+=g.m;n+=g.n;}});return{p,m,n};};
+const pfAnch=(b,L)=>(5*L.p+L.m+b*APP_BUF)/(L.p+L.m+APP_BUF);
+// Ergebnis {pot, form, base, blocks}
+function pfCalc(cat,pid){const C=calcCache();C.pf=C.pf||{};const ck=cat+'|'+pid;if(ck in C.pf)return C.pf[ck];
+  const[t,k]=cat.split(':');let res;
+  if(t==='a'&&(k==='spiel'||k==='torwart')){const subs=(k==='spiel'?RATINGS:GK_RATINGS).map(r=>pfCalc('r:'+r.k,pid));const P=subs.map(x=>x.pot).filter(isNum),F=subs.map(x=>x.form).filter(isNum);res={pot:P.length?avg(P):null,form:F.length?avg(F):null,blocks:subs.reduce((a,x)=>a+x.blocks,0)};}
+  else{const R=pfRatings(cat,pid),T=pfTest(cat,pid),ks=pfLiveKeys(cat);
+    const base=mix2(R.length?avg(R):null,T);const anch=isNum(base)?base:3;
+    const bl=ks.length?pfBlocks().map(([a,b])=>pfLive(liveAggR(pid,a,b),ks)).filter(L=>L.n>=BLOCK_MIN).map(L=>pfAnch(anch,L)):[];
+    const E=[...R,...bl];const pot=E.length?mix2(avg(E),T):T;
+    const L=ks.length?pfLive(liveAggR(pid,formSince(),''),ks):{p:0,m:0,n:0};
+    const form=L.n?pfAnch(isNum(pot)?pot:3,L):pot;
+    res={pot,form,base,blocks:bl.length};}
+  return C.pf[ck]=res;}
 // Wert je Kategorie nach gewählter Quelle: Trainer (Einschätzung + Live-Aktionen als Zusatzbewertungen), App (Live-Aktionen + Tests) oder Mix (Mittelwert).
 function srcVal(cat,pid,ss,per){per=per||perMode();const C=calcCache(),std=!ss||ss===C.sw[cat];ss=ss||sessionsWith(cat);const ck=cat+'|'+pid+'|'+per;if(std&&ck in C.sv)return C.sv[ck];const v=srcVal0(cat,pid,ss,per);if(std)C.sv[ck]=v;return v;}
 function srcVal0(cat,pid,ss,per){const md=srcMode();
   if(md==='trainer')return trainerVal(cat,pid,ss,per);
+  if(md==='mix'&&srcApplies(cat)&&!cat.startsWith('x:')){const r=pfCalc(cat,pid);return per==='pot'?r.pot:per==='form'?r.form:mix2(r.pot,r.form);}
   if(md==='mix'){const sw=sessionsWith(cat);const tmL=()=>teamMean('lv|'+cat+'|'+per,q=>trainerVal(cat,q,sw,per));
     let lv=trainerVal(cat,pid,ss,per);
     if(!srcApplies(cat)){let tv=periodVal(cat,pid,ss,per);if(!isNum(lv)&&!isNum(tv))return null;if(!isNum(tv))tv=teamMean('tv|'+cat+'|'+per,q=>periodVal(cat,q,sw,per));if(!isNum(lv))lv=tmL();return mix2(lv,tv);}
@@ -822,8 +860,8 @@ function srcVal0(cat,pid,ss,per){const md=srcMode();
     if(!isNum(ap))return isNum(lv)?lv:tmL(); // keine Live-Aktionen/Tests: dein Wert zählt allein, kein Mannschaftsschnitt
     if(!isNum(lv))lv=tmL();if(!isNum(ap)||!isNum(w))return lv;if(!isNum(lv))return ap;return (lv+w*ap)/(1+w);}
   const tr=cat.startsWith('x:')?null:shrinkPV(cat,pid,ss,per);if(!srcApplies(cat))return tr;const ap=appCat(cat,pid,per);return isNum(ap)?ap:tr;}
-function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?'Potenzial: alle Werte der Saison (bei Tests der Bestwert).':pm==='form'?`Form: nur die letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test, auch wenn er älter ist.`:`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div><div class="sub" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;margin-top:4px">Form-Zeitraum: ${[4,6,8].map(w=>`<button class="chip ${formWeeks()===w?'on':''}" style="padding:2px 8px" onclick="A.cfgSet('formWeeks',${w})">${w} Wo.</button>`).join('')}</div>`;}
-function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Nur deine Einschätzungen, ohne Testmessungen (Tempo, Technik usw. aus deiner Athletik-, Dribbling- und Pass-Einschätzung), dazu jede Live-Aktion als Zusatzbewertung: Plus zählt wie eine 5, Minus wie eine 1 (4 Aktionen = 1 Bewertung, Live höchstens die Hälfte).':md==='app'?'Nur Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':'Mittelwert aus „Trainer“ und dem App-Wert. Der App-Wert zählt erst mit mehr Aktionen voll (2 Aktionen = halbes Gewicht), Tests zählen gleich voll. Fehlt einer, zählt der andere.'}</div>`;}
+function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?(srcMode()==='mix'?'Potenzial: deine Einschätzungen und Messwerte der Saison (Tests: Bestwert) plus abgeschlossene Form-Blöcke.':'Potenzial: alle Werte der Saison (bei Tests der Bestwert).'):pm==='form'?(srcMode()==='mix'?`Form: Potenzial plus Live-Aktionen der letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test.`:`Form: nur die letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test, auch wenn er älter ist.`):`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div><div class="sub" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap;margin-top:4px">Form-Zeitraum: ${[4,6,8].map(w=>`<button class="chip ${formWeeks()===w?'on':''}" style="padding:2px 8px" onclick="A.cfgSet('formWeeks',${w})">${w} Wo.</button>`).join('')}</div>`;}
+function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Nur deine Einschätzungen, ohne Testmessungen (Tempo, Technik usw. aus deiner Athletik-, Dribbling- und Pass-Einschätzung), dazu jede Live-Aktion als Zusatzbewertung: Plus zählt wie eine 5, Minus wie eine 1 (4 Aktionen = 1 Bewertung, Live höchstens die Hälfte).':md==='app'?'Nur Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':`Potenzial = deine Einschätzungen + Messwerte (Mittelwert), jeder abgeschlossene ${formWeeks()}-Wochen-Block mit mindestens 4 Aktionen zählt wie eine weitere Einschätzung. Form = Potenzial, durch die Live-Aktionen der letzten ${formWeeks()} Wochen bestätigt oder korrigiert.`}</div>`;}
 // Erklärt, woher der Torwart-Wert eines Kindes kommt (Bewertungen mit TW-Einschätzung/TW-Tests, App-Werte aus Torwart-Aktionen)
 function gkInfo(pid){
   const GKT=['tw_fangen','tw_reaktion','tw_abwurf'];
@@ -931,7 +969,7 @@ function vLineupInner(){
   h+=`<button class="btn pri" style="width:100%;margin:10px 0 0" onclick="A.liveFromLineup()">▶ Live mit dieser Aufstellung</button>`;
   const est=filled.filter(k=>fitOf(cur[k],k).cov<.5).map(k=>esc(S.players[cur[k]].name));
   if(est.length)h+=`<div class="banner">Gestrichelt = wenig Daten, Wert teilweise geschätzt: ${est.join(', ')}. Fehlende Bereiche zählen mit dem Mannschaftsschnitt.</div>`;
-  tail+=`<details class="card"><summary>So rechnet die App</summary>${Object.values(POS).map(P=>`<div class="wt"><b>${P.n}:</b> ${Object.entries(P.w).map(([c,w])=>`${catName(c)} ${Math.round(w*100)} %`).join(', ')}</div>`).join('')}<div class="wt">Bonus: starker Fuß passend zur Seite (+0,1 bis +0,15). Spielweise (Kader): offensiv = Sturm +0,2 / Abwehr −0,2, defensiv umgekehrt, ausgewogen = Mittelfeld +0,1. Positionstreue: gering = Abwehr −0,3 / Mittelfeld −0,1, hoch = Abwehr +0,1 / Mittelfeld +0,05. Messwerte zählen relativ zum Team (3 = Schnitt), deine Einschätzung direkt (1–5). Werte bleiben immer zwischen 1 und 5. Messwerte: Potenzial = bester Wert der Saison, Form = letzter Wert (gibt es keinen neuen Test, zählt der letzte ältere, dazu die aktuellen Live-Aktionen). Deine Einschätzungen: Schnitt aller Bewertungen im Zeitraum, dazu zählt der Mannschaftsschnitt wie eine weitere Bewertung (ein Kind mit nur einer Bewertung zählt so noch nicht voll). Hat ein Kind noch gar keinen Wert (z. B. bei allen Testtagen gefehlt), zählt dort der Mannschaftsschnitt – Fehlen ist so weder Vor- noch Nachteil. Bei „Trainer“ zählt jede Live-Aktion als Zusatzbewertung: Plus wie eine 5, Minus wie eine 1, 4 Aktionen = 1 Bewertung, Live höchstens die Hälfte des Werts. „App“ nimmt die Werte aus „Trainer vs. App“, „Mix“ (Standard) den Mittelwert aus „Trainer“ und „App“. Zeitraum: Potenzial = alle Werte der Saison (Tests: Bestwert), Form = letzte Wochen (Tests: letzter Wert), Mix = Mittelwert aus beiden.</div></details>`;
+  tail+=`<details class="card"><summary>So rechnet die App</summary>${Object.values(POS).map(P=>`<div class="wt"><b>${P.n}:</b> ${Object.entries(P.w).map(([c,w])=>`${catName(c)} ${Math.round(w*100)} %`).join(', ')}</div>`).join('')}<div class="wt">Bonus: starker Fuß passend zur Seite (+0,1 bis +0,15). Spielweise (Kader): offensiv = Sturm +0,2 / Abwehr −0,2, defensiv umgekehrt, ausgewogen = Mittelfeld +0,1. Positionstreue: gering = Abwehr −0,3 / Mittelfeld −0,1, hoch = Abwehr +0,1 / Mittelfeld +0,05. Messwerte zählen relativ zum Team (3 = Schnitt), deine Einschätzung direkt (1–5). Werte bleiben immer zwischen 1 und 5. Messwerte: Potenzial = bester Wert der Saison, Form = letzter Wert (gibt es keinen neuen Test, zählt der letzte ältere, dazu die aktuellen Live-Aktionen). Deine Einschätzungen zählen genau so, wie du sie eingetragen hast. Hat ein Kind noch gar keinen Wert (z. B. bei allen Testtagen gefehlt), zählt dort der Mannschaftsschnitt – Fehlen ist so weder Vor- noch Nachteil. Bei „Trainer“ zählt jede Live-Aktion als Zusatzbewertung: Plus wie eine 5, Minus wie eine 1, 4 Aktionen = 1 Bewertung, Live höchstens die Hälfte des Werts. „App“ nimmt die Werte aus „Trainer vs. App“. „Mix“ (Standard): Potenzial = Mittelwert aus deinen Einschätzungen und den Messwerten (Bestwert); jeder abgeschlossene Form-Block (je Form-Wochen ab Saisonstart, mindestens 4 Aktionen) zählt dort wie eine weitere Einschätzung. Form = das Potenzial, durch die Live-Aktionen der letzten Form-Wochen bestätigt, hochgeschoben oder nach unten korrigiert (Plus wie eine 5, Minus wie eine 1, Potenzial zählt doppelt); ohne Aktionen ist Form = Potenzial. Athletik: Potenzial = bester Test, Form = letzter Test. Zeitraum „Mix“ = Mittelwert aus Potenzial und Form.</div></details>`;
   return h+tail;
 }
 // Aufstellung rechnet immer mit Mix/Mix (wie die Gesamtstärke im Kader)
@@ -1103,6 +1141,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:83,items:['<b>Neues Modell für Potenzial und Form:</b> Das Potenzial ist der Mittelwert aus deinen Einschätzungen und den Messwerten. Live-Aktionen zählen nicht mehr direkt ins Potenzial.','Die Form ist dein Potenzial, durch die Live-Aktionen der letzten Wochen bestätigt, hochgeschoben oder nach unten korrigiert. Ohne Aktionen ist Form gleich Potenzial.','Nach jedem abgeschlossenen Form-Block (z. B. 6 Wochen ab Saisonstart) zählt die Form dieses Blocks wie eine weitere Einschätzung ins Potenzial, wenn das Kind darin mindestens 4 Aktionen im Bereich hatte. So wächst das Potenzial mit, wenn ein Kind dauerhaft besser oder schwächer spielt.']},
  {v:82,items:['Stärkenprofil: Die Potenzial-Linie ist jetzt orange gestrichelt, der Teamschnitt-Ring (3) hellgrau gepunktet. So verwechselt man sie nicht mehr. Sind Form und Potenzial gleich, steht das direkt unter dem Netz.']},
  {v:81,items:['Deine Einschätzungen zählen jetzt genau so, wie du sie eingetragen hast. Bisher wurde bei wenigen Einschätzungen der Mannschaftsschnitt mit eingerechnet (eine einzelne 5 ergab 4,0). Gute oder schwache Phasen zeigt der Formpfeil.']},
  {v:80,items:['Live-Aktionen orientieren sich jetzt an deinem eingetragenen Potenzial-Wert des Kindes statt am Mittelwert 3: Plus-Aktionen schieben ihn hoch, Minus-Aktionen korrigieren ihn nach unten, ohne Aktionen bleibt er wie eingetragen.','Hat ein Kind in einem Bereich keine Live-Aktionen, zählt im Mix nur dein Wert – es wird kein Mannschaftsschnitt mehr hineingerechnet.']},
