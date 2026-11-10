@@ -2,80 +2,70 @@
 <html lang="de"><head><meta charset="utf-8"><title>TrainerRadar – Flyer</title>
 <link rel="stylesheet" href="common.css">
 <style>
-/* Flyer für alle Trainerinnen und Trainer. Screenshots: node shots_flyer.js */
+/* Flyer für alle Trainerinnen und Trainer. Screenshots: node shots_flyer.js (Handy-Format 375 × 800) */
 .page{background:#f6f4ec}
-.top{padding:12mm 14mm 0;position:relative}
-.brand{display:flex;align-items:center;gap:3mm}
-.brand img{width:11mm;height:11mm;border-radius:2.6mm}
-.brand b{font:800 15pt/1 'Inter Display';color:var(--gd);letter-spacing:-.2px}
-.tag{position:absolute;right:14mm;top:13.5mm;font:700 8.4pt Inter;color:var(--gd);border:.35mm solid var(--gd);border-radius:10mm;padding:1.4mm 3.4mm}
-h1{font:800 34pt/1.02 'Inter Display';letter-spacing:-1.2px;color:var(--gd);margin-top:8mm}
-h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--lime) 62%,var(--lime) 92%,transparent 92%)}
-.lead{font:400 11.2pt/1.5 Inter;color:#33433a;margin-top:4.5mm;width:172mm;hyphens:manual}
-.lead b{color:var(--gd)}
-.phones{position:relative;z-index:2;display:flex;justify-content:center;align-items:flex-start;gap:8mm;margin-top:7mm;padding:0 10mm}
-.pc{width:52mm;text-align:center}
-.pc.mid{margin-top:-4mm}
-.fr{position:relative;border:1.8mm solid #101a14;border-radius:6.5mm;overflow:hidden;background:#101a14;box-shadow:0 3mm 8mm #0f3d2233}
-.fr img{display:block;width:100%;height:82mm;object-fit:cover;object-position:top}
-.lbl{position:absolute;left:50%;bottom:3mm;transform:translateX(-50%);white-space:nowrap;background:var(--lime);color:var(--gd);font:800 8.6pt 'Inter Display';padding:1.4mm 3.2mm;border-radius:10mm;box-shadow:0 1mm 2.5mm #0004}
-.lbl i{font-style:normal;opacity:.55;margin-right:1.2mm}
-.pc .nX{display:inline-flex;align-items:center;justify-content:center;width:6mm;height:6mm;border-radius:50%;background:var(--gd);color:var(--lime);font:800 9pt 'Inter Display';margin-top:3.2mm}
-.pc b{display:block;font:800 10.6pt 'Inter Display';color:var(--gd);margin-top:1.4mm}
-.pc span{display:block;font:400 8.4pt/1.35 Inter;color:#4a5a50;margin-top:.6mm}
-.all{position:relative;margin-top:-20mm;background:var(--gd);color:#fff;padding:25mm 14mm 6.5mm}
-.all h2{font:800 15pt 'Inter Display';letter-spacing:-.2px}
-.all h2 em{font-style:normal;color:var(--lime)}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3.6mm 6mm;margin-top:4mm}
-.f b{display:flex;align-items:center;gap:1.8mm;font:700 9.6pt 'Inter Display';color:#fff}
-.f b:before{content:"";flex:none;width:2.2mm;height:2.2mm;border-radius:.6mm;background:var(--lime)}
-.f span{display:block;font:400 8.2pt/1.4 Inter;color:#cfe0d3;margin-top:.8mm}
-.bot{position:absolute;left:0;right:0;bottom:0;height:44mm;display:flex;align-items:center;gap:8mm;padding:0 14mm}
+.hero{position:absolute;left:0;right:0;top:0;height:187mm;background:radial-gradient(150mm 110mm at 50% 105%,#2a8a4f 0%,#14532d 45%,#0a2414 100%);overflow:hidden}
+.lines{position:absolute;inset:0;opacity:.09}
+.brand{position:absolute;left:14mm;top:12mm;display:flex;align-items:center;gap:3mm}
+.brand img{width:11mm;height:11mm;border-radius:2.6mm;box-shadow:0 1mm 3mm #0005}
+.brand b{font:800 15pt/1 'Inter Display';color:#fff;letter-spacing:-.2px}
+.tag{position:absolute;right:14mm;top:13.5mm;font:700 8.4pt Inter;color:var(--gd);background:var(--lime);border-radius:10mm;padding:1.5mm 3.6mm}
+h1{position:absolute;left:14mm;right:14mm;top:31mm;font:800 35pt/1.02 'Inter Display';letter-spacing:-1.3px;color:#fff;text-align:center}
+h1 em{font-style:normal;color:var(--lime)}
+.lead{position:absolute;left:14mm;right:14mm;top:63mm;text-align:center;font:500 11.5pt/1.4 Inter;color:#d3e6d8}
+.ph{position:absolute;border:1.7mm solid #0b120e;border-radius:7.5mm;overflow:hidden;background:#0b120e;box-shadow:0 5mm 12mm #0007}
+.ph img{display:block;width:100%}
+.ph.l{width:52mm;left:20mm;top:84mm;transform:rotate(-6deg)}
+.ph.r{width:52mm;right:20mm;top:84mm;transform:rotate(6deg)}
+.ph.c{width:60mm;left:75mm;top:76mm;z-index:2;box-shadow:0 6mm 16mm #000a}
+.cap{position:absolute;z-index:3;background:#fff;color:var(--gd);font:800 8.6pt 'Inter Display';padding:1.5mm 3.4mm;border-radius:10mm;box-shadow:0 1mm 3mm #0004;white-space:nowrap}
+.feat{position:absolute;left:12mm;right:12mm;top:192mm;display:grid;grid-template-columns:1fr 1fr 1fr;gap:3mm}
+.f{background:#fff;border-radius:3.5mm;padding:2.8mm 3.4mm;box-shadow:0 .6mm 2mm #0f3d2214}
+.f b{display:block;font:800 10.4pt/1.2 'Inter Display';color:var(--gd)}
+.f span{display:flex;flex-wrap:wrap;gap:1.1mm;margin-top:1.6mm;hyphens:manual}
+.f i{font:600 7.9pt/1 Inter;font-style:normal;color:var(--gd);background:#e9f6c2;border-radius:10mm;padding:1.1mm 2.2mm;white-space:nowrap}
+.bot{position:absolute;left:0;right:0;bottom:0;height:43mm;background:var(--gd);display:flex;align-items:center;gap:8mm;padding:0 14mm;color:#fff}
 .bot .s{flex:1}
-.bot h3{font:800 14pt 'Inter Display';color:var(--gd)}
+.bot h3{font:800 15pt 'Inter Display'}
+.bot h3 em{font-style:normal;color:var(--lime)}
 .steps{display:flex;gap:2.5mm;margin-top:3mm}
-.steps div{flex:1;background:#fff;border-radius:3mm;padding:2.4mm 3mm;font:500 8.6pt/1.35 Inter;color:#33433a;box-shadow:0 .5mm 1.5mm #0f3d2214}
-.steps i{display:block;font:800 12pt 'Inter Display';font-style:normal;color:var(--g);margin-bottom:.5mm}
-.chk{margin-top:3mm;font:600 8.4pt Inter;color:var(--gd)}
-.chk b{color:var(--g)}
-.qr{flex:none;background:#fff;border-radius:4mm;padding:2.8mm;text-align:center;box-shadow:0 1mm 3mm #0f3d2222}
-.qr img{width:29mm;height:29mm;display:block}
-.qr div{font:700 7.4pt Inter;color:var(--gd);margin-top:1mm}
+.steps div{flex:1;background:#ffffff14;border:.3mm solid #ffffff2a;border-radius:3mm;padding:2.2mm 3mm;font:500 8.6pt/1.3 Inter}
+.steps i{font:800 11pt 'Inter Display';font-style:normal;color:var(--lime);margin-right:1.4mm}
+.chk{margin-top:3mm;font:600 8.4pt Inter;color:#cfe3d4}
+.chk b{color:var(--lime)}
+.qr{flex:none;background:#fff;border-radius:4mm;padding:2.6mm;text-align:center}
+.qr img{width:28mm;height:28mm;display:block}
+.qr div{font:700 7.2pt Inter;color:var(--gd);margin-top:1mm}
 </style></head>
 <body>
 <section class="page">
-  <div class="top">
+  <div class="hero">
+    <svg class="lines" viewBox="0 0 210 190" preserveAspectRatio="none"><g fill="none" stroke="#fff" stroke-width=".5"><rect x="6" y="6" width="198" height="166"/><line x1="6" y1="120" x2="204" y2="120"/><circle cx="105" cy="120" r="24"/><rect x="60" y="6" width="90" height="28"/></g></svg>
     <div class="brand"><img src="../icon-512.png" alt=""><b>TrainerRadar</b></div>
     <div class="tag">Kostenlos · für jede Mannschaft</div>
     <h1>Weniger Bauchgefühl.<br><em>Mehr Überblick.</em></h1>
-    <div class="lead">Die Trainer-App für deine Mannschaft – von der Jugend bis zu den Senioren. <b>Spiel live erfassen, fair wechseln, Stärken erkennen und die beste Aufstellung finden.</b> Alles auf deinem Handy, auch ohne Netz am Platz.</div>
+    <div class="lead">Die Trainer-App für deine Mannschaft – von der Jugend bis zu den Senioren.</div>
+    <div class="ph l"><img src="f_lineup.png" alt=""></div>
+    <div class="ph r"><img src="f_profil.png" alt=""></div>
+    <div class="ph c"><img src="f_live.png" alt=""></div>
+    <div class="cap" style="left:29mm;top:177mm">Aufstellung</div>
+    <div class="cap" style="left:91.5mm;top:177mm">Live-Erfassung</div>
+    <div class="cap" style="right:28mm;top:177mm">Stärkenprofil</div>
   </div>
 
-  <div class="phones">
-    <div class="pc"><div class="fr"><img src="f_live.png" alt=""><div class="lbl"><i>1</i>Live am Spielfeldrand</div></div></div>
-    <div class="pc mid"><div class="fr"><img src="f_lineup.png" alt=""><div class="lbl"><i>2</i>Aufstellung auf Knopfdruck</div></div></div>
-    <div class="pc"><div class="fr"><img src="f_profil.png" alt=""><div class="lbl"><i>3</i>Stärkenprofil für jeden</div></div></div>
-  </div>
-
-  <div class="all">
-    <h2>Das alles kann <em>TrainerRadar</em></h2>
-    <div class="g3">
-      <div class="f"><b>Live-Erfassung</b><span>Plus &amp; Minus mit Kategorie, Tore, Vorlagen und Karten – jede Aktion mit Spielminute.</span></div>
-      <div class="f"><b>Faire Spielzeit</b><span>Spielzeit-Ampel und Wechselvorschläge, die Einsatzzeit und Stärke abwägen. Auch fürs Turnier.</span></div>
-      <div class="f"><b>Aufstellung</b><span>Stärkste oder ausgewogene Elf, von Funino bis 11 gegen 11, mit Gastspielern.</span></div>
-      <div class="f"><b>Positionen</b><span>Mitte und außen getrennt bewertet, schwacher Fuß inklusive. „Warum hier?“ erklärt jede Wahl.</span></div>
-      <div class="f"><b>Potenzial &amp; Form</b><span>Deine Einschätzung, Messwerte und Spielaktionen ergeben ein ehrliches Bild.</span></div>
-      <div class="f"><b>Testtage &amp; Torwart</b><span>Sprint, Slalom, Pass, Schuss mit Verlauf. Torhüter werden eigens bewertet.</span></div>
-      <div class="f"><b>Ranglisten &amp; Berichte</b><span>Torschützen, Vorlagen, Bestwerte und ein Saisonbericht fürs Spielergespräch.</span></div>
-      <div class="f"><b>Ziele &amp; Rückblick</b><span>Entwicklungsziele pro Spieler, Stärkenkarte und Saison-Rückblick als PDF.</span></div>
-      <div class="f"><b>Trainerteam</b><span>Mehrere Mannschaften, Sicherung per WhatsApp teilen, Daten vom Co-Trainer zusammenführen.</span></div>
-    </div>
+  <div class="feat">
+    <div class="f"><b>Gerechtes Stärkenprofil</b><span><i>Trainerbeobachtung</i><i>Leistungsmessung</i><i>Live-Erfassung</i></span></div>
+    <div class="f"><b>Live am Spielfeldrand</b><span><i>Plus &amp; Minus</i><i>Tore &amp; Vorlagen</i><i>Karten</i></span></div>
+    <div class="f"><b>Faire Spielzeit</b><span><i>Spielzeit-Ampel</i><i>Wechselvorschläge</i><i>Turniermodus</i></span></div>
+    <div class="f"><b>Beste Aufstellung</b><span><i>Stärkste Elf</i><i>Positionsvorschlag</i><i>Funino bis 11 gegen 11</i></span></div>
+    <div class="f"><b>Entwicklung im Blick</b><span><i>Potenzial &amp; Form</i><i>Ziele</i><i>Saisonbericht</i></span></div>
+    <div class="f"><b>Fürs ganze Trainerteam</b><span><i>Mehrere Mannschaften</i><i>Teilen per WhatsApp</i><i>Offline</i></span></div>
   </div>
 
   <div class="bot">
     <div class="s">
-      <h3>In 3 Schritten startklar</h3>
-      <div class="steps"><div><i>1</i>QR-Code scannen</div><div><i>2</i>„Zum Home-Bildschirm“ hinzufügen</div><div><i>3</i>Kader anlegen – los geht's</div></div>
+      <h3>In 3 Schritten <em>startklar</em></h3>
+      <div class="steps"><div><i>1</i>QR-Code scannen</div><div><i>2</i>Zum Home-Bildschirm</div><div><i>3</i>Kader anlegen</div></div>
       <div class="chk"><b>✓</b> kostenlos &nbsp; <b>✓</b> ohne Anmeldung &nbsp; <b>✓</b> läuft offline &nbsp; <b>✓</b> Daten bleiben auf deinem Handy</div>
     </div>
     <div class="qr"><img src="qr.png" alt="QR-Code"><div>cschwarte82.github.io/Wacker</div></div>
