@@ -317,7 +317,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='71';
+const APP_VERSION='72';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -720,7 +720,7 @@ function vRank(){
 // ---------- Aufstellung ----------
 const FORMS={4:{'2-2':['A-L','A-R','S-L','S-R'],'1-2-1':['A-Z','M-L','M-R','S-Z']},5:{'2-2-1':['A-L','A-R','M-L','M-R','S-Z'],'2-1-2':['A-L','A-R','M-Z','S-L','S-R'],'3-1-1':['A-L','A-Z','A-R','M-Z','S-Z']},6:{'2-3-1':['A-L','A-R','M-L','M-Z','M-R','S-Z'],'3-2-1':['A-L','A-Z','A-R','M-L','M-R','S-Z'],'2-2-2':['A-L','A-R','M-L','M-R','S-L','S-R'],'3-1-2':['A-L','A-Z','A-R','M-Z','S-L','S-R']}};
 const POS={
-  A:{n:'Abwehr',w:{'r:zweik':.3,'r:spielv':.2,'r:komm':.15,'a:tempo':.2,'a:kraft':.15}},
+  A:{n:'Abwehr',w:{'r:zweik':.45,'r:spielv':.2,'r:komm':.1,'a:tempo':.15,'a:kraft':.1}},
   M:{n:'Mittelfeld',w:{'a:ausdauer':.15,'a:technik':.2,'r:pass':.2,'r:ueber':.15,'r:spielv':.15,'r:frei':.15}},
   S:{n:'Sturm',w:{'a:tempo':.2,'a:technik':.15,'a:gewandt':.1,'r:dribb':.15,'r:mut':.15,'r:frei':.15,'r:abschluss':.1}}
 };
@@ -1066,6 +1066,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:72,items:['Wechselvorschläge verteilen zwei Einwechselspieler jetzt gemeinsam: Wer besser in die Abwehr passt, wird für die Abwehr vorgeschlagen, der andere fürs Mittelfeld oder den Sturm.','Zweikampfverhalten zählt für die Abwehr jetzt 45 % statt 30 %. Das wirkt auch auf Aufstellung und Gesamtstärke.']},
  {v:71,items:['Klügere Wechselvorschläge: Wer von der Bank kommt, wird immer auf einer seiner starken Positionen vorgeschlagen, nicht einfach dort, wo gerade jemand lange gespielt hat. Passt keine freie Position, rückt ein Mitspieler auf (z. B. „Lea rückt nach Sturm“) – ein Tipp erledigt beides. Die Spielzeit bleibt fair: Raus geht nur, wer deutlich länger gespielt hat.']},
  {v:70,items:['Spielzeit-Ampel: „knapp“ ist jetzt deutlich gelb statt orange und lässt sich so klar von Rot unterscheiden.']},
  {v:69,items:['Torwart gerechter bei den Stärken: Auf der Stärkenkarte tritt jeder Torwartwert einzeln an, genau wie die Feldwerte, statt nur als Durchschnitt. Saisonbericht und Saison-Rückblick zeigen die Torwartwerte jetzt auch bei Stärken und Entwicklung.']},
@@ -1533,20 +1534,20 @@ function subSuggest(L){
   const fit=(pid,k)=>{const c=pid+'|'+k;if(!(c in fc)){const p=S.players[pid];fc[c]=p?slotFit({...p,id:pid},profileOf(pid),k).v:0;}return fc[c];};
   const slots=Object.keys(L.pos).filter(k=>k!=='TW'&&L.pos[k]);
   const ins=L.bench.filter(p=>!sent.has(p)).sort((a,b)=>daySecs(L,a)-daySecs(L,b));
-  const res=[],used=new Set();
-  for(const pin of ins.slice(0,3)){
-    const free=slots.filter(k=>!used.has(k));if(!free.length)break;
-    const top=Math.max(...free.map(k=>fit(pin,k)));let best=null;
-    const take=o=>{if(!best||o.sc>best.sc)best=o;};
-    const outs=free.filter(k=>(daySecs(L,L.pos[k])-daySecs(L,pin))/60>=2);
-    for(const k2 of outs){const f=fit(pin,k2);if(f>=top-.3)take({pin,pout:L.pos[k2],slot:k2,gap:(daySecs(L,L.pos[k2])-daySecs(L,pin))/60,fit:f,sc:(daySecs(L,L.pos[k2])-daySecs(L,pin))/360+f});}
-    // Keine starke Position frei? Dann Rochade prüfen, sonst bester direkter Wechsel
-    if(!best)for(const k2 of outs){const pout=L.pos[k2],gap=(daySecs(L,pout)-daySecs(L,pin))/60,base=gap/6;
-      {const f=fit(pin,k2);take({pin,pout,slot:k2,gap,fit:f,sc:base+f-1});}
-      for(const k1 of free){if(k1===k2)continue;const p1=L.pos[k1];const f=fit(pin,k1);if(f<top-.3)continue;
-        const q=f+fit(p1,k2)-fit(p1,k1);take({pin,pout,slot:k2,to:k1,mv:p1,gap,fit:f,sc:base+q-.2});}}
-    if(best){res.push(best);used.add(best.slot);if(best.to)used.add(best.to);}if(res.length===2)break;
-  }
+  // Optionen je Einwechselspieler sammeln, dann die beiden Wechsel GEMEINSAM wählen (wer besser in die Abwehr passt, geht in die Abwehr)
+  const optsOf=pin=>{const top=Math.max(...slots.map(k=>fit(pin,k)));const o=[];
+    const outs=slots.filter(k=>(daySecs(L,L.pos[k])-daySecs(L,pin))/60>=2);
+    for(const k2 of outs){const f=fit(pin,k2),gap=(daySecs(L,L.pos[k2])-daySecs(L,pin))/60;o.push({pin,pout:L.pos[k2],slot:k2,gap,fit:f,sc:gap/6+f-(f>=top-.3?0:1),uses:[k2]});}
+    // Keine starke Position mit Auswechselkandidat? Dann Rochade: Einwechsler auf starken Platz, dortiger Spieler rückt auf
+    if(!o.some(x=>x.fit>=top-.3))for(const k2 of outs){const pout=L.pos[k2],gap=(daySecs(L,pout)-daySecs(L,pin))/60;
+      for(const k1 of slots){if(k1===k2)continue;const p1=L.pos[k1],f=fit(pin,k1);if(f<top-.3)continue;
+        o.push({pin,pout,slot:k2,to:k1,mv:p1,gap,fit:f,sc:gap/6+f+fit(p1,k2)-fit(p1,k1)-.2,uses:[k1,k2]});}}
+    return o;};
+  const pins=ins.slice(0,2),O=pins.map(optsOf);let best=null;
+  const one=O.flat().filter(x=>x.pin===pins[0]);one.forEach(a=>{if(!best||a.sc>best.sc)best={sc:a.sc,res:[a]};});
+  if(O[1])for(const a of O[0])for(const b of O[1]){if(a.uses.some(k=>b.uses.includes(k)))continue;const sc=a.sc+b.sc+10;if(!best||sc>best.sc)best={sc,res:[a,b]};}
+  if(!best&&O[1])O[1].forEach(b=>{if(!best||b.sc>best.sc)best={sc:b.sc,res:[b]};});
+  const res=best?best.res:[];
   return res;
 }
 const t0n=L=>{const n=tourPrev(L).n;return n?` – ${n} Spiel${n===1?'':'e'} schon gespeichert`:'';};

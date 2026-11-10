@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 71, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 72, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -89,3 +89,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V69:** Torwart fair bei Stärken: Stärkenkarte – jeder GK-Wert (Einschätzung + App-Wert je Schlüssel) tritt einzeln an, „Torwart“ höchstens einmal (vorher Schnitt aller GK-Werte → Spitzen gingen verloren). Saisonbericht (`GK_SHORT`) und Kinder-Rückblick (`KID_SHORT` tw_*) nehmen GK_RATINGS mit; Rückblick-Netz fasst GK zu einer Achse „Torwart“ zusammen, „gewachsen“/„Deine Stärken“ einzeln.
 - **V70:** Spielzeit-Ampel „knapp“ deutlich gelb (#facc15, `.lmin.warn` als Badge mit dunkler Schrift, `.adot.warn`), vorher orange #c2410c kaum von Rot zu unterscheiden.
 - **V71:** `subSuggest` neu: rein = wenigste Spielzeit; raus nur mit ≥2 Min. mehr; Einwechsler nur auf „starke“ Slots (slotFit ≥ eigenes Maximum − 0,3), Score = Fit + Gap/6. Gibt es keinen solchen Wechsel, Rochade (`to`/`mv`: Einwechsler auf starken Slot k1, dortiger Spieler rückt auf den Slot des Auswechselspielers) oder bester direkter Wechsel mit −1 Strafe. `A.liveSub(slot,pid,to)` führt Wechsel + Tausch aus. Simulation 300 Zufallslagen: starke Position 88 % → 99 %, Spielzeit-Abstand unverändert (~9,5 Min.), Rochade in ~1 %.
+- **V72:** `subSuggest` wählt die zwei Wechsel gemeinsam (alle Optionspaare der zwei Kinder mit der wenigsten Spielzeit, beste Summe; vorher gierig je Kind → schwacher Zweikämpfer in Abwehr, starker ins Mittelfeld). POS.A-Gewichte: Zweikampf .45 (vorher .3), Spielv .2, Komm .1, Tempo .15, Sprungkraft .1 (Christian: Zweikampf für Abwehr essenziell). Simulation 400 Lagen: falsch verteilte Paare 52 → 4.
