@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 74, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 75, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -92,3 +92,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V72:** `subSuggest` wählt die zwei Wechsel gemeinsam (alle Optionspaare der zwei Kinder mit der wenigsten Spielzeit, beste Summe; vorher gierig je Kind → schwacher Zweikämpfer in Abwehr, starker ins Mittelfeld). POS.A-Gewichte: Zweikampf .4 (vorher .3), Mut .2 (neu), Spielv .15, Tempo .1, Komm .1, Sprungkraft .05 (Christian: Zweikampf und Mut machen einen großen Teil der Abwehrstärke aus). Simulation 400 Lagen: falsch verteilte Paare 52 → 4. Feste Sperren `posBan(pid,slot)`: Abwehr verboten bei r:zweik < Teamschnitt, Sturm verboten bei r:abschluss < 3 (gilt für Einwechsler und Rochade-Spieler; sonst kein Vorschlag). Simulation: verbotene Platzierungen 68 → 0.
 - **V73:** POS.S-Gewichte: Abschluss .3 (vorher .1), Dribbling .25 (vorher .15), Tempo .15, Freilaufen .1, Mut .1, Technik .05, Gewandtheit .05 (Christian: Abschluss und Dribbling wichtig für den Sturm).
 - **V74:** `bestLineup` beachtet `posBan` (−100 auf verbotene Plätze, angezeigter Fit bleibt echt); Hinweis-Banner in der Aufstellung, wenn ein Kind auf verbotenem Platz steht (unvermeidbar oder eigene Aufstellung ✎). Test 120 Aufstellungen: 2 unvermeidbare Fälle.
+- **V75:** Torschütze- und Vorlage-Auswahl je 10 s (vorher 7 s / 6 s).
