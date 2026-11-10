@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 75, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 76, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -93,3 +93,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V73:** POS.S-Gewichte: Abschluss .3 (vorher .1), Dribbling .25 (vorher .15), Tempo .15, Freilaufen .1, Mut .1, Technik .05, Gewandtheit .05 (Christian: Abschluss und Dribbling wichtig für den Sturm).
 - **V74:** `bestLineup` beachtet `posBan` (−100 auf verbotene Plätze, angezeigter Fit bleibt echt); Hinweis-Banner in der Aufstellung, wenn ein Kind auf verbotenem Platz steht (unvermeidbar oder eigene Aufstellung ✎). Test 120 Aufstellungen: 2 unvermeidbare Fälle.
 - **V75:** Torschütze- und Vorlage-Auswahl je 10 s (vorher 7 s / 6 s).
+- **V76:** Aufstellungsseite neu geordnet (Christian): Kopfzeile `.lutop` (Selects Spielform/Formation + Stärkste/Ausgewogen), „Dabei“ als `<details class=lud>` (`S.luHereOpen`), Torwart-Select, Spielfeld, Bank `.lubench` direkt am Feld (`.pitch.wb`), Durchschnitt, Spielzeit-Einteilung, Live-Knopf, unten (`tail`) Torwart-Info, Warum hier?, So rechnet die App. `vLineup`/`subSuggest` laufen über `withMix()` (immer src/per = mix); „Werte aus“/„Zeitraum“ nur noch in Ranglisten.
