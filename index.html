@@ -317,7 +317,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='72';
+const APP_VERSION='73';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -722,7 +722,7 @@ const FORMS={4:{'2-2':['A-L','A-R','S-L','S-R'],'1-2-1':['A-Z','M-L','M-R','S-Z'
 const POS={
   A:{n:'Abwehr',w:{'r:zweik':.4,'r:mut':.2,'r:spielv':.15,'a:tempo':.1,'r:komm':.1,'a:kraft':.05}},
   M:{n:'Mittelfeld',w:{'a:ausdauer':.15,'a:technik':.2,'r:pass':.2,'r:ueber':.15,'r:spielv':.15,'r:frei':.15}},
-  S:{n:'Sturm',w:{'a:tempo':.2,'a:technik':.15,'a:gewandt':.1,'r:dribb':.15,'r:mut':.15,'r:frei':.15,'r:abschluss':.1}}
+  S:{n:'Sturm',w:{'r:abschluss':.3,'r:dribb':.25,'a:tempo':.15,'r:frei':.1,'r:mut':.1,'a:technik':.05,'a:gewandt':.05}}
 };
 const SIDE={L:'links',R:'rechts',Z:'zentral'};
 const catShort=c=>catName(c).replace(/\s*\/.*$/,'').replace('\u00AD','').replace('­','').replace('verhalten','');
@@ -1066,6 +1066,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:73,items:['Neue Sturmstärke: Abschluss 30 % und Dribbling 25 % machen jetzt den größten Teil aus (vorher 10 % und 15 %). Dazu Tempo 15 %, Freilaufen 10 %, Mut 10 %, Technik 5 %, Gewandtheit 5 %. Das wirkt auf Wechselvorschläge, Aufstellung und Gesamtstärke.']},
  {v:72,items:['Wechselvorschläge verteilen zwei Einwechselspieler jetzt gemeinsam: Wer besser in die Abwehr passt, wird für die Abwehr vorgeschlagen, der andere fürs Mittelfeld oder den Sturm.','Neue Abwehrstärke: Zweikampfverhalten 40 % und Mut 20 % machen jetzt den größten Teil aus (vorher Zweikampf 30 %, Mut gar nicht). Dazu Spielverständnis 15 %, Tempo 10 %, Kommunikation 10 %, Sprungkraft 5 %. Das wirkt auch auf Aufstellung und Gesamtstärke.','Feste Regeln für Wechselvorschläge: Wer im Zweikampf unter dem Mannschaftsschnitt liegt, wird nie für die Abwehr vorgeschlagen, wer im Abschluss unter 3 liegt, nie für den Sturm. Geht es anders nicht, schlägt die App einen Positionstausch vor oder lässt den Vorschlag weg.']},
  {v:71,items:['Klügere Wechselvorschläge: Wer von der Bank kommt, wird immer auf einer seiner starken Positionen vorgeschlagen, nicht einfach dort, wo gerade jemand lange gespielt hat. Passt keine freie Position, rückt ein Mitspieler auf (z. B. „Lea rückt nach Sturm“) – ein Tipp erledigt beides. Die Spielzeit bleibt fair: Raus geht nur, wer deutlich länger gespielt hat.']},
  {v:70,items:['Spielzeit-Ampel: „knapp“ ist jetzt deutlich gelb statt orange und lässt sich so klar von Rot unterscheiden.']},

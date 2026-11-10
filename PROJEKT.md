@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 72, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 73, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -90,3 +90,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V70:** Spielzeit-Ampel „knapp“ deutlich gelb (#facc15, `.lmin.warn` als Badge mit dunkler Schrift, `.adot.warn`), vorher orange #c2410c kaum von Rot zu unterscheiden.
 - **V71:** `subSuggest` neu: rein = wenigste Spielzeit; raus nur mit ≥2 Min. mehr; Einwechsler nur auf „starke“ Slots (slotFit ≥ eigenes Maximum − 0,3), Score = Fit + Gap/6. Gibt es keinen solchen Wechsel, Rochade (`to`/`mv`: Einwechsler auf starken Slot k1, dortiger Spieler rückt auf den Slot des Auswechselspielers) oder bester direkter Wechsel mit −1 Strafe. `A.liveSub(slot,pid,to)` führt Wechsel + Tausch aus. Simulation 300 Zufallslagen: starke Position 88 % → 99 %, Spielzeit-Abstand unverändert (~9,5 Min.), Rochade in ~1 %.
 - **V72:** `subSuggest` wählt die zwei Wechsel gemeinsam (alle Optionspaare der zwei Kinder mit der wenigsten Spielzeit, beste Summe; vorher gierig je Kind → schwacher Zweikämpfer in Abwehr, starker ins Mittelfeld). POS.A-Gewichte: Zweikampf .4 (vorher .3), Mut .2 (neu), Spielv .15, Tempo .1, Komm .1, Sprungkraft .05 (Christian: Zweikampf und Mut machen einen großen Teil der Abwehrstärke aus). Simulation 400 Lagen: falsch verteilte Paare 52 → 4. Feste Sperren `posBan(pid,slot)`: Abwehr verboten bei r:zweik < Teamschnitt, Sturm verboten bei r:abschluss < 3 (gilt für Einwechsler und Rochade-Spieler; sonst kein Vorschlag). Simulation: verbotene Platzierungen 68 → 0.
+- **V73:** POS.S-Gewichte: Abschluss .3 (vorher .1), Dribbling .25 (vorher .15), Tempo .15, Freilaufen .1, Mut .1, Technik .05, Gewandtheit .05 (Christian: Abschluss und Dribbling wichtig für den Sturm).
