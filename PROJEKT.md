@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 85, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 86, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -103,3 +103,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V83:** Neues Potenzial/Form-Modell in „Werte aus: Mix“ (`pfCalc`, `pfBlocks`, `liveAggR`, `pfTest`, `pfRatings`): Potenzial = mix2(Schnitt aller Einschätzungen + abgeschlossene Form-Blöcke, Test-Bestwert); Block = formWeeks ab erstem Saisondatum, zählt ab `BLOCK_MIN=4` Aktionen als eine Einschätzung (Wert = an Basis verankert). Form = (5P+M+Potenzial·APP_BUF)/(P+M+APP_BUF) über letzte formWeeks, ohne Aktionen = Potenzial. a:spiel/a:torwart = Schnitt der r:-Unterwerte. Athletik (tempo…) und Modi Trainer/App unverändert.
 - **V84:** Form-Startwert ohne Blöcke, deren Ende nach `formSince()` liegt (keine Doppelzählung von Aktionen in Potenzial-Block und Form-Fenster); Potenzial zeigt weiterhin alle abgeschlossenen Blöcke.
 - **V85:** Positionsprofile `PROF` (AZ/AA/MZ/MA/SZ/SA, `profOf(slot)`: L/R = außen, Z/LZ/RZ = Mitte; Sturm nur S-Z = Mitte), `slotFit`/`bestField` nutzen sie; `POS` (A/M/S) bleibt für Namen, posBan, styleAdj. Fuß: `footBonus(p,sd)` außen 0,15 für starken Fuß/beide, schwacher Fuß × `weakFoot(pid)` (Bestwerte pass_l/r, schuss_l/r, Verhältnis schwach/stark), Halbpositionen ½. Neue Tests `schuss_l`, `schuss_r` (alter `schuss` bleibt). Profil-Hinweis „Fast beidfüßig“ ab 85 %.
+- **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).

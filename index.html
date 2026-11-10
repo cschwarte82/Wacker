@@ -175,7 +175,7 @@ details textarea{margin-top:8px}
 .lslot.sel,.lb.sel{border-color:var(--lime);box-shadow:0 0 0 3px #d7f25a99}
 .lslot.tw{background:#f4fbd6;max-width:130px}
 .lslot>b{display:block;font-size:12px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lslot small{display:block;font-size:9.5px;line-height:1.2;color:var(--mut);white-space:nowrap;overflow:hidden}
+.lslot small{display:block;font-size:9.5px;line-height:1.2;color:var(--mut);white-space:nowrap;overflow:hidden}.prowl.w4 .bv{display:none}.lslot small.pab,.lb small.pab{display:block;font-size:10px;font-weight:700;color:var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pm{display:flex;align-items:center;justify-content:space-between;gap:2px;margin-top:3px}
 .pm .cnt{display:flex;flex-direction:column;align-items:center;line-height:1.1;font-size:12px;min-width:14px;opacity:.85}
 .pm button{flex:0 1 40px;min-width:30px;height:42px;border-radius:9px;border:0;font:700 28px/1 var(--ft);color:#fff;cursor:pointer;flex:none;padding:0}
@@ -323,7 +323,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='85';
+const APP_VERSION='86';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -763,6 +763,11 @@ const PROF={
 };
 const profOf=slot=>{const[pt,sd]=slot.split('-');if(pt==='S')return sd==='Z'?'SZ':'SA';return pt+(sd==='L'||sd==='R'?'A':'Z');};
 const SIDE={L:'links',R:'rechts',Z:'zentral',LZ:'halblinks',RZ:'halbrechts'};
+// Positionskürzel (wie im Fußballspiel am PC): TW, IV, VL, VR, ZM, LM, RM, MS, ST, LA, RA
+function slotAbbr(k){if(k==='TW')return'TW';const[pt,sd]=k.split('-');if(pt==='A')return sd==='L'?'VL':sd==='R'?'VR':'IV';if(pt==='M')return sd==='L'?'LM':sd==='R'?'RM':'ZM';return sd==='L'?'LA':sd==='R'?'RA':sd==='Z'?'MS':'ST';}
+const ABBR_SLOTS=['A-L','A-Z','A-R','M-L','M-Z','M-R','S-L','S-Z','S-R'];
+// Stärkste Position eines Kindes (Mix-Werte, inkl. Fuß, Spielweise, Positionstreue; Torwart, wenn der TW-Wert höher ist)
+function bestSlot(pid){const p=S.players[pid];if(!p||p.guest)return null;return withMix(()=>{const pr=profileOf(pid);let b=null;ABBR_SLOTS.forEach(k=>{const f=slotFit({...p,id:pid},pr,k);if(f.cov>0&&(!b||f.v>b.v))b={k,v:f.v};});const g=pr['a:torwart'];if(isNum(g)&&(!b||g>b.v))b={k:'TW',v:g};return b;});}
 const catShort=c=>catName(c).replace(/\s*\/.*$/,'').replace('\u00AD','').replace('­','').replace('verhalten','');
 const catName=c=>{const[t,k]=c.split(':');if(t==='x')return 'Abschluss (aus Spielen, nur App/Mix)';return t==='a'?AREAS.find(a=>a.k===k).n:[...RATINGS,...ATH_RATINGS,...GK_RATINGS].find(r=>r.k===k).n;};
 const SRC=[['trainer','Trainer'],['app','App'],['mix','Mix']];
@@ -1166,6 +1171,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:86,items:['<b>Live:</b> Jede Karte zeigt jetzt das Kürzel der Position mit dem Wert des Kindes dort (z. B. IV 3,4) und mit ★ die stärkste Position (z. B. ★VL 3,7). Auch die Bank zeigt die stärkste Position. Kürzel: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA.']},
  {v:85,items:['<b>Aufstellung: Mitte und außen getrennt bewertet.</b> In der Mitte (Abwehr Mitte, Mittelfeld Mitte, einzige Spitze) zählen Spielverständnis und Übersicht mehr, außen eher Tempo, Ausdauer und Dribbling. Halbpositionen zählen als Mitte. Die Prozente stehen unter „So rechnet die App“.','<b>Schwacher Fuß:</b> Neue Tests „Torschuss Ecken links“ und „rechts“. Aus Pass- und Schusstests links/rechts berechnet die App, wie gut der schwache Fuß ist, und gibt auf der anderen Seite anteilig Fuß-Bonus. Starker Fuß außen jetzt links und rechts gleich +0,15. Ab 85 % schlägt das Profil „beidfüßig“ vor.']},
  {v:84,items:['Form ohne Doppelzählung: Liegen die Spiele eines gerade abgeschlossenen Blocks noch in den letzten Form-Wochen, zählen sie nur in der Form und erst danach ins Potenzial. Die Form springt dadurch nicht mehr, wenn ein Block endet.']},
  {v:83,items:['<b>Neues Modell für Potenzial und Form:</b> Das Potenzial ist der Mittelwert aus deinen Einschätzungen und den Messwerten. Live-Aktionen zählen nicht mehr direkt ins Potenzial.','Die Form ist dein Potenzial, durch die Live-Aktionen der letzten Wochen bestätigt, hochgeschoben oder nach unten korrigiert. Ohne Aktionen ist Form gleich Potenzial.','Nach jedem abgeschlossenen Form-Block (z. B. 6 Wochen ab Saisonstart) zählt die Form dieses Blocks wie eine weitere Einschätzung ins Potenzial, wenn das Kind darin mindestens 4 Aktionen im Bereich hatte. So wächst das Potenzial mit, wenn ein Kind dauerhaft besser oder schwächer spielt.']},
@@ -1678,7 +1684,8 @@ function vLive(){
   L.goals=L.goals||[];
   const sel=S.liveSel,isSel=(k,key)=>sel&&sel.kind===k&&sel.key===key;
   const pm=pid=>`<div class="pm"><button class="lm" onclick="event.stopPropagation();A.liveAct('${pid}',-1)" aria-label="Minus">−</button><span class="cnt"><b class="pos">${L.plus[pid]||0}</b><b class="neg">${L.minus[pid]||0}</b></span><button class="lp" onclick="event.stopPropagation();A.liveAct('${pid}',1)" aria-label="Plus">+</button></div>`;
-  const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid))+cardBadge(L,pid):'frei'}${pid?` <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span>`:''}</b>${pid?'':`<small>${slotLabel(k)}</small>`}${pid?pm(pid):''}</div>`;};
+  const PF={};const posLine=(pid,k)=>{const p=S.players[pid];if(!p||p.guest)return `<small class="pab">${slotAbbr(k)} · Gast</small>`;const c=PF[pid+'|'+k]||(PF[pid+'|'+k]=withMix(()=>k==='TW'?profileOf(pid)['a:torwart']:slotFit({...p,id:pid},profileOf(pid),k).v));const b=bestSlot(pid);const cur=`${slotAbbr(k)} ${isNum(c)?fnum(r1(c)):'–'}`;if(!b)return `<small class="pab">${cur}</small>`;return `<small class="pab">${b.k===k||slotAbbr(b.k)===slotAbbr(k)?'★'+cur:cur+`<span class="bv"> ·</span> ★${slotAbbr(b.k)}<span class="bv"> ${fnum(r1(b.v))}</span>`}</small>`;};
+  const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid))+cardBadge(L,pid):'frei'}${pid?` <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span>`:''}</b>${pid?posLine(pid,k):`<small>${slotLabel(k)}</small>`}${pid?pm(pid):''}</div>`;};
   const line=pt=>FORMS[L.n][L.form].filter(k=>k[0]===pt).sort(bySide);
   const tp=Object.values(L.plus).reduce((a,b)=>a+b,0),tm=Object.values(L.minus).reduce((a,b)=>a+b,0);
   const PI=partInfo(L);const pn=PART_N(PI.F.parts);
@@ -1693,9 +1700,10 @@ function vLive(){
   h+=`<div class="pitch live">${['S','M','A'].map(pt=>{const l=line(pt);return l.length?`<div class="prowl${l.length>=4?' w4':''}">${l.map(card).join('')}</div>`:'';}).join('')}${noGK(L.n)?'':`<div class="prowl">${card('TW')}</div>`}</div>`;
   {const PI2=partInfo(L);if(!PI2.done&&PI2.last&&PI2.F.len>=6&&PI2.over>=-180){const u=underTxt(L);if(u)h+=`<div class="banner">⏱ <b>Unter dem Spielzeit-Ziel:</b> ${esc(u)}</div>`;}}
   {const sg=subSuggest(L);if(sg.length)h+=`<div class="subsug"><div class="lbl2" style="margin:0 0 4px">💡 Wechselvorschlag</div>${sg.map(x=>`<button onclick="A.liveSub('${x.slot}','${x.pin}','${x.to||''}')"><b>${esc(short(x.pin))}</b> <small>${Math.floor(daySecs(L,x.pin)/60)}'</small> ⇄ <b>${esc(short(x.pout))}</b> <small>${Math.floor(daySecs(L,x.pout)/60)}' · ${slotLabel(x.to||x.slot)}</small>${x.to?`<br><small>${esc(short(x.mv))} rückt nach ${slotLabel(x.slot)}</small>`:''}</button>`).join('')}</div>`;}
+  h+=`<div class="sub" style="margin:4px 2px 0;font-size:11.5px">Kürzel + Wert = jetzige Position, ★ = stärkste Position (TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA)</div>`;
   h+=`<div class="row between" style="margin-top:6px"><div class="lbl2" style="margin:0">Bank</div><div class="pill">Team <b class="pos">+${tp}</b> <b class="neg">−${tm}</b></div></div>`;
   const bsort=L.bench.slice().sort((a,b)=>daySecs(L,a)-daySecs(L,b));
-  h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}${cardBadge(L,pid)}</b><small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
+  h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}${cardBadge(L,pid)}</b>${(()=>{const b=bestSlot(pid);return b?`<small class="pab">★${slotAbbr(b.k)} ${fnum(r1(b.v))}</small>`:'';})()}<small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
   h+=`<details class="card" ${S.optOpen?'open':''} ontoggle="S.optOpen=this.open"><summary><b>Optionen</b> <small class="sub">Formation, Spielzeit-Ziel, Tor/Vorlage = Plus</small></summary><div class="lbl2">Spielform &amp; Formation</div><div class="lutop">${modeSel(L,'A.liveN')}${funSeg(L,'A.liveN')}<select class="sel" aria-label="Formation" onchange="A.liveForm(this.value)">${Object.keys(FORMS[L.n]).map(f=>`<option value="${f}" ${L.form===f?'selected':''}>${f}</option>`).join('')}</select></div><div class="ampel"><span>Spielzeit-Ziel je Kind:</span>${[33,50,66].map(n=>`<button class="chip ${((S.cfg&&S.cfg.minShare)||50)===n?'on':''}" onclick="A.cfgSet('minShare',${n})">${n} %</button>`).join('')}</div><div class="sub"><span class="adot ok"></span>im Ziel <span class="adot warn"></span>knapp <span class="adot low"></span>zu wenig (ab Minute 3)</div><label class="chk2"><input type="checkbox" ${goalPlusOn()?'checked':''} onchange="A.cfgSet('goalPlus',this.checked)"> Tor und Vorlage zählen als Plus („Guter Abschluss“ für den Torschützen, „Torvorlage“ für den Vorbereiter)</label><label class="chk2"><input type="checkbox" ${S.cfg&&S.cfg.wake?'checked':''} onchange="A.cfgSet('wake',this.checked);wakeSync()"> Bildschirm bleibt an, solange ein Live-Spiel läuft</label><label class="chk2">${tourChk(L)}</label></details>`;
   if((L.sentOff||[]).length)h+=`<div class="sub" style="margin-top:4px"><b>Platzverweis:</b> ${(L.cards||[]).filter(c=>c.c!=='y').map(c=>`${esc(short(c.p))} (${c.c==='yr'?'Gelb-Rot':'Rot'}, ${mlOf(c)})`).join(', ')}</div>`;
   const inGame=new Set([...liveField(L),...L.bench,...(L.sentOff||[])]);const others=plist().filter(p=>!inGame.has(p.id));
