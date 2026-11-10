@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 86, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 87, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -104,3 +104,4 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V84:** Form-Startwert ohne Blöcke, deren Ende nach `formSince()` liegt (keine Doppelzählung von Aktionen in Potenzial-Block und Form-Fenster); Potenzial zeigt weiterhin alle abgeschlossenen Blöcke.
 - **V85:** Positionsprofile `PROF` (AZ/AA/MZ/MA/SZ/SA, `profOf(slot)`: L/R = außen, Z/LZ/RZ = Mitte; Sturm nur S-Z = Mitte), `slotFit`/`bestField` nutzen sie; `POS` (A/M/S) bleibt für Namen, posBan, styleAdj. Fuß: `footBonus(p,sd)` außen 0,15 für starken Fuß/beide, schwacher Fuß × `weakFoot(pid)` (Bestwerte pass_l/r, schuss_l/r, Verhältnis schwach/stark), Halbpositionen ½. Neue Tests `schuss_l`, `schuss_r` (alter `schuss` bleibt). Profil-Hinweis „Fast beidfüßig“ ab 85 %.
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
+- **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.

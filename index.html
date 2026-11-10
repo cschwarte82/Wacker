@@ -175,7 +175,7 @@ details textarea{margin-top:8px}
 .lslot.sel,.lb.sel{border-color:var(--lime);box-shadow:0 0 0 3px #d7f25a99}
 .lslot.tw{background:#f4fbd6;max-width:130px}
 .lslot>b{display:block;font-size:12px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lslot small{display:block;font-size:9.5px;line-height:1.2;color:var(--mut);white-space:nowrap;overflow:hidden}.prowl.w4 .bv{display:none}.lslot small.pab,.lb small.pab{display:block;font-size:10px;font-weight:700;color:var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lslot small{display:block;font-size:9.5px;line-height:1.2;color:var(--mut);white-space:nowrap;overflow:hidden}.lslot{position:relative;margin-top:5px}.pbadge{position:absolute;top:-11px;left:-4px;font:800 9.5px/1 var(--ft);font-style:normal;background:#16241b;color:#fff;border-radius:6px;padding:3px 4px;letter-spacing:.2px;pointer-events:none}.pbadge.best{background:#d7f25a;color:#16241b}.lslot small.pab,.lb small.pab{display:block;font-size:10px;font-weight:700;color:var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pm{display:flex;align-items:center;justify-content:space-between;gap:2px;margin-top:3px}
 .pm .cnt{display:flex;flex-direction:column;align-items:center;line-height:1.1;font-size:12px;min-width:14px;opacity:.85}
 .pm button{flex:0 1 40px;min-width:30px;height:42px;border-radius:9px;border:0;font:700 28px/1 var(--ft);color:#fff;cursor:pointer;flex:none;padding:0}
@@ -323,7 +323,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='86';
+const APP_VERSION='87';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1171,6 +1171,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:87,items:['<b>Live:</b> Die Spielerkarten sind wieder luftig. Die Position steht als kleines Schild an der Kartenecke (gelb mit ★ = stärkste Position). Tippst du ein Kind an, stehen oben sein Wert auf der jetzigen und auf der stärksten Position.']},
  {v:86,items:['<b>Live:</b> Jede Karte zeigt jetzt das Kürzel der Position mit dem Wert des Kindes dort (z. B. IV 3,4) und mit ★ die stärkste Position (z. B. ★VL 3,7). Auch die Bank zeigt die stärkste Position. Kürzel: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA.']},
  {v:85,items:['<b>Aufstellung: Mitte und außen getrennt bewertet.</b> In der Mitte (Abwehr Mitte, Mittelfeld Mitte, einzige Spitze) zählen Spielverständnis und Übersicht mehr, außen eher Tempo, Ausdauer und Dribbling. Halbpositionen zählen als Mitte. Die Prozente stehen unter „So rechnet die App“.','<b>Schwacher Fuß:</b> Neue Tests „Torschuss Ecken links“ und „rechts“. Aus Pass- und Schusstests links/rechts berechnet die App, wie gut der schwache Fuß ist, und gibt auf der anderen Seite anteilig Fuß-Bonus. Starker Fuß außen jetzt links und rechts gleich +0,15. Ab 85 % schlägt das Profil „beidfüßig“ vor.']},
  {v:84,items:['Form ohne Doppelzählung: Liegen die Spiele eines gerade abgeschlossenen Blocks noch in den letzten Form-Wochen, zählen sie nur in der Form und erst danach ins Potenzial. Die Form springt dadurch nicht mehr, wenn ein Block endet.']},
@@ -1684,8 +1685,11 @@ function vLive(){
   L.goals=L.goals||[];
   const sel=S.liveSel,isSel=(k,key)=>sel&&sel.kind===k&&sel.key===key;
   const pm=pid=>`<div class="pm"><button class="lm" onclick="event.stopPropagation();A.liveAct('${pid}',-1)" aria-label="Minus">−</button><span class="cnt"><b class="pos">${L.plus[pid]||0}</b><b class="neg">${L.minus[pid]||0}</b></span><button class="lp" onclick="event.stopPropagation();A.liveAct('${pid}',1)" aria-label="Plus">+</button></div>`;
-  const PF={};const posLine=(pid,k)=>{const p=S.players[pid];if(!p||p.guest)return `<small class="pab">${slotAbbr(k)} · Gast</small>`;const c=PF[pid+'|'+k]||(PF[pid+'|'+k]=withMix(()=>k==='TW'?profileOf(pid)['a:torwart']:slotFit({...p,id:pid},profileOf(pid),k).v));const b=bestSlot(pid);const cur=`${slotAbbr(k)} ${isNum(c)?fnum(r1(c)):'–'}`;if(!b)return `<small class="pab">${cur}</small>`;return `<small class="pab">${b.k===k||slotAbbr(b.k)===slotAbbr(k)?'★'+cur:cur+`<span class="bv"> ·</span> ★${slotAbbr(b.k)}<span class="bv"> ${fnum(r1(b.v))}</span>`}</small>`;};
-  const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid))+cardBadge(L,pid):'frei'}${pid?` <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span>`:''}</b>${pid?posLine(pid,k):`<small>${slotLabel(k)}</small>`}${pid?pm(pid):''}</div>`;};
+  const PF={};const curV=(pid,k)=>{const p=S.players[pid];if(!p||p.guest)return null;const c=pid+'|'+k;return c in PF?PF[c]:(PF[c]=withMix(()=>k==='TW'?profileOf(pid)['a:torwart']:slotFit({...p,id:pid},profileOf(pid),k).v));};
+  const isBest=(pid,k)=>{const b=bestSlot(pid);return b&&slotAbbr(b.k)===slotAbbr(k);};
+  const badge=(pid,k)=>`<i class="pbadge ${pid&&isBest(pid,k)?'best':''}">${slotAbbr(k)}${pid&&isBest(pid,k)?'★':''}</i>`;
+  const posInfo=pid=>{const p=S.players[pid];if(!p||p.guest)return '';const k=Object.keys(L.pos).find(x=>L.pos[x]===pid),b=bestSlot(pid),v=k?curV(pid,k):null;const cur=k?`${slotAbbr(k)} ${isNum(v)?fnum(r1(v)):'–'}`:'Bank';return `<b>${esc(p.name)}</b>: ${cur}${b?(k&&slotAbbr(b.k)===slotAbbr(k)?' – das ist die stärkste Position ★':` · stärkste Position ★${slotAbbr(b.k)} ${fnum(r1(b.v))}`):''}<br>`;};
+  const card=k=>{const pid=L.pos[k];return `<div class="lslot ${isSel('slot',k)?'sel':''} ${k==='TW'?'tw':''} ${pid?'':'empty'}" onclick="A.liveTap('slot','${k}')"><b>${pid?esc(short(pid))+cardBadge(L,pid):'frei'}${pid?` <span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span>`:''}</b>${badge(pid,k)}${pid?'':`<small>${slotLabel(k)}</small>`}${pid?pm(pid):''}</div>`;};
   const line=pt=>FORMS[L.n][L.form].filter(k=>k[0]===pt).sort(bySide);
   const tp=Object.values(L.plus).reduce((a,b)=>a+b,0),tm=Object.values(L.minus).reduce((a,b)=>a+b,0);
   const PI=partInfo(L);const pn=PART_N(PI.F.parts);
@@ -1696,11 +1700,11 @@ function vLive(){
   if(L.tour){const tp=tourPrev(L);h+=`<div class="tourline">🏆 <b>${esc(L.tour.name)}</b> · Spiel ${tp.n+1} · Minuten zählen über den ganzen Tag</div>`;}
   if(liveSecs(L)===0&&!L.clock.running)h+=fmtPicker('A.liveFmt')+`<label class="chk2 card" style="margin-top:0">${tourChk(L)}</label>`;
   h+=`<div class="score"><button class="btn goalb" onclick="A.goalAsk()">⚽ Tor</button><button class="btn concb" onclick="A.concede()">Gegentor</button><button class="btn cardb" onclick="A.cardMenu()"><span class="yc"></span> Karte</button></div>`;
-  if(sel)h+=`<div class="selhint">Ziel antippen: Feldspieler = tauschen, Bankspieler = Wechsel. Nochmal = abbrechen.</div>`;
+  if(sel)h+=`<div class="selhint">${posInfo(sel.kind==='slot'?L.pos[sel.key]:sel.key)}Ziel antippen: Feldspieler = tauschen, Bankspieler = Wechsel. Nochmal = abbrechen.</div>`;
   h+=`<div class="pitch live">${['S','M','A'].map(pt=>{const l=line(pt);return l.length?`<div class="prowl${l.length>=4?' w4':''}">${l.map(card).join('')}</div>`:'';}).join('')}${noGK(L.n)?'':`<div class="prowl">${card('TW')}</div>`}</div>`;
   {const PI2=partInfo(L);if(!PI2.done&&PI2.last&&PI2.F.len>=6&&PI2.over>=-180){const u=underTxt(L);if(u)h+=`<div class="banner">⏱ <b>Unter dem Spielzeit-Ziel:</b> ${esc(u)}</div>`;}}
   {const sg=subSuggest(L);if(sg.length)h+=`<div class="subsug"><div class="lbl2" style="margin:0 0 4px">💡 Wechselvorschlag</div>${sg.map(x=>`<button onclick="A.liveSub('${x.slot}','${x.pin}','${x.to||''}')"><b>${esc(short(x.pin))}</b> <small>${Math.floor(daySecs(L,x.pin)/60)}'</small> ⇄ <b>${esc(short(x.pout))}</b> <small>${Math.floor(daySecs(L,x.pout)/60)}' · ${slotLabel(x.to||x.slot)}</small>${x.to?`<br><small>${esc(short(x.mv))} rückt nach ${slotLabel(x.slot)}</small>`:''}</button>`).join('')}</div>`;}
-  h+=`<div class="sub" style="margin:4px 2px 0;font-size:11.5px">Kürzel + Wert = jetzige Position, ★ = stärkste Position (TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA)</div>`;
+  h+=`<div class="sub" style="margin:4px 2px 0;font-size:11.5px">Schild = Position (TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA), gelb mit ★ = stärkste Position des Kindes. Antippen zeigt die Werte.</div>`;
   h+=`<div class="row between" style="margin-top:6px"><div class="lbl2" style="margin:0">Bank</div><div class="pill">Team <b class="pos">+${tp}</b> <b class="neg">−${tm}</b></div></div>`;
   const bsort=L.bench.slice().sort((a,b)=>daySecs(L,a)-daySecs(L,b));
   h+=L.bench.length?`<div class="lbench">${bsort.map(pid=>`<div class="lb ${isSel('bench',pid)?'sel':''}" onclick="A.liveTap('bench','${pid}')"><b>${esc(short(pid))}${cardBadge(L,pid)}</b>${(()=>{const b=bestSlot(pid);return b?`<small class="pab">★${slotAbbr(b.k)} ${fnum(r1(b.v))}</small>`:'';})()}<small><span class="lmin ${ampel(L,pid)}" data-p="${pid}">${Math.floor(daySecs(L,pid)/60)}'</span> · <span class="neg">−${L.minus[pid]||0}</span> <span class="pos">+${L.plus[pid]||0}</span></small></div>`).join('')}</div>`:`<div class="sub">Niemand auf der Bank.</div>`;
