@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 83, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 84, 10.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -100,4 +100,5 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V80:** App-Wert aus Live-Aktionen startet beim eigenen Potenzial-Wert des Kindes (`appVals` anchor: periodVal 'pot' von r:/a:-Kategorie, sonst 3) statt bei 3: (5P+M+Basis·2)/(P+M+2). Mix ohne App-Wert = Trainerwert allein (kein Team-Schnitt-App-Wert mehr).
 - **V81:** `RATE_BUF=0`: kein Zug der Einschätzungen zum Mannschaftsschnitt mehr (`shrinkPV`, `liveVal`).
 - **V82:** Radar: Potenzial `.pp` orange gestrichelt (#b7791f, dunkel #e0a84a), 3er-Ring gepunktet, Legende mit „3 = Teamschnitt“, Hinweis wenn Form = Potenzial.
-- **V83:** Neues Potenzial/Form-Modell in „Werte aus: Mix“ (`pfCalc`, `pfBlocks`, `liveAggR`, `pfTest`, `pfRatings`): Potenzial = mix2(Schnitt aller Einschätzungen + abgeschlossene Form-Blöcke, Test-Bestwert); Block = formWeeks ab erstem Saisondatum, zählt ab `BLOCK_MIN=4` Aktionen als eine Einschätzung (Wert = an Basis verankert). Form = (5P+M+Potenzial·APP_BUF)/(P+M+APP_BUF) über letzte formWeeks, ohne Aktionen = Potenzial. a:spiel/a:torwart = Schnitt der r:-Unterwerte. Athletik (tempo…) und Modi Trainer/App unverändert. Bekannt: ein gerade abgeschlossener Block überlappt noch mit dem Form-Fenster.
+- **V83:** Neues Potenzial/Form-Modell in „Werte aus: Mix“ (`pfCalc`, `pfBlocks`, `liveAggR`, `pfTest`, `pfRatings`): Potenzial = mix2(Schnitt aller Einschätzungen + abgeschlossene Form-Blöcke, Test-Bestwert); Block = formWeeks ab erstem Saisondatum, zählt ab `BLOCK_MIN=4` Aktionen als eine Einschätzung (Wert = an Basis verankert). Form = (5P+M+Potenzial·APP_BUF)/(P+M+APP_BUF) über letzte formWeeks, ohne Aktionen = Potenzial. a:spiel/a:torwart = Schnitt der r:-Unterwerte. Athletik (tempo…) und Modi Trainer/App unverändert.
+- **V84:** Form-Startwert ohne Blöcke, deren Ende nach `formSince()` liegt (keine Doppelzählung von Aktionen in Potenzial-Block und Form-Fenster); Potenzial zeigt weiterhin alle abgeschlossenen Blöcke.
