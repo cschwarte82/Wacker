@@ -137,16 +137,16 @@ details textarea{margin-top:8px}
 .pitch:after{content:'';position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border:2px solid #ffffff55;border-radius:50%}
 .prowl{display:flex;justify-content:space-around;gap:6px;margin:12px 0;position:relative;z-index:1}
 .slot{background:var(--card);border-radius:10px;padding:6px 8px;min-width:0;flex:1;max-width:120px;text-align:center;box-shadow:0 2px 4px #0003}
-.slot b{display:block;font-size:14px;line-height:1.2;white-space:normal;overflow-wrap:break-word;hyphens:auto}
+.slot b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .slot small{display:block;font-size:11px;color:var(--mut)}
 .slot .fit{font:700 15px var(--fc);color:var(--g)}
 .slot.tw{background:var(--lime)}
 .slot.est{outline:2px dashed #c2410c}
 .bench{display:flex;flex-wrap:wrap;gap:6px}
 .lutop{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 8px}.lutop .sel{width:auto;flex:1 1 40%;margin:0;padding:9px 6px;font-size:15px}.lutop .seg{flex:1 1 100%;margin:0}.lutop .seg.fun button{font-weight:700}
-.prowl.w4{gap:3px}.prowl.w4 .slot{padding:5px 1px;border-width:2px}.prowl.w4 .slot b{white-space:normal;font-size:10.5px;line-height:1.2;hyphens:auto;overflow-wrap:break-word;text-overflow:clip}.prowl.w4 .slot small{font-size:10px}.prowl.w4 .lslot{padding:3px 1px}.prowl.w4 .pm{gap:1px}.prowl.w4 .pm button{min-width:21px;width:22px;height:36px;font-size:20px;border-radius:7px}.prowl.w4 .pm .cnt{font-size:10px;min-width:8px}.prowl.w4 .lslot>b{font-size:11px}.lutop .seg button{padding:8px 4px}
+.prowl.w4{gap:3px}.prowl.w4 .slot{padding:5px 1px;border-width:2px}.prowl.w4 .slot b{font-size:11px}.prowl.w4 .slot small{font-size:10px}.prowl.w4 .lslot{padding:3px 1px}.prowl.w4 .pm{gap:1px}.prowl.w4 .pm button{min-width:21px;width:22px;height:36px;font-size:20px;border-radius:7px}.prowl.w4 .pm .cnt{font-size:10px;min-width:8px}.prowl.w4 .lslot>b{font-size:11px}.lutop .seg button{padding:8px 4px}
 .lud{padding:10px 12px;margin:8px 0}.lud .chips{margin-top:8px}
-.pitch.wb{border-radius:14px 14px 0 0;margin-bottom:0}.lubench{background:#1d6b3a;border-radius:0 0 14px 14px;padding:8px 8px 10px;margin:0 0 10px}.lubench .lbl3{color:#d7f2c0;font-size:12px;font-weight:700;margin:0 2px 6px}.lubench .bench span{background:#fff;color:#16241b}.lubench .bench{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.lubench .bench span{padding:5px 4px;text-align:center;line-height:1.2}.lubench .bench b{display:block;font-size:12.5px;overflow-wrap:break-word;hyphens:auto}.lubench .bench small{display:block;font-size:11px;opacity:.75}
+.pitch.wb{border-radius:14px 14px 0 0;margin-bottom:0}.lubench{background:#1d6b3a;border-radius:0 0 14px 14px;padding:8px 8px 10px;margin:0 0 10px}.lubench .lbl3{color:#d7f2c0;font-size:12px;font-weight:700;margin:0 2px 6px}.lubench .bench span{background:#fff;color:#16241b}.lubench .bench{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.lubench .bench span{padding:5px 4px;text-align:center;line-height:1.2}.lubench .bench b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lubench .bench small{display:block;font-size:11px;opacity:.75}
 .bench span{background:#eef1ea;border-radius:8px;padding:6px 10px;font-size:13px}
 .wt{font-size:13px;color:var(--mut);margin:4px 0}
 .btn.sm2{padding:6px 12px;min-height:34px;font-size:13px;white-space:nowrap}
@@ -321,7 +321,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='77';
+const APP_VERSION='78';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1100,7 +1100,8 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
- {v:77,items:['Neue Spielformen: Funino (ohne Torwart) mit Auswahl 2 gegen 2, 3 gegen 3 oder 4 gegen 4 sowie 7 + 1 bis 10 + 1. Erst die Spielform wählen, dann erscheinen die passenden Formationen (z. B. 4-4-2, 4-3-3, 3-5-2). Bei Funino gibt es kein Tor-Feld, alle Kinder sind Feldspieler.','Bei großen Formationen werden die Karten automatisch schmaler, damit fünf Kinder nebeneinander passen.','Aufstellung: Die Bank steht jetzt kompakt in drei Spalten direkt am Spielfeld, der Hinweis „passt nicht zur Position“ erscheint gleich darunter. Lange Namen werden auf dem Feld umgebrochen statt abgeschnitten. Die Aufstellung rechnet auch bei 10 + 1 in Sekundenbruchteilen.']},
+ {v:78,items:['Lange Namen werden auf den Spielfeld-Karten und auf der Bank wieder mit „…“ gekürzt statt umgebrochen – das Spielfeld bleibt ruhiger.']},
+ {v:77,items:['Neue Spielformen: Funino (ohne Torwart) mit Auswahl 2 gegen 2, 3 gegen 3 oder 4 gegen 4 sowie 7 + 1 bis 10 + 1. Erst die Spielform wählen, dann erscheinen die passenden Formationen (z. B. 4-4-2, 4-3-3, 3-5-2). Bei Funino gibt es kein Tor-Feld, alle Kinder sind Feldspieler.','Bei großen Formationen werden die Karten automatisch schmaler, damit fünf Kinder nebeneinander passen.','Aufstellung: Die Bank steht jetzt kompakt in drei Spalten direkt am Spielfeld, der Hinweis „passt nicht zur Position“ erscheint gleich darunter. Die Aufstellung rechnet auch bei 10 + 1 in Sekundenbruchteilen.']},
  {v:76,items:['Aufstellung aufgeräumt: Spielform, Formation und Stärkste/Ausgewogen stehen in einer Zeile, „Dabei“ ist eingeklappt, das Spielfeld steht fast ganz oben und die Bank direkt darunter am Spielfeld. Danach Spielzeit-Einteilung und „Live mit dieser Aufstellung“, ganz unten Torwart-Info, „Warum hier?“ und „So rechnet die App“.','Aufstellung und Wechselvorschläge rechnen jetzt immer mit Mix-Werten (Trainer + App, Potenzial + Form) – genau wie die Gesamtstärke im Kader. Die Auswahl „Werte aus“ und „Zeitraum“ gibt es weiter in den Ranglisten.']},
  {v:75,items:['Mehr Zeit nach einem Tor: Die Auswahl von Torschütze und Vorlage bleibt jetzt jeweils 10 Sekunden offen (vorher 7 und 6).']},
  {v:74,items:['Die Aufstellung beachtet jetzt dieselben festen Regeln wie die Wechselvorschläge: Wer im Zweikampf unter dem Mannschaftsschnitt liegt, wird nicht für die Abwehr eingeplant, wer im Abschluss unter 3 liegt, nicht für den Sturm. Geht es mit den anwesenden Kindern nicht anders (oder bei deiner eigenen Aufstellung), zeigt ein Hinweis, wer betroffen ist.']},
