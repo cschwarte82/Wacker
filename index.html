@@ -333,7 +333,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='109';
+const APP_VERSION='110';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -683,7 +683,7 @@ function vPlayer(){
   const grows=GK_RATINGS.map(r=>{const pts=ss.map(s=>s.ratings?.[pid]?.[r.k]).filter(isNum);if(!pts.length)return'';return `<div class="trow"><div class="t2">${esc(r.n)}</div>${spark(trendPts(ss,s=>s.ratings?.[pid]?.[r.k]),false,1,5)}<div class="val">${pts[pts.length-1]}<small>/5</small></div></div>`;}).join('');
   // Eigenes Torwart-Netz: Torwart-Aktionen aus dem Live-Spiel bewegen die Form genau wie beim Feld-Netz (Christian 11.11.2026)
   const gkC=[],gkP=[];GK_RATINGS.forEach(r=>{const c='r:'+r.k,s2=sessionsWith(c);const po=srcVal(c,pid,s2,'pot');let fo=srcVal(c,pid,s2,'form');if(!isNum(fo)&&isNum(po))fo=po;gkC.push(isNum(fo)?fo:null);gkP.push(isNum(po)?po:null);});const gkHas=gkC.some(isNum);
-  if(grows||gkHas){const g=latestVal('a:torwart',pid,ss.slice().reverse());const ov=(overallAll([{...p,id:pid}])[pid]||{}).tw;h+=`<div class="card"><div class="lbl">🧤 Torwart${isNum(ov)?` <small>Wert ${fnum(r1(ov))} / 5 wie im Kader</small>`:''}</div>${gkHas?`${radar(gkC,gkP,GK_RATINGS)}<div class="legend"><span><i></i>Form (${formWeeks()} Wo.)</span><span><i class="lp"></i>Potenzial (Saison)</span><span><i class="lm"></i>3 = Mitte</span></div><div class="sub" style="margin-bottom:6px">Wie das Stärkenprofil, nur mit den Torwart-Bereichen: Torwart-Aktionen aus dem Live-Spiel (z. B. „Starke Parade“, „Sicher gefangen“) bewegen die Form. Kommandos/Mut kommt nur aus deiner Einschätzung.</div>`:''}${isNum(g)&&isNum(ov)&&r1(g)!==r1(ov)?`<div class="sub" style="margin:-2px 0 6px">Deine letzten Torwart-Einschätzungen allein ergeben ${fnum(r1(g))}. Der Wert ${fnum(r1(ov))} rechnet wie im Kader und in der Aufstellung mit „Mix“: Trainer + App (Torwart-Aktionen aus Live-Spielen), Potenzial (ganze Saison) + Form (letzte Wochen).</div>`:''}${grows}</div>`;}
+  if(grows||gkHas){const g=latestVal('a:torwart',pid,ss.slice().reverse());const ov=(overallAll([{...p,id:pid}])[pid]||{}).tw;h+=`<div class="card"><div class="lbl">🧤 Torwart${isNum(ov)?` <small>Wert ${fnum(r1(ov))} / 5 wie im Kader</small>`:''}</div>${gkHas?`${radar(gkC,gkP,GK_RATINGS)}<div class="legend"><span><i></i>Form (${formWeeks()} Wo.)</span><span><i class="lp"></i>Potenzial (Saison)</span><span><i class="lm"></i>3 = Mitte</span></div><div class="sub" style="margin-bottom:6px">Wie das Stärkenprofil, nur mit den Torwart-Bereichen: Torwart-Aktionen aus dem Live-Spiel (z. B. „Starke Parade“, „Sicher gefangen“) bewegen die Form. „Gut herausgelaufen“ und „Nicht rausgekommen / weggedreht“ bewegen auch Kommandos/Mut.</div>`:''}${isNum(g)&&isNum(ov)&&r1(g)!==r1(ov)?`<div class="sub" style="margin:-2px 0 6px">Deine letzten Torwart-Einschätzungen allein ergeben ${fnum(r1(g))}. Der Wert ${fnum(r1(ov))} rechnet wie im Kader und in der Aufstellung mit „Mix“: Trainer + App (Torwart-Aktionen aus Live-Spielen), Potenzial (ganze Saison) + Form (letzte Wochen).</div>`:''}${grows}</div>`;}
   const ms=ss.filter(s=>isNum(s.mood?.[pid]));
   if(ms.length)h+=`<div class="card"><div class="lbl">Spaß am Fußball <small>Selbstauskunft</small></div><div class="moodhist">${ms.map(s=>`<span>${MOODS[s.mood[pid]-1]||''}<small>${fdate(s.date).slice(0,5)}</small></span>`).join('')}</div></div>`;
   {const rows=[...RATINGS,...ATH_RATINGS].map(r=>{const c='r:'+r.k,ss2=sessionsWith(c);const po=srcVal(c,pid,ss2,'pot'),fo=srcVal(c,pid,ss2,'form');if(!isNum(po)&&!isNum(fo))return'';const d=isNum(po)&&isNum(fo)?fo-po:0;
@@ -1090,11 +1090,13 @@ function vLineup(){return withMix(vLineupInner);}
 const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbling',m:'Ballverlust im Dribbling'},{k:'schuss',p:'Guter Abschluss',m:'Chance vergeben',mOff:1},{k:'lauf',p:'Guter Laufweg',m:'Falsch gelaufen / versteckt'},{k:'zweik',p:'Zweikampf gewonnen',m:'Zweikampf verloren'},{k:'entsch',p:'Kluge Entscheidung',m:'Falsche Entscheidung'},{k:'verp',p:null,m:'Abspiel verpasst'},{k:'gross',p:null,m:'Großchance vergeben',mo:2.5},{k:'vorl',p:'Torvorlage',m:null,pOff:1}];
 // Auswahl je Vorzeichen: ausgeblendete Kategorien (mOff) nur zeigen, wenn die Aktion sie schon hat; Minus-Reihenfolge über mo
 const catsFor=(gk,plus,cur)=>(gk?ACT_G:ACT_F).map((c,i)=>({c,o:(!plus&&c.mo)||i})).filter(({c})=>c.k===cur||(plus?(c.p&&!c.pOff):(c.m&&!c.mOff))).sort((a,b)=>a.o-b.o).map(x=>x.c);
-const ACT_G=[{k:'parade',p:'Starke Parade',m:'Haltbarer Gegentreffer'},{k:'fang',p:'Sicher gefangen',m:'Abprallen lassen'},{k:'raus',p:'Gut herausgelaufen',m:'Falsch herausgelaufen'},{k:'stell',p:'Gut positioniert',m:'Falsch positioniert'},{k:'eroeff',p:'Abwurf/Abstoß angekommen',m:'Abwurf/Abstoß zum Gegner'}];
-const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5,spielv:.5},dribb:{dribb:1,technik:1},schuss:{technik:1,abschluss:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},verp:{pass:1,ueber:1,spielv:.5},gross:{abschluss:2,technik:1},vorl:{pass:1,ueber:1,spielv:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
+const ACT_G=[{k:'parade',p:'Starke Parade',m:'Haltbarer Gegentreffer'},{k:'fang',p:'Sicher gefangen',m:'Abprallen lassen'},{k:'raus',p:'Gut herausgelaufen',m:'Falsch herausgelaufen'},{k:'weg',p:null,m:'Nicht rausgekommen / weggedreht'},{k:'stell',p:'Gut positioniert',m:'Falsch positioniert'},{k:'eroeff',p:'Abwurf/Abstoß angekommen',m:'Abwurf/Abstoß zum Gegner'}];
+const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5,spielv:.5},dribb:{dribb:1,technik:1},schuss:{technik:1,abschluss:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},verp:{pass:1,ueber:1,spielv:.5},gross:{abschluss:2,technik:1},vorl:{pass:1,ueber:1,spielv:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},weg:{tw_komm:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
 // Nur für Plus-Aktionen: gewonnener Zweikampf zählt auch für Mut; Torwart: herausgelaufen → Zweikampf/Mut, Abwurf → Passspiel, positioniert → Spielverständnis. Minus wirkt hier nie.
-const ACT_MAP_P={zweik:{mut:.5},raus:{zweik:.5,mut:.5},eroeff:{pass:.5},stell:{spielv:.5}}; // Torwart-Plus wirkt auch aufs Spielernetz (Christian 11.11.2026)
-const actMap=a=>a.t==='+'&&ACT_MAP_P[a.c]?{...ACT_MAP[a.c],...ACT_MAP_P[a.c]}:ACT_MAP[a.c];
+const ACT_MAP_P={zweik:{mut:.5},raus:{zweik:.5,mut:.5,tw_komm:.5},eroeff:{pass:.5},stell:{spielv:.5}}; // Torwart-Plus wirkt auch aufs Spielernetz (Christian 11.11.2026)
+// Nur für Minus-Aktionen: „versteckt“ ist fehlender Mut; Torwart „nicht rausgekommen / weggedreht“ zählt halb auf Mut im Spielernetz (Christian 11.11.2026)
+const ACT_MAP_M={lauf:{mut:.5},weg:{mut:.5}};
+const actMap=a=>{const b=ACT_MAP[a.c];if(!b)return b;const x=(a.t==='+'?ACT_MAP_P:ACT_MAP_M)[a.c];return x?{...b,...x}:b;};
 const PASS_TESTS=['pass_r','pass_l'];
 const GK_TEST_MAP={tw_fangen:'tw_fang',tw_reaktion:'tw_reak',tw_abwurf:'tw_eroeff'};
 const r1=x=>Math.round(x*10)/10;
@@ -1267,6 +1269,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:110,items:['<b>Mut kann live auch sinken:</b> „Falsch gelaufen / versteckt“ zählt zusätzlich halb auf Mut. Neuer Torwart-Minus-Knopf „Nicht rausgekommen / weggedreht“: voll auf Kommandos/Mut im Torwart-Netz und halb auf Mut im Spielernetz. „Gut herausgelaufen“ zählt zusätzlich halb auf Kommandos/Mut.']},
  {v:109,items:['<b>Tests fair benotet:</b> Sprint, Slalom, Sprung & Co. werden jetzt gegen alle Messungen der Saison benotet, nicht mehr nur gegen die Kinder desselben Testtags. Gleiche Zeit = gleiche Note, echte Verbesserung wird sichtbar, und fehlende starke Kinder verschieben die Noten der anderen nicht mehr.']},
  {v:108,items:['<b>Spielbewertung fairer eingerechnet:</b> Eine Spielbewertung zählt jetzt als weitere Stimme neben deinen Einschätzungen, der Test bleibt die andere Hälfte. Bisher ersetzte schon eine einzige Spielbewertung den Startwert der Form komplett, Test und Einschätzungen zählten dann nicht mehr.']},
  {v:107,items:['<b>Tests in Potenzial und Form:</b> Ins Potenzial zählt der beste Test der Saison, in die Form der letzte Test (ohne neuen Test der letzte ältere). Bisher nutzte die Form bei „Mix“ ebenfalls den Bestwert, ein schwächerer neuer Test drückte die Form also nicht.']},
