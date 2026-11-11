@@ -327,7 +327,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='99';
+const APP_VERSION='100';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1145,12 +1145,13 @@ function vActs(s){
 // Live-Daten nachträglich korrigieren (Christian 11.11.2026): Aktionen hinzufügen/löschen/Kind tauschen, Tore und Gegentore nachtragen/löschen
 function squadOf(lv){return[...new Set([...(lv.squad||[]),...Object.keys(lv.mins||{})])].filter(p=>S.players[p]).sort((a,b)=>S.players[a].name.localeCompare(S.players[b].name,'de'));}
 function resSync(s){const c=score(s.live);s.result=c.gf+':'+c.ga;}
-function naModal(){const s=S.sessions[S.sessionId];if(!s||!s.live)return;const N=S.na,pl=squadOf(s.live),cats=catsFor(N.gk,N.t==='+',N.c);
-  showModal(`<h3>Aktion nachtragen</h3><div class="lbl2">Kind</div><div class="chips">${pl.map(p=>`<button class="chip ${N.p===p?'onp':''}" onclick="A.naSet('p','${p}')">${esc(short(p))}</button>`).join('')}</div>
-  <div class="seg" style="margin:10px 0 6px"><button class="${N.t==='+'?'on':''}" onclick="A.naSet('t','+')">＋ Plus</button><button class="${N.t==='-'?'on':''}" onclick="A.naSet('t','-')">− Minus</button></div>
-  <label class="row gap" style="align-items:center;margin:4px 0"><input type="checkbox" ${N.gk?'checked':''} onchange="A.naSet('gk',this.checked)" style="width:auto"> Torwart-Aktion</label>
-  <div class="lbl2">Was? <small class="sub">(optional)</small></div><div class="chips">${cats.map(c=>`<button class="chip ${N.c===c.k?(N.t==='+'?'onp':'onm'):''}" onclick="A.naSet('c','${c.k}')">${esc(N.t==='+'?c.p:c.m)}</button>`).join('')}</div>
-  <div class="row end gap" style="margin-top:12px"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn pri" ${N.p?'':'disabled'} onclick="A.naSave()">Speichern</button></div>`);}
+function naCats(){const N=S.na;return catsFor(N.gk,N.t==='+',N.c).map(c=>`<button class="chip ${N.c===c.k?(N.t==='+'?'onp':'onm'):''}" onclick="A.naSet('c','${c.k}')">${esc(N.t==='+'?c.p:c.m)}</button>`).join('');}
+function naModal(){const s=S.sessions[S.sessionId];if(!s||!s.live)return;const N=S.na;let pl=squadOf(s.live);if(!pl.length)pl=plist().map(p=>p.id);
+  showModal(`<h3>Aktion nachtragen</h3><div class="lbl2">Kind</div><div class="chips" id="na_p">${pl.map(p=>`<button type="button" class="chip ${N.p===p?'onp':''}" data-p="${p}" onclick="A.naKid(this)">${esc(short(p))}</button>`).join('')}</div>
+  <div class="seg" id="na_t" style="margin:10px 0 6px"><button type="button" class="${N.t==='+'?'on':''}" onclick="A.naSet('t','+')">＋ Plus</button><button type="button" class="${N.t==='-'?'on':''}" onclick="A.naSet('t','-')">− Minus</button></div>
+  <div class="row gap" style="align-items:center;margin:4px 0"><input type="checkbox" id="na_gk" ${N.gk?'checked':''} onchange="A.naSet('gk',this.checked)" style="width:auto;margin:0"><span onclick="const c=$('#na_gk');c.checked=!c.checked;A.naSet('gk',c.checked)">Torwart-Aktion</span></div>
+  <div class="lbl2">Was? <small class="sub">(optional)</small></div><div class="chips" id="na_c">${naCats()}</div>
+  <div class="row end gap" style="margin-top:12px"><button type="button" class="btn" onclick="A.closeModal()">Abbrechen</button><button type="button" class="btn pri" onclick="A.naSave()">Speichern</button></div>`);}
 let sheetT=null;
 function sheetOpen(html,ms){const el=$('#sheet');clearTimeout(sheetT);el.innerHTML=html+(ms?`<div class="sbarw"><div class="sbar" id="sbar"></div></div>`:'');el.classList.add('open');
   if(ms){requestAnimationFrame(()=>{const b=$('#sbar');if(b){b.style.transition='none';b.style.width='100%';requestAnimationFrame(()=>{b.style.transition=`width ${ms/1000}s linear`;b.style.width='0%';});}});sheetT=setTimeout(()=>A.sheetHide(),ms);}}
@@ -1242,6 +1243,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:100,items:['„Aktion nachtragen“: Das Antippen des Kindes funktioniert jetzt zuverlässig. Ohne gewähltes Kind erscheint ein Hinweis statt eines grauen Speichern-Knopfs.']},
  {v:99,items:['<b>Live-Daten nachträglich korrigieren:</b> Im gespeicherten Spiel unter „Aktionen“ kannst du jetzt Aktionen nachtragen (+ Aktion nachtragen), löschen (🗑) oder einem anderen Kind zuordnen (⇄). Vergessene Tore und Gegentore trägst du mit „+ Tor“ / „+ Gegentor“ nach oder löschst sie; das Ergebnis passt sich automatisch an.']},
  {v:98,items:['<b>👀 Blinder Fleck:</b> Die Ranglisten zeigen, welche Kinder du in den letzten 6 Wochen deutlich seltener notiert hast (wenige Live-Aktionen je Spielminute oder keine Einschätzung). Beim Spielende siehst du, wer heute ohne Aktion geblieben ist.','<b>📊 Mannschafts-Bilanz:</b> Siege, Unentschieden, Niederlagen, Torverhältnis, die letzten 5 Spiele und wann die Tore fallen (Anfang, Mitte, Schluss).','<b>Spielzeit</b> ist jetzt ein Reiter der Saison-Statistik: Minuten gesamt, Ø je gespieltem Spiel und Anteil.']},
  {v:97,items:['<b>Form-Zeitraum fest 6 Wochen:</b> Die Form rechnet jetzt überall in der App mit den letzten 6 Wochen. Die Auswahl 4/6/8 Wochen ist entfernt.']},
@@ -1863,8 +1865,9 @@ const A={
     if(g.p&&goalPlusOn()){lv.plus[g.p]=(lv.plus[g.p]||0)+1;lv.actions.push({t:'+',p:g.p,c:'schuss',at:isNum(g.at)?g.at:null,ml:g.ml,gk:false,goal:g.id});}
     astSync(lv,g);saveDoc('sessions',S.sessionId,s);render(true);},
   naOpen(){S.na={p:null,t:'+',gk:false,c:null};naModal();},
-  naSet(k,v){if(k==='c'&&S.na.c===v)v=null;S.na[k]=v;if(k==='t'||k==='gk')S.na.c=null;naModal();},
-  naSave(){const N=S.na;if(!N||!N.p)return;const s=clone(S.sessions[S.sessionId]);const lv=s.live;lv.actions=lv.actions||[];lv.plus=lv.plus||{};lv.minus=lv.minus||{};const k=N.t==='+'?'plus':'minus';lv[k][N.p]=(lv[k][N.p]||0)+1;lv.actions.push({t:N.t,p:N.p,c:N.c||null,at:null,ml:null,gk:!!N.gk,late:1});saveDoc('sessions',S.sessionId,s);closeModal();S.actsAll=true;render(true);toast('Aktion nachgetragen');},
+  naKid(el){S.na=S.na||{p:null,t:'+',gk:false,c:null};S.na.p=el.dataset.p;document.querySelectorAll('#na_p .chip').forEach(c=>c.classList.toggle('onp',c===el));},
+  naSet(k,v){S.na=S.na||{p:null,t:'+',gk:false,c:null};if(k==='c'&&S.na.c===v)v=null;S.na[k]=v;if(k==='t'||k==='gk')S.na.c=null;if(k==='t')document.querySelectorAll('#na_t button').forEach((b,i)=>b.classList.toggle('on',(i===0)===(v==='+')));const c=$('#na_c');if(c)c.innerHTML=naCats();},
+  naSave(){const N=S.na;if(!N||!N.p){toast('Bitte zuerst ein Kind antippen');return;}const s=clone(S.sessions[S.sessionId]);const lv=s.live;lv.actions=lv.actions||[];lv.plus=lv.plus||{};lv.minus=lv.minus||{};const k=N.t==='+'?'plus':'minus';lv[k][N.p]=(lv[k][N.p]||0)+1;lv.actions.push({t:N.t,p:N.p,c:N.c||null,at:null,ml:null,gk:!!N.gk,late:1});saveDoc('sessions',S.sessionId,s);closeModal();S.actsAll=true;render(true);toast('Aktion nachgetragen');},
   actWho(i){const s=S.sessions[S.sessionId];const a=s&&s.live&&(s.live.actions||[])[i];if(!a)return;showModal(`<h3>Anderes Kind</h3><div class="sub" style="margin-bottom:8px">${a.t==='+'?'Plus':'Minus'}-Aktion ${mlOf(a)} – bisher bei ${esc(short(a.p))}.</div><div class="chips">${squadOf(s.live).map(p=>`<button class="chip ${a.p===p?'onp':''}" onclick="A.actWhoSet(${i},'${p}')">${esc(short(p))}</button>`).join('')}</div><div class="row end" style="margin-top:12px"><button class="btn" onclick="A.closeModal()">Abbrechen</button></div>`);},
   actWhoSet(i,pid){const s=clone(S.sessions[S.sessionId]);const lv=s.live,a=lv.actions[i];if(!a||a.p===pid){closeModal();return;}const k=a.t==='+'?'plus':'minus';lv[k]=lv[k]||{};lv[k][a.p]=Math.max(0,(lv[k][a.p]||0)-1);lv[k][pid]=(lv[k][pid]||0)+1;a.p=pid;saveDoc('sessions',S.sessionId,s);closeModal();render(true);},
   actDelAsk(i){const s=S.sessions[S.sessionId];const a=s&&s.live&&(s.live.actions||[])[i];if(!a)return;showModal(`<h3>Aktion löschen?</h3><p>${a.t==='+'?'Plus':'Minus'}-Aktion ${mlOf(a)} bei ${esc(short(a.p))}.</p><div class="row end gap"><button class="btn" onclick="A.closeModal()">Abbrechen</button><button class="btn danger" onclick="A.actDel(${i})">Löschen</button></div>`);},
