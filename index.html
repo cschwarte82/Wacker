@@ -333,7 +333,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='103';
+const APP_VERSION='104';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1085,8 +1085,8 @@ const ACT_F=[{k:'pass',p:'Toller Pass',m:'Fehlpass'},{k:'dribb',p:'Super Dribbli
 const catsFor=(gk,plus,cur)=>(gk?ACT_G:ACT_F).map((c,i)=>({c,o:(!plus&&c.mo)||i})).filter(({c})=>c.k===cur||(plus?(c.p&&!c.pOff):(c.m&&!c.mOff))).sort((a,b)=>a.o-b.o).map(x=>x.c);
 const ACT_G=[{k:'parade',p:'Starke Parade',m:'Haltbarer Gegentreffer'},{k:'fang',p:'Sicher gefangen',m:'Abprallen lassen'},{k:'raus',p:'Gut herausgelaufen',m:'Falsch herausgelaufen'},{k:'stell',p:'Gut positioniert',m:'Falsch positioniert'},{k:'eroeff',p:'Abwurf/Abstoß angekommen',m:'Abwurf/Abstoß zum Gegner'}];
 const ACT_MAP={pass:{pass:1,technik:.5,ueber:.5,spielv:.5},dribb:{dribb:1,technik:1},schuss:{technik:1,abschluss:1},lauf:{frei:1},zweik:{zweik:1},entsch:{spielv:1,ueber:.5},verp:{pass:1,ueber:1,spielv:.5},gross:{abschluss:2,technik:1},vorl:{pass:1,ueber:1,spielv:.5},parade:{tw_reak:1},fang:{tw_fang:1},raus:{tw_raus:1},stell:{tw_stell:1},eroeff:{tw_eroeff:1}};
-// Nur für Plus-Aktionen: gewonnener Zweikampf zählt auch für Mut (Christian 11.11.2026); ein verlorener senkt den Mut nicht
-const ACT_MAP_P={zweik:{mut:.5}};
+// Nur für Plus-Aktionen: gewonnener Zweikampf zählt auch für Mut; Torwart: herausgelaufen → Zweikampf/Mut, Abwurf → Passspiel, positioniert → Spielverständnis. Minus wirkt hier nie.
+const ACT_MAP_P={zweik:{mut:.5},raus:{zweik:.5,mut:.5},eroeff:{pass:.5},stell:{spielv:.5}}; // Torwart-Plus wirkt auch aufs Spielernetz (Christian 11.11.2026)
 const actMap=a=>a.t==='+'&&ACT_MAP_P[a.c]?{...ACT_MAP[a.c],...ACT_MAP_P[a.c]}:ACT_MAP[a.c];
 const PASS_TESTS=['pass_r','pass_l'];
 const GK_TEST_MAP={tw_fangen:'tw_fang',tw_reaktion:'tw_reak',tw_abwurf:'tw_eroeff'};
@@ -1260,6 +1260,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:104,items:['<b>Torwart-Aktionen zählen auch fürs Spielernetz:</b> „Gut herausgelaufen“ zählt halb auf Zweikampf und Mut, „Abwurf/Abstoß angekommen“ halb auf Passspiel, „Gut positioniert“ halb auf Spielverständnis. Nur Plus-Aktionen – ein Torwart-Fehler verschlechtert das Feldprofil nicht.']},
  {v:103,items:['<b>Neues Stärkenprofil-Netz:</b> Sechs Fußball-Achsen nach den DFB-Säulen: Technik, Abschluss, Spielintelligenz, Zweikampf, Athletik und Mentalität. Fünf davon reagieren auf Live-Aktionen: Ein gewonnener Zweikampf zählt jetzt auch für Mut (Mentalität). Tempo, Gewandtheit, Sprungkraft und Ausdauer stecken jetzt zusammen in „Athletik“, die einzelnen Tests siehst du weiter unter „Entwicklung der Messwerte“.','Die Torschuss-Tests zählen jetzt zum Abschluss statt zur Technik.']},
  {v:102,items:['<b>🧤 Torwart-Netz:</b> Im Spielerprofil hat der Torwart jetzt ein eigenes Netz mit Reaktion, Fangen, Stellungsspiel, Herauslaufen, Spieleröffnung und Kommandos – Form gefüllt, Potenzial gestrichelt. Torwart-Aktionen aus dem Live-Spiel bewegen dort die Form.','„Wer ist in Form?“ und die ▲/▼ im Kader berücksichtigen jetzt auch die Torwart-Bereiche.']},
  {v:101,items:['Die Versionsnummer steht jetzt klein ganz unten in den Einstellungen. Falls in der App ein Fehler auftritt, erscheint er kurz als Hinweis.']},
