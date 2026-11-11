@@ -333,7 +333,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='104';
+const APP_VERSION='105';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -703,8 +703,9 @@ let DV=0,CC={k:null,sw:{},sv:{}};
 function calcCache(){const k=DV+'|'+CUR+'|'+(S.archView||'')+'|'+formWeeks()+'|'+srcMode()+'|'+Object.keys(S.sessions||{}).length+'|'+Object.keys(S.players||{}).length;if(CC.k!==k)CC={k,sw:{},sv:{}};return CC;}
 function sessionsWith(cat){const C=calcCache();if(C.sw[cat])return C.sw[cat];const ps=plist(true);return C.sw[cat]=slist().filter(s=>ps.some(p=>isNum(catVal(s,cat,p.id))));}
 function latestVal(cat,pid,ss){const multi=isRA(cat);const vals=[];for(const s of ss){const v=catVal(s,cat,pid);if(isNum(v)){if(!multi)return v;vals.push(v);if(vals.length===3)break;}}return vals.length?avg(vals):null;}
+// Ohne Einschätzung/Test (z. B. Torwart nur mit Live-Aktionen) startet die Form bei 3 = Teamschnitt, also wird auch dagegen verglichen (Christian 11.11.2026)
 function formRows(ps){const cats=[...RATINGS,...ATH_RATINGS,...GK_RATINGS].map(r=>'r:'+r.k);const ss={};cats.forEach(c=>ss[c]=sessionsWith(c));
-  return ps.map(p=>{const ds=[];cats.forEach(c=>{const po=srcVal(c,p.id,ss[c],'pot'),fo=srcVal(c,p.id,ss[c],'form');if(isNum(po)&&isNum(fo))ds.push({c,d:fo-po});});if(!ds.length)return null;ds.sort((a,b)=>b.d-a.d);return{p,d:avg(ds.map(x=>x.d)),top:ds[0],low:ds[ds.length-1]};}).filter(Boolean);}
+  return ps.map(p=>{const ds=[];cats.forEach(c=>{let po=srcVal(c,p.id,ss[c],'pot');const fo=srcVal(c,p.id,ss[c],'form');if(!isNum(po)&&isNum(fo))po=3;if(isNum(po)&&isNum(fo))ds.push({c,d:fo-po});});if(!ds.length)return null;ds.sort((a,b)=>b.d-a.d);return{p,d:avg(ds.map(x=>x.d)),top:ds[0],low:ds[ds.length-1]};}).filter(Boolean);}
 // Gesamtstärke fürs Kader: Wert auf der besten Feldposition wie in der Aufstellung, immer mit Werte aus „Mix“ und Zeitraum „Mix“; Torwart-Wert getrennt
 function overallAll(ps){const c=S.cfg=S.cfg||{},o={src:c.src,per:c.per},out={};c.src='mix';c.per='mix';
   try{ps.forEach(p=>{if(p.guest)return;const pr=profileOf(p.id);const b=bestField(p,pr);const g=pr['a:torwart'];out[p.id]={f:b.cov>0?b.v:null,pt:b.pt,tw:isNum(g)?g:null};});}
@@ -1260,6 +1261,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:105,items:['<b>„Wer ist in Form?“ zählt auch Torwart-Werte ohne Einschätzung:</b> Hat ein Kind in einem Bereich noch keine Einschätzung und keinen Test, aber Live-Aktionen (z. B. ein Torwart mit Paraden), wird seine Form gegen 3 = Teamschnitt verglichen. Vorher fiel der Bereich aus der Rechnung, und Torhüter tauchten oft gar nicht auf.']},
  {v:104,items:['<b>Torwart-Aktionen zählen auch fürs Spielernetz:</b> „Gut herausgelaufen“ zählt halb auf Zweikampf und Mut, „Abwurf/Abstoß angekommen“ halb auf Passspiel, „Gut positioniert“ halb auf Spielverständnis. Nur Plus-Aktionen – ein Torwart-Fehler verschlechtert das Feldprofil nicht.']},
  {v:103,items:['<b>Neues Stärkenprofil-Netz:</b> Sechs Fußball-Achsen nach den DFB-Säulen: Technik, Abschluss, Spielintelligenz, Zweikampf, Athletik und Mentalität. Fünf davon reagieren auf Live-Aktionen: Ein gewonnener Zweikampf zählt jetzt auch für Mut (Mentalität). Tempo, Gewandtheit, Sprungkraft und Ausdauer stecken jetzt zusammen in „Athletik“, die einzelnen Tests siehst du weiter unter „Entwicklung der Messwerte“.','Die Torschuss-Tests zählen jetzt zum Abschluss statt zur Technik.']},
  {v:102,items:['<b>🧤 Torwart-Netz:</b> Im Spielerprofil hat der Torwart jetzt ein eigenes Netz mit Reaktion, Fangen, Stellungsspiel, Herauslaufen, Spieleröffnung und Kommandos – Form gefüllt, Potenzial gestrichelt. Torwart-Aktionen aus dem Live-Spiel bewegen dort die Form.','„Wer ist in Form?“ und die ▲/▼ im Kader berücksichtigen jetzt auch die Torwart-Bereiche.']},
