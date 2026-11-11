@@ -327,7 +327,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='100';
+const APP_VERSION='101';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -1243,6 +1243,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:101,items:['Die Versionsnummer steht jetzt klein ganz unten in den Einstellungen. Falls in der App ein Fehler auftritt, erscheint er kurz als Hinweis.']},
  {v:100,items:['„Aktion nachtragen“: Das Antippen des Kindes funktioniert jetzt zuverlässig. Ohne gewähltes Kind erscheint ein Hinweis statt eines grauen Speichern-Knopfs.']},
  {v:99,items:['<b>Live-Daten nachträglich korrigieren:</b> Im gespeicherten Spiel unter „Aktionen“ kannst du jetzt Aktionen nachtragen (+ Aktion nachtragen), löschen (🗑) oder einem anderen Kind zuordnen (⇄). Vergessene Tore und Gegentore trägst du mit „+ Tor“ / „+ Gegentor“ nach oder löschst sie; das Ergebnis passt sich automatisch an.']},
  {v:98,items:['<b>👀 Blinder Fleck:</b> Die Ranglisten zeigen, welche Kinder du in den letzten 6 Wochen deutlich seltener notiert hast (wenige Live-Aktionen je Spielminute oder keine Einschätzung). Beim Spielende siehst du, wer heute ohne Aktion geblieben ist.','<b>📊 Mannschafts-Bilanz:</b> Siege, Unentschieden, Niederlagen, Torverhältnis, die letzten 5 Spiele und wann die Tore fallen (Anfang, Mitte, Schluss).','<b>Spielzeit</b> ist jetzt ein Reiter der Saison-Statistik: Minuten gesamt, Ø je gespieltem Spiel und Anteil.']},
@@ -1350,6 +1351,7 @@ function vSettings(){
   h+=det('guide')+`<summary>📖 Anleitung</summary><div style="height:10px"></div><a class="btn pri" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px" href="TrainerRadar-Anleitung.pdf?v=${APP_VERSION}" target="_blank" rel="noopener">📄 Anleitung als PDF öffnen</a><div class="sub" style="margin-bottom:4px">Das PDF wird mit jedem Update aktualisiert. Kurzfassung zum Aufklappen:</div>${GUIDE.map(([t,c],i)=>`<details class="gd" ${i===1?'open':''}><summary>${t}</summary><div class="gdc">${c}</div></details>`).join('')}</details>`;
   h+=det('arch')+`<summary>🗄 Saison-Archiv</summary><div style="height:6px"></div>`+archCard()+`</details>`;
   h+=footCard();
+  h+=`<div class="sub" style="text-align:center;font-size:11px;margin:10px 0 4px">TrainerRadar · Version ${APP_VERSION}</div>`;
   return h;
 }
 // ---------- Saison-Archiv ----------
@@ -2138,6 +2140,7 @@ window.A=A;
 (function init(){
   loadLocal();S.mode='local';S.ready=true;render(true);
   setTimeout(()=>{const has=Object.keys(S.players).length||Object.keys(S.sessions).length;if(!META.seenVersion&&!has){META.seenVersion=+APP_VERSION;saveLocal();}else if((META.seenVersion||0)<+APP_VERSION)whatsNew(false);},400);
+  window.addEventListener('error',e=>{try{toast('⚠ Fehler: '+(e.message||'unbekannt')+' (V'+APP_VERSION+')',6000);}catch(_){}});
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});}catch(e){}
   if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
     const hadCtrl=!!navigator.serviceWorker.controller;let reloaded=false;
