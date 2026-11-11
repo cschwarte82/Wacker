@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 100, 11.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 101, 11.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,6 +106,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V101:** Versionsnummer klein ganz unten in den Einstellungen (Christian: immer sichtbar). Globaler `error`-Listener zeigt Fehler als Toast mit Versionsnummer (Fehlersuche auf dem Handy).
 - **V100:** „Aktion nachtragen“ robuster: Kind-Auswahl per `A.naKid(el)` ohne Neuaufbau des Dialogs (Christian: Auswahl klappte auf dem Handy nicht), Kategorien über `naCats()` in `#na_c`, Speichern immer aktiv mit Hinweis-Toast, Fallback auf ganzen Kader wenn Spiel ohne Kader.
 - **V99:** Nachträgliche Korrektur im Reiter „Aktionen“ (jetzt bei jedem Live-Spiel): `A.naOpen/naSet/naSave` (Aktion nachtragen, `late:1`, ohne Minute), `A.actWho/actWhoSet` (Kind tauschen), `A.actDelAsk/actDel`, `A.gAdd(t)` (Tor/Gegentor ohne Minute, `on` = alle mit Spielminuten), `A.gDelAsk/gDel` (entfernt verknüpfte Tor-/Vorlagen-Plus); `resSync(s)` setzt `s.result` aus den Toren. Aktionen mit `goal`/`ast` folgen dem Tor und sind nicht einzeln editierbar. Spielminuten bewusst NICHT korrigierbar (Christian).
 - **V98:** `blindCard()`/`blindSpots()` (letzte 6 Wo.: Aktionen je 45 Min. < halber Team-Median ab 45 Min., oder keine Einschätzung während ≥ Hälfte des Teams eine hat), Hinweis „Ohne Aktion heute“ im Spiel-beenden-Dialog (≥10 Min., 0 Aktionen); `teamCard()`/`teamRecord()` (S/U/N aus `s.result`, letzte 5, Tore nach Spieldritteln aus `g.sec`/`duration`); `playtimeCard` → Reiter „Spielzeit“ (`playtimeRows()`) in der Saison-Statistik.
