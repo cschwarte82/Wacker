@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 109, 11.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 110, 11.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,6 +106,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V110:** `ACT_MAP_M` (nur Minus): lauf → mut .5, neue TW-Minus-Kategorie `weg` „Nicht rausgekommen / weggedreht“ → tw_komm 1 + mut .5; `ACT_MAP_P` raus zusätzlich tw_komm .5. Tor zählt bewusst einfach (Christian 11.11.2026).
 - **V109:** `testScore`: z-Wert gegen alle Messungen der Saison (alle Testtage/Kinder, gecacht in calcCache `C.ts`) statt nur gegen den Testtag – gleiche Zeit = gleiche Note, Verbesserung sichtbar (Christian 11.11.2026).
 - **V108:** `pfCalc`: Spielbewertungen ersetzen den Form-Startwert nicht mehr, sondern zählen als weitere Einschätzung: fStart = mix2(avg([...Ef,...Gw]),Tf); Blöcke analog mix2(avg([...R,...g]),T) (Christian 11.11.2026). Plus=5/Minus=1 absolut bleibt bewusst (Christian: ein Pass ist gut oder schlecht, unabhängig von der Stärke).
 - **V107:** `pfCalc`: Form-Startwert nutzt `pfTest(cat,pid,formSince())` = letzter Test (sonst letzter älterer), Potenzial weiter Bestwert der Saison; Form ≠ Potenzial auch ohne Aktionen, wenn letzter Test ≠ Bestwert (Christian 11.11.2026).
