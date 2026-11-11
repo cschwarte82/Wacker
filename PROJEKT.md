@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 106, 11.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 107, 11.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,6 +106,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V107:** `pfCalc`: Form-Startwert nutzt `pfTest(cat,pid,formSince())` = letzter Test (sonst letzter älterer), Potenzial weiter Bestwert der Saison; Form ≠ Potenzial auch ohne Aktionen, wenn letzter Test ≠ Bestwert (Christian 11.11.2026).
 - **V106:** `formRows`: Schnitt nur über Kategorien mit |Form−Potenzial| ≥ .01 (bewegte Bereiche); vorher verwässerten unberührte Kategorien (Torwart: alle Feldwerte) die Zahl, Torwart tauchte nicht auf (Christian 11.11.2026).
 - **V105:** `formRows`: fehlt das Potenzial einer Kategorie (keine Einschätzung/Test), aber es gibt eine Form aus Live-Aktionen, wird gegen 3 verglichen (= Startwert der Form). Vorher fielen solche Kategorien raus, Torhüter ohne TW-Einschätzung fehlten in „Wer ist in Form?“. `sw.js` war seit V92 versehentlich leer (kein Offline-Cache) – wiederhergestellt, Cache u10-profil-v105.
 - **V104:** `ACT_MAP_P` erweitert: Torwart-Plus raus → zweik/mut .5, eroeff → pass .5, stell → spielv .5 (nur Plus, Christian 11.11.2026).
