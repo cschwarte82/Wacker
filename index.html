@@ -333,7 +333,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='108';
+const APP_VERSION='109';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -445,9 +445,13 @@ function footCard(){return `${DONATE_URL?`<div class="card" style="text-align:ce
 // ---------- Auswertung ----------
 function testScore(s,k,pid){
   const t=TEST[k]; const v=s.results?.[pid]?.[k]; if(!t||!isNum(v))return null;
-  const vals=Object.values(s.results||{}).map(r=>r&&r[k]).filter(isNum);
-  if(vals.length<3)return 3;
-  const m=avg(vals); const sd=Math.sqrt(avg(vals.map(x=>(x-m)**2)));
+  // Note gegen alle Messungen der Saison (alle Testtage, alle Kinder) statt nur gegen die Kinder desselben Tages:
+  // gleiche Zeit = gleiche Note, echte Verbesserung wird sichtbar, fehlende Starke verschieben nichts (Christian 11.11.2026)
+  const C=calcCache();C.ts=C.ts||{};let st=C.ts[k];
+  if(!st){const vals=[];Object.values(S.sessions||{}).forEach(x=>{if(x.type==='game')return;Object.values(x.results||{}).forEach(r=>{if(r&&isNum(r[k]))vals.push(r[k]);});});
+    const m=vals.length?avg(vals):0;st=C.ts[k]={n:vals.length,m,sd:vals.length?Math.sqrt(avg(vals.map(x=>(x-m)**2))):0};}
+  if(st.n<3)return 3;
+  const m=st.m,sd=st.sd;
   if(sd===0)return 3;
   let z=(v-m)/sd; if(t.lower)z=-z;
   return Math.max(1,Math.min(5,3+z));
@@ -1075,7 +1079,7 @@ function vLineupInner(){
   h+=`<button class="btn pri" style="width:100%;margin:10px 0 0" onclick="A.liveFromLineup()">▶ Live mit dieser Aufstellung</button>`;
   const est=filled.filter(k=>fitOf(cur[k],k).cov<.5).map(k=>esc(S.players[cur[k]].name));
   if(est.length)h+=`<div class="banner">Gestrichelt = wenig Daten, Wert teilweise geschätzt: ${est.join(', ')}. Fehlende Bereiche zählen mit dem Mannschaftsschnitt.</div>`;
-  tail+=`<details class="card"><summary>So rechnet die App</summary>${Object.values(PROF).map(P=>`<div class="wt"><b>${P.n}:</b> ${Object.entries(P.w).map(([c,w])=>`${catName(c)} ${Math.round(w*100)} %`).join(', ')}</div>`).join('')}<div class="wt">Mitte und außen werden getrennt bewertet (Halbpositionen zählen als Mitte, im Sturm nur die einzige Spitze). Fuß-Bonus außen: starker Fuß (oder „beide“) +0,15, schwacher Fuß anteilig nach den Pass- und Schusstests links/rechts; Halbpositionen die Hälfte. Spielweise (Kader): offensiv = Sturm +0,2 / Abwehr −0,2, defensiv umgekehrt, ausgewogen = Mittelfeld +0,1. Positionstreue: gering = Abwehr −0,3 / Mittelfeld −0,1, hoch = Abwehr +0,1 / Mittelfeld +0,05. Messwerte zählen relativ zum Team (3 = Schnitt), deine Einschätzung direkt (1–5). Werte bleiben immer zwischen 1 und 5. Messwerte: Potenzial = bester Wert der Saison, Form = letzter Wert (gibt es keinen neuen Test, zählt der letzte ältere, dazu die aktuellen Live-Aktionen). Deine Einschätzungen zählen genau so, wie du sie eingetragen hast. Hat ein Kind noch gar keinen Wert (z. B. bei allen Testtagen gefehlt), zählt dort der Mannschaftsschnitt – Fehlen ist so weder Vor- noch Nachteil. Bei „Trainer“ zählt jede Live-Aktion als Zusatzbewertung: Plus wie eine 5, Minus wie eine 1, 4 Aktionen = 1 Bewertung, Live höchstens die Hälfte des Werts. „App“ nimmt die Werte aus „Trainer vs. App“. „Mix“ (Standard): Potenzial = Mittelwert aus deinen Einschätzungen und den Messwerten (Bestwert); jeder abgeschlossene Form-Block (je Form-Wochen ab Saisonstart, mindestens 4 Aktionen) zählt dort wie eine weitere Einschätzung. Form = das Potenzial, durch die Live-Aktionen der letzten Form-Wochen bestätigt, hochgeschoben oder nach unten korrigiert (Plus wie eine 5, Minus wie eine 1, Potenzial zählt doppelt); ohne Aktionen ist Form = Potenzial. Athletik: Potenzial = bester Test, Form = letzter Test. Zeitraum „Mix“ = Mittelwert aus Potenzial und Form.</div></details>`;
+  tail+=`<details class="card"><summary>So rechnet die App</summary>${Object.values(PROF).map(P=>`<div class="wt"><b>${P.n}:</b> ${Object.entries(P.w).map(([c,w])=>`${catName(c)} ${Math.round(w*100)} %`).join(', ')}</div>`).join('')}<div class="wt">Mitte und außen werden getrennt bewertet (Halbpositionen zählen als Mitte, im Sturm nur die einzige Spitze). Fuß-Bonus außen: starker Fuß (oder „beide“) +0,15, schwacher Fuß anteilig nach den Pass- und Schusstests links/rechts; Halbpositionen die Hälfte. Spielweise (Kader): offensiv = Sturm +0,2 / Abwehr −0,2, defensiv umgekehrt, ausgewogen = Mittelfeld +0,1. Positionstreue: gering = Abwehr −0,3 / Mittelfeld −0,1, hoch = Abwehr +0,1 / Mittelfeld +0,05. Messwerte zählen relativ zu allen Messungen der Saison (3 = Schnitt), deine Einschätzung direkt (1–5). Werte bleiben immer zwischen 1 und 5. Messwerte: Potenzial = bester Wert der Saison, Form = letzter Wert (gibt es keinen neuen Test, zählt der letzte ältere, dazu die aktuellen Live-Aktionen). Deine Einschätzungen zählen genau so, wie du sie eingetragen hast. Hat ein Kind noch gar keinen Wert (z. B. bei allen Testtagen gefehlt), zählt dort der Mannschaftsschnitt – Fehlen ist so weder Vor- noch Nachteil. Bei „Trainer“ zählt jede Live-Aktion als Zusatzbewertung: Plus wie eine 5, Minus wie eine 1, 4 Aktionen = 1 Bewertung, Live höchstens die Hälfte des Werts. „App“ nimmt die Werte aus „Trainer vs. App“. „Mix“ (Standard): Potenzial = Mittelwert aus deinen Einschätzungen und den Messwerten (Bestwert); jeder abgeschlossene Form-Block (je Form-Wochen ab Saisonstart, mindestens 4 Aktionen) zählt dort wie eine weitere Einschätzung. Form = das Potenzial, durch die Live-Aktionen der letzten Form-Wochen bestätigt, hochgeschoben oder nach unten korrigiert (Plus wie eine 5, Minus wie eine 1, Potenzial zählt doppelt); ohne Aktionen ist Form = Potenzial. Athletik: Potenzial = bester Test, Form = letzter Test. Zeitraum „Mix“ = Mittelwert aus Potenzial und Form.</div></details>`;
   return h+tail;
 }
 // Aufstellung rechnet immer mit Mix/Mix (wie die Gesamtstärke im Kader)
@@ -1263,6 +1267,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:109,items:['<b>Tests fair benotet:</b> Sprint, Slalom, Sprung & Co. werden jetzt gegen alle Messungen der Saison benotet, nicht mehr nur gegen die Kinder desselben Testtags. Gleiche Zeit = gleiche Note, echte Verbesserung wird sichtbar, und fehlende starke Kinder verschieben die Noten der anderen nicht mehr.']},
  {v:108,items:['<b>Spielbewertung fairer eingerechnet:</b> Eine Spielbewertung zählt jetzt als weitere Stimme neben deinen Einschätzungen, der Test bleibt die andere Hälfte. Bisher ersetzte schon eine einzige Spielbewertung den Startwert der Form komplett, Test und Einschätzungen zählten dann nicht mehr.']},
  {v:107,items:['<b>Tests in Potenzial und Form:</b> Ins Potenzial zählt der beste Test der Saison, in die Form der letzte Test (ohne neuen Test der letzte ältere). Bisher nutzte die Form bei „Mix“ ebenfalls den Bestwert, ein schwächerer neuer Test drückte die Form also nicht.']},
  {v:106,items:['<b>„Wer ist in Form?“ fairer:</b> Die Zahl ist jetzt der Schnitt nur der Bereiche, in denen sich in den letzten 6 Wochen etwas bewegt hat. Bisher zählten unberührte Bereiche als 0 mit und drückten die Zahl – besonders beim Torwart, dessen Feldwerte sich kaum bewegen.']},
