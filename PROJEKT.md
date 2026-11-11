@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 103, 11.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 104, 11.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,6 +106,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V104:** `ACT_MAP_P` erweitert: Torwart-Plus raus → zweik/mut .5, eroeff → pass .5, stell → spielv .5 (nur Plus, Christian 11.11.2026).
 - **V103:** Neues Netz `AREAS` = technik, absch, iq, zwk, ath, ment (DFB-Säulen, Christian 11.11.2026). Alte Bereiche tempo/gewandt/kraft/ausdauer/spiel in `AREAS_IN` (Tests, POS-Gewichte unverändert). `COMPOS` (iq/zwk/ment/absch → Ratings) laufen wie a:spiel über pfCalc/appCat/liveKeys; `a:ath` = Mittel der vier Athletik-Bereiche (Fallback Athletik-Einschätzung) in `srcVal0`. Torschuss-Tests haben area 'absch' (nicht mehr technik) und fließen per `pfTest`/`appVals` in r:abschluss. `isRA()` ersetzt die multi-Prüfungen. `ACT_MAP_P`/`actMap(a)`: Zweikampf gewonnen (nur Plus) zählt .5 auf Mut.
 - **V102:** Eigenes Torwart-Netz im Profil (`radar(cur,prev,GK_RATINGS)`, Kurznamen `s` in GK_RATINGS), Werte wie Feld-Netz über `srcVal('r:tw_*',…,'pot'/'form')`; Karte erscheint auch ohne Trainer-TW-Einschätzung, sobald Werte da sind. `formRows` zählt GK_RATINGS mit (Wer ist in Form?, ▲/▼ im Kader).
 - **V101:** Versionsnummer klein ganz unten in den Einstellungen (Christian: immer sichtbar). Globaler `error`-Listener zeigt Fehler als Toast mit Versionsnummer (Fehlersuche auf dem Handy).
