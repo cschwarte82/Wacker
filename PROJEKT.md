@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 96, 11.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 97, 11.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -55,7 +55,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 
 ## Bewertungslogik
 - Einschätzung 1–5: Spielverständnis, Freilaufen, Zweikampf, Passspiel, Dribbling, Übersicht, Mut, Kommunikation; Athletik (Schnelligkeit, Dynamik, Ausdauer) **nur in der Trainereinschätzung**; Torwart-Kategorien optional
-- Zeitraum (`cfg.per`, Standard `mix`, Wunsch des Trainers): Potenzial = alle Werte der Saison (Einschätzungen: Schnitt, Tests/Bereiche: Bestwert, App: alle Spiele), Form = letzte `cfg.formWeeks` (4/6/8, Standard 6) Wochen (Tests: letzter Wert), Mix = Mittelwert; gilt für Aufstellung, Ranglisten, Profil-Karte „Potenzial & Form“. „Trainer vs. App“ im Profil nutzt weiter den Schnitt der letzten 3 Bewertungen
+- Zeitraum (`cfg.per`, Standard `mix`, Wunsch des Trainers): Potenzial = alle Werte der Saison (Einschätzungen: Schnitt, Tests/Bereiche: Bestwert, App: alle Spiele), Form = letzte 6 Wochen (fest seit V97) (Tests: letzter Wert), Mix = Mittelwert; gilt für Aufstellung, Ranglisten, Profil-Karte „Potenzial & Form“. „Trainer vs. App“ im Profil nutzt weiter den Schnitt der letzten 3 Bewertungen
 - Testwerte relativ zum Teamschnitt (3 = Schnitt)
 - Quelle V35 (`srcMode`: trainer / app / mix, Standard `mix` = Mittel aus `liveVal` und `appCat`; alter Wert `live` → trainer). „Trainer“ = nur Einschätzungen (keine Tests) plus Live (`trainerVal`: Test-Bereiche über `TR_AREA` auf Athletik-/Dribbling-/Pass-/TW-Einschätzungen abgebildet, sonst `liveVal`): `liveVal` – Live-Aktionen als Zusatzbewertungen (Plus = 5, Minus = 1, je Aktion `LIVE_W`=0,25 einer Bewertung, über `ACT_MAP` anteilig auf Kategorien; `a:spiel`/`a:torwart` summieren die passenden Rating-Keys, `a:technik` die Technik-Aktionen). Deckel `LIVE_CAP`: Live-Gewicht ≤ Anzahl der Basiswerte im Zeitraum (also max. 50 %). Ohne Basiswert zählt Live allein. Zeitraum Mix = Mittel aus Potenzial- und Form-Rechnung. „App“ = App-Wert (`appCat`).
 - Gewichte V33: Mittelfeld Passspiel 20 %, Ausdauer 15 %; Sturm mit `r:abschluss` 10 % (Trainer-Einschätzung „Abschluss / Torschuss“, seit V33 in RATINGS; App-Wert aus „Guter Abschluss“/Toren; zählt nicht für das ✓ „fertig bewertet“, damit alte Bewertungen vollständig bleiben), Technik 15 %, Freilaufen 15 %
@@ -106,6 +106,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V97:** `formWeeks()` liefert fest 6 (Christian 11.11.2026: überall gleich, nicht änderbar); Auswahl 4/6/8 Wo. unter Ranglisten entfernt, alter `cfg.formWeeks` wird ignoriert.
 - **V96:** Ranglisten-Umbau: `formOverview()` als Tabelle (je 3 ▲/▼), `statCard()` Saison-Statistik (Tore/Vorlagen/Scorer/Paraden/Impact, Gesamt oder je 45 Min. ab 45 Min.), `seasonAwards()` (auch im Saison-Rückblick), `liveSeason()` mit Impact: z-Werte von (P−N+4·Teamquote)/(P+N+4) (doppelt) und (gf−ga) je 45 Min., mit Puffer `IMP_BUF_A`=4 Aktionen und `IMP_BUF_M`=45 Min. auf Teamniveau (statt Mindestzeit), ≥4 Kinder, Stufen 0,5/1/1,5 → 1–3 Pfeile, keine Zahlen. Tor-Bilanz auf dem Feld überall entfernt (nur noch intern im Impact), `topOverview` und Live-Kategorien in CATS entfernt.
 - **V95:** Wechselvorschlag `subSugHtml(L)` in `#subsugw`, im Sekunden-Intervall alle 5 s neu (nicht während ein Spieler ausgewählt ist). Vorher nur beim Rendern → nach Wechseln blieb die Box leer (Christian 10.11.).
 - **V94:** Live-Übersicht „Spielzeiten“: `daySecs` wie die Karten (vorher `liveSecs`, im Turnier ohne Vorspiele) und sekündlich aktualisiert (`.lmin2`).
