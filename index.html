@@ -333,7 +333,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='106';
+const APP_VERSION='107';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -911,7 +911,8 @@ function liveAggR(pid,from,to){const ck=CUR+'|'+META.lastChange+'|'+(S.archView|
 const PF_ATH={schnell:['a:tempo'],dyn:['a:gewandt','a:kraft'],ausd:['a:ausdauer']};
 const gkTestByR=k=>(Object.entries(GK_TEST_MAP).find(([t,r])=>r===k)||[])[0];
 // Messwert (Bestwert der Saison) passend zu einer Kategorie, auf 1–5 umgerechnet
-function pfTest(cat,pid){const[t,k]=cat.split(':');const best=c=>testPick(c,pid,'');
+// since leer = Bestwert der Saison (Potenzial); mit since = letzter Test ab since, sonst letzter älterer Test (Form)
+function pfTest(cat,pid,since){const[t,k]=cat.split(':');const best=c=>testPick(c,pid,since||'');
   if(t==='a'&&k==='technik')return best('a:technik');
   if(t!=='r')return null;
   if(PF_ATH[k]){const v=PF_ATH[k].map(best).filter(isNum);return v.length?avg(v):null;}
@@ -936,10 +937,10 @@ function pfCalc(cat,pid){const C=calcCache();C.pf=C.pf||{};const ck=cat+'|'+pid;
     const blk=pfBlocks().map(([a,b])=>{const L=ks.length?pfLive(liveAggR(pid,a,b),ks):{p:0,m:0,n:0},g=G.filter(x=>x.d>=a&&x.d<b).map(x=>x.v);return{b,L,g};}).filter(x=>x.L.n>=BLOCK_MIN||x.g.length).map(x=>({b:x.b,v:pfAnch(x.g.length?avg(x.g):anch,x.L)}));const bl=blk.map(x=>x.v);
     const E=[...R,...bl];const pot=E.length?mix2(avg(E),T):T;
     // Form zählt jede Aktion nur einmal: Blöcke, deren Spiele noch im Form-Fenster liegen, bleiben beim Startwert der Form außen vor
-    const Ef=[...R,...blk.filter(x=>x.b<=fs0).map(x=>x.v)];const fAnch=Ef.length?mix2(avg(Ef),T):T;
+    const Tf=pfTest(cat,pid,fs0);const Ef=[...R,...blk.filter(x=>x.b<=fs0).map(x=>x.v)];const fAnch=Ef.length?mix2(avg(Ef),Tf):Tf;
     const Gw=G.filter(x=>x.d>=fs0).map(x=>x.v);const fStart=Gw.length?avg(Gw):fAnch;
     const L=ks.length?pfLive(liveAggR(pid,fs0,''),ks):{p:0,m:0,n:0};
-    const form=L.n||Gw.length?pfAnch(isNum(fStart)?fStart:3,L):pot;
+    const form=L.n||Gw.length||(isNum(Tf)&&Tf!==T)?pfAnch(isNum(fStart)?fStart:3,L):pot;
     res={pot,form,base,blocks:bl.length};}
   return C.pf[ck]=res;}
 // Wert je Kategorie nach gewählter Quelle: Trainer (Einschätzung + Live-Aktionen als Zusatzbewertungen), App (Live-Aktionen + Tests) oder Mix (Mittelwert).
@@ -1262,6 +1263,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:107,items:['<b>Tests in Potenzial und Form:</b> Ins Potenzial zählt der beste Test der Saison, in die Form der letzte Test (ohne neuen Test der letzte ältere). Bisher nutzte die Form bei „Mix“ ebenfalls den Bestwert, ein schwächerer neuer Test drückte die Form also nicht.']},
  {v:106,items:['<b>„Wer ist in Form?“ fairer:</b> Die Zahl ist jetzt der Schnitt nur der Bereiche, in denen sich in den letzten 6 Wochen etwas bewegt hat. Bisher zählten unberührte Bereiche als 0 mit und drückten die Zahl – besonders beim Torwart, dessen Feldwerte sich kaum bewegen.']},
  {v:105,items:['<b>„Wer ist in Form?“ zählt auch Torwart-Werte ohne Einschätzung:</b> Hat ein Kind in einem Bereich noch keine Einschätzung und keinen Test, aber Live-Aktionen (z. B. ein Torwart mit Paraden), wird seine Form gegen 3 = Teamschnitt verglichen. Vorher fiel der Bereich aus der Rechnung, und Torhüter tauchten oft gar nicht auf.']},
  {v:104,items:['<b>Torwart-Aktionen zählen auch fürs Spielernetz:</b> „Gut herausgelaufen“ zählt halb auf Zweikampf und Mut, „Abwurf/Abstoß angekommen“ halb auf Passspiel, „Gut positioniert“ halb auf Spielverständnis. Nur Plus-Aktionen – ein Torwart-Fehler verschlechtert das Feldprofil nicht.']},
