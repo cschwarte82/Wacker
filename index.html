@@ -333,7 +333,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='107';
+const APP_VERSION='108';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -899,8 +899,8 @@ function trainerVal(cat,pid,ss,per){const[t,k]=cat.split(':');
   return liveVal(cat,pid,ss,per);}
 // ---------- Potenzial & Form (Werte aus „Mix“, seit V83) ----------
 // Potenzial = Trainereinschätzungen + Messwerte (Bestwert) als Mittelwert, dazu jeder abgeschlossene Form-Block (Länge = Form-Wochen, ab Saisonstart)
-// mit mindestens BLOCK_MIN Aktionen oder einer Spielbewertung wie eine weitere Einschätzung. Form = Startwert (Spielbewertungen der letzten Form-Wochen,
-// sonst Potenzial), durch die Live-Aktionen dieser Wochen bestätigt, hochgeschoben oder korrigiert: (5·Plus + 1·Minus + Start·APP_BUF) / (Plus + Minus + APP_BUF).
+// mit mindestens BLOCK_MIN Aktionen oder einer Spielbewertung wie eine weitere Einschätzung. Form = Startwert (Einschätzungen + Spielbewertungen der letzten Form-Wochen, dazu der letzte Test;
+// ohne Spielbewertung = Potenzial mit letztem Test), durch die Live-Aktionen dieser Wochen bestätigt, hochgeschoben oder korrigiert: (5·Plus + 1·Minus + Start·APP_BUF) / (Plus + Minus + APP_BUF).
 const BLOCK_MIN=4;
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const addDays=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return ymd(x);};
@@ -934,11 +934,11 @@ function pfCalc(cat,pid){const C=calcCache();C.pf=C.pf||{};const ck=cat+'|'+pid;
     const base=mix2(R.length?avg(R):null,T);const anch=isNum(base)?base:3;
     const fs0=formSince();
     // Abgeschlossener Block: Startwert = Spielbewertungen im Block (sonst Grundwert), Live-Aktionen schieben ihn; zählt ab BLOCK_MIN Aktionen oder mit einer Spielbewertung
-    const blk=pfBlocks().map(([a,b])=>{const L=ks.length?pfLive(liveAggR(pid,a,b),ks):{p:0,m:0,n:0},g=G.filter(x=>x.d>=a&&x.d<b).map(x=>x.v);return{b,L,g};}).filter(x=>x.L.n>=BLOCK_MIN||x.g.length).map(x=>({b:x.b,v:pfAnch(x.g.length?avg(x.g):anch,x.L)}));const bl=blk.map(x=>x.v);
+    const blk=pfBlocks().map(([a,b])=>{const L=ks.length?pfLive(liveAggR(pid,a,b),ks):{p:0,m:0,n:0},g=G.filter(x=>x.d>=a&&x.d<b).map(x=>x.v);return{b,L,g};}).filter(x=>x.L.n>=BLOCK_MIN||x.g.length).map(x=>({b:x.b,v:pfAnch(x.g.length?mix2(avg([...R,...x.g]),T):anch,x.L)}));const bl=blk.map(x=>x.v);
     const E=[...R,...bl];const pot=E.length?mix2(avg(E),T):T;
     // Form zählt jede Aktion nur einmal: Blöcke, deren Spiele noch im Form-Fenster liegen, bleiben beim Startwert der Form außen vor
     const Tf=pfTest(cat,pid,fs0);const Ef=[...R,...blk.filter(x=>x.b<=fs0).map(x=>x.v)];const fAnch=Ef.length?mix2(avg(Ef),Tf):Tf;
-    const Gw=G.filter(x=>x.d>=fs0).map(x=>x.v);const fStart=Gw.length?avg(Gw):fAnch;
+    const Gw=G.filter(x=>x.d>=fs0).map(x=>x.v);const fStart=Gw.length?mix2(avg([...Ef,...Gw]),Tf):fAnch; // Spielbewertung = weitere Stimme neben den Einschätzungen, verdrängt Test/Einschätzung nicht (Christian 11.11.2026)
     const L=ks.length?pfLive(liveAggR(pid,fs0,''),ks):{p:0,m:0,n:0};
     const form=L.n||Gw.length||(isNum(Tf)&&Tf!==T)?pfAnch(isNum(fStart)?fStart:3,L):pot;
     res={pot,form,base,blocks:bl.length};}
@@ -956,7 +956,7 @@ function srcVal0(cat,pid,ss,per){const md=srcMode();
     if(!isNum(ap))return isNum(lv)?lv:tmL(); // keine Live-Aktionen/Tests: dein Wert zählt allein, kein Mannschaftsschnitt
     if(!isNum(lv))lv=tmL();if(!isNum(ap)||!isNum(w))return lv;if(!isNum(lv))return ap;return (lv+w*ap)/(1+w);}
   const tr=cat.startsWith('x:')?null:shrinkPV(cat,pid,ss,per);if(!srcApplies(cat))return tr;const ap=appCat(cat,pid,per);return isNum(ap)?ap:tr;}
-function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?(srcMode()==='mix'?'Potenzial: deine Trainereinschätzungen und Messwerte der Saison (Tests: Bestwert) plus abgeschlossene Form-Blöcke.':'Potenzial: alle Werte der Saison (bei Tests der Bestwert).'):pm==='form'?(srcMode()==='mix'?`Form: Spielbewertungen und Live-Aktionen der letzten ${formWeeks()} Wochen, ohne neue Spielbewertung ausgehend vom Potenzial. Bei Tests zählt der letzte Test.`:`Form: nur die letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test, auch wenn er älter ist.`):`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div>`;}
+function perSeg(){const pm=perMode();return `<div class="lbl2">Zeitraum</div><div class="seg" style="margin-top:4px">${PER.map(([k,n])=>`<button class="${pm===k?'on':''}" onclick="A.cfgSet('per','${k}')">${n}</button>`).join('')}</div><div class="sub">${pm==='pot'?(srcMode()==='mix'?'Potenzial: deine Trainereinschätzungen und Messwerte der Saison (Tests: Bestwert) plus abgeschlossene Form-Blöcke.':'Potenzial: alle Werte der Saison (bei Tests der Bestwert).'):pm==='form'?(srcMode()==='mix'?`Form: deine Einschätzungen, Spielbewertungen der letzten ${formWeeks()} Wochen und der letzte Test als Startwert, bewegt durch die Live-Aktionen dieser Wochen.`:`Form: nur die letzten ${formWeeks()} Wochen. Bei Tests zählt der letzte Test, auch wenn er älter ist.`):`Mix: Mittelwert aus Potenzial (ganze Saison) und Form (letzte ${formWeeks()} Wochen).`}</div>`;}
 function srcSeg(){const md=srcMode();return `<div class="lbl2">Werte aus</div><div class="seg" style="margin-top:4px">${SRC.map(([k,n])=>`<button class="${md===k?'on':''}" onclick="A.cfgSet('src','${k}')">${n}</button>`).join('')}</div><div class="sub">${md==='trainer'?'Nur deine Einschätzungen, ohne Testmessungen (Tempo, Technik usw. aus deiner Athletik-, Dribbling- und Pass-Einschätzung), dazu jede Live-Aktion als Zusatzbewertung: Plus zählt wie eine 5, Minus wie eine 1 (4 Aktionen = 1 Bewertung, Live höchstens die Hälfte).':md==='app'?'Nur Werte aus den Live-Aktionen und den Testtagen. Was die App nicht misst (z. B. Mut, Kommunikation), kommt aus deiner Einschätzung.':`Potenzial = deine Einschätzungen + Messwerte (Mittelwert), jeder abgeschlossene ${formWeeks()}-Wochen-Block mit mindestens 4 Aktionen zählt wie eine weitere Einschätzung. Form = Potenzial, durch die Live-Aktionen der letzten ${formWeeks()} Wochen bestätigt oder korrigiert.`}</div>`;}
 // Erklärt, woher der Torwart-Wert eines Kindes kommt (Bewertungen mit TW-Einschätzung/TW-Tests, App-Werte aus Torwart-Aktionen)
 function gkInfo(pid){
@@ -1263,6 +1263,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:108,items:['<b>Spielbewertung fairer eingerechnet:</b> Eine Spielbewertung zählt jetzt als weitere Stimme neben deinen Einschätzungen, der Test bleibt die andere Hälfte. Bisher ersetzte schon eine einzige Spielbewertung den Startwert der Form komplett, Test und Einschätzungen zählten dann nicht mehr.']},
  {v:107,items:['<b>Tests in Potenzial und Form:</b> Ins Potenzial zählt der beste Test der Saison, in die Form der letzte Test (ohne neuen Test der letzte ältere). Bisher nutzte die Form bei „Mix“ ebenfalls den Bestwert, ein schwächerer neuer Test drückte die Form also nicht.']},
  {v:106,items:['<b>„Wer ist in Form?“ fairer:</b> Die Zahl ist jetzt der Schnitt nur der Bereiche, in denen sich in den letzten 6 Wochen etwas bewegt hat. Bisher zählten unberührte Bereiche als 0 mit und drückten die Zahl – besonders beim Torwart, dessen Feldwerte sich kaum bewegen.']},
  {v:105,items:['<b>„Wer ist in Form?“ zählt auch Torwart-Werte ohne Einschätzung:</b> Hat ein Kind in einem Bereich noch keine Einschätzung und keinen Test, aber Live-Aktionen (z. B. ein Torwart mit Paraden), wird seine Form gegen 3 = Teamschnitt verglichen. Vorher fiel der Bereich aus der Rechnung, und Torhüter tauchten oft gar nicht auf.']},
