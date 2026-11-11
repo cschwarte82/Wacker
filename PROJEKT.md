@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 95, 10.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 96, 11.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,6 +106,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V96:** Ranglisten-Umbau: `formOverview()` als Tabelle (je 3 ▲/▼), `statCard()` Saison-Statistik (Tore/Vorlagen/Scorer/Paraden/Impact, Gesamt oder je 45 Min. ab 45 Min.), `seasonAwards()` (auch im Saison-Rückblick), `liveSeason()` mit Impact: z-Werte von (P−N+4·Teamquote)/(P+N+4) (doppelt) und (gf−ga) je 45 Min., mit Puffer `IMP_BUF_A`=4 Aktionen und `IMP_BUF_M`=45 Min. auf Teamniveau (statt Mindestzeit), ≥4 Kinder, Stufen 0,5/1/1,5 → 1–3 Pfeile, keine Zahlen. Tor-Bilanz auf dem Feld überall entfernt (nur noch intern im Impact), `topOverview` und Live-Kategorien in CATS entfernt.
 - **V95:** Wechselvorschlag `subSugHtml(L)` in `#subsugw`, im Sekunden-Intervall alle 5 s neu (nicht während ein Spieler ausgewählt ist). Vorher nur beim Rendern → nach Wechseln blieb die Box leer (Christian 10.11.).
 - **V94:** Live-Übersicht „Spielzeiten“: `daySecs` wie die Karten (vorher `liveSecs`, im Turnier ohne Vorspiele) und sekündlich aktualisiert (`.lmin2`).
 - **V93:** `pitchPick(L,pids,btn)`: Torschützen-/Vorlagen-Auswahl wie das Feld (Reihen S, M, A, TW, je Reihe `bySide`; Ausgewechselte in einer Zusatzreihe, „Eigentor Gegner“ breit darunter).
