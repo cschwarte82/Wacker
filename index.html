@@ -334,7 +334,7 @@ const MOODS=['😟','🙁','😐','🙂','😄'];
 const DEFAULT_TESTS=['sprint10','slalom','dribbel','pass_r','pass_l'];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
 const LSKEY='u10-leistungsprofil-v1';
-const APP_VERSION='112';
+const APP_VERSION='113';
 
 // ---------- Helfer ----------
 const $=s=>document.querySelector(s);
@@ -584,9 +584,9 @@ function vKids(s){
   const game=s.type==='game',ev=s.type==='eval';
   let h=`<div class="kidnav"><button class="btn" onclick="A.kid(-1)" aria-label="Vorheriges Kind">‹</button><select onchange="A.kidSel(this.value)">${ps.map((q,i)=>`<option value="${i}" ${i===S.kidIdx?'selected':''}>${esc(q.name)}${done(q)?' ✓':''}</option>`).join('')}</select><button class="btn" onclick="A.kid(1)" aria-label="Nächstes Kind">›</button></div>`;
   if((p.goals||[]).some(g=>g.status!=='erreicht'))h+=goalsHtml(p.id,true);
-  h+=`<div class="card"><div class="lbl">Trainer-Einschätzung <small>1 = noch wenig, 5 = sehr ausgeprägt</small></div>${RATINGS.map(x=>`<div class="rrow"><span>${x.n}${rbAvg(r[x.k])}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${rbCls(r[x.k],n)}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
-  if(ev)h+=`<div class="card"><div class="lbl">Athletik <small>dein Eindruck, 1–5</small></div>${ATH_RATINGS.map(x=>`<div class="rrow"><span>${x.n}${rbAvg(r[x.k])}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${rbCls(r[x.k],n)}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
-  {const gkHas=GK_RATINGS.some(x=>isNum(r[x.k]));h+=`<details class="card" ${gkHas?'open':''}><summary>Torwart-Einschätzung <small class="sub">nur für Kinder, die ins Tor gehen</small></summary><div style="margin-top:8px">${GK_RATINGS.map(x=>`<div class="rrow"><span>${x.n}${rbAvg(r[x.k])}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${rbCls(r[x.k],n)}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div></details>`;}
+  h+=`<div class="card"><div class="lbl">Trainer-Einschätzung <small>1 = noch wenig, 5 = sehr ausgeprägt</small></div>${RATINGS.map(x=>`<div class="rrow"><span>${x.n}${rbAvg(r[x.k],(s.avgOrig||{})[p.id],p.id,x.k)}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${rbCls(r[x.k],n)}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
+  if(ev)h+=`<div class="card"><div class="lbl">Athletik <small>dein Eindruck, 1–5</small></div>${ATH_RATINGS.map(x=>`<div class="rrow"><span>${x.n}${rbAvg(r[x.k],(s.avgOrig||{})[p.id],p.id,x.k)}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${rbCls(r[x.k],n)}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div>`;
+  {const gkHas=GK_RATINGS.some(x=>isNum(r[x.k]));h+=`<details class="card" ${gkHas?'open':''}><summary>Torwart-Einschätzung <small class="sub">nur für Kinder, die ins Tor gehen</small></summary><div style="margin-top:8px">${GK_RATINGS.map(x=>`<div class="rrow"><span>${x.n}${rbAvg(r[x.k],(s.avgOrig||{})[p.id],p.id,x.k)}</span><div class="scale">${[1,2,3,4,5].map(n=>`<button class="${rbCls(r[x.k],n)}" onclick="A.rate('${p.id}','${x.k}',${n})">${n}</button>`).join('')}</div></div>`).join('')}</div></details>`;}
   if(game&&s.live){const lv=s.live;const b=gameBal(lv,p.id);h+=`<div class="card hint">Live: <b class="pos">+${(lv.plus||{})[p.id]||0}</b> / <b class="neg">−${(lv.minus||{})[p.id]||0}</b> · ${(lv.mins||{})[p.id]||0} Spielminuten${lv.periods&&lv.periods[p.id]?` (${fmtP(lv.periods[p.id],lv.fmt,lv.partStarts)})`:''}${b.tore?` · ⚽ ${b.tore}`:''}${b.vorl?` · 🅰 ${b.vorl}`:''}${(lv.cards||[]).filter(c=>c.p===p.id).map(c=>` <span class="${c.c==='y'?'yc':c.c==='yr'?'yrc':'rc'}"></span>`).join('')}</div>`;}
   if(ev)h=`<div class="sub" style="margin-bottom:8px">Deine Einschätzung zwischendurch. Nur Kinder bewerten, die du gut beobachten konntest – leer bleibt leer. ${ps.filter(done).length} von ${ps.length} vollständig.</div>`+h;
   if(game)h=`<div class="sub" style="margin-bottom:8px">Nur Kinder bewerten, die gespielt haben – wer leer bleibt, zählt als nicht dabei. ${ps.filter(done).length} von ${ps.length} vollständig.</div>`+h;
@@ -1089,7 +1089,7 @@ function vLineupInner(){
 function withMix(fn){const c=S.cfg=S.cfg||{},o={src:c.src,per:c.per};c.src='mix';c.per='mix';try{return fn();}finally{c.src=o.src;c.per=o.per;}}
 // Gemittelter Wert (z. B. 3,5 nach Zusammenlegen mit dem Co-Trainer): beide Nachbarn umrandet, Ø-Wert am Namen
 const rbCls=(v,n)=>v===n?'on':isNum(v)&&v%1&&(n===Math.floor(v)||n===Math.ceil(v))?'half':'';
-const rbAvg=v=>isNum(v)&&v%1?` <small class="sub">Ø ${fnum(r1(v))}</small>`:'';
+const rbAvg=(v,o,pid,k)=>{if(isNum(v)&&v%1)return ` <small class="sub">Ø ${fnum(r1(v))}</small>`;const a=o&&o[k];return isNum(a)&&a!==v?` <button style="border:0;background:none;padding:0 2px;font:600 12px var(--ft);color:var(--g);cursor:pointer" onclick="A.rateAvg('${pid}','${k}')">↺ Ø ${fnum(r1(a))}</button>`:'';};
 function vLineup(){return withMix(vLineupInner);}
 
 // ---------- Aktions-Kategorien & App-Werte ----------
@@ -1275,6 +1275,7 @@ function vStrength(){
 
 // ---------- Was ist neu, Einstellungen, Anleitung, Profil-PDF ----------
 const CHANGELOG=[
+ {v:113,items:['<b>Mittelwert zurückholen:</b> Hast du einen gemittelten Wert (z. B. Ø 3,5) versehentlich überschrieben oder gelöscht, steht am Bereich „↺ Ø 3,5“. Ein Tipp darauf stellt den Mittelwert wieder her.']},
  {v:112,items:['<b>Gemittelte Werte sichtbar:</b> Steht in einer Bewertung ein Mittelwert (z. B. 3,5 nach dem Zusammenlegen mit dem Co-Trainer), sind beide Nachbar-Knöpfe grün umrandet und am Bereich steht „Ø 3,5“. Ein Tipp auf einen Knopf setzt wie gewohnt einen ganzen Wert.']},
  {v:111,items:['<b>Spiel mit Co-Trainer zusammenlegen:</b> Haben beide ein Kind im selben Spiel bewertet, wird jetzt je Bereich der Mittelwert genommen. Was nur einer eingetragen hat, wird übernommen. Live-Aktionen kommen wie bisher je Kind aus der Erfassung mit mehr Aktionen.']},
  {v:110,items:['<b>Mut kann live auch sinken:</b> „Falsch gelaufen / versteckt“ zählt zusätzlich halb auf Mut. Neuer Torwart-Minus-Knopf „Nicht rausgekommen / weggedreht“: voll auf Kommandos/Mut im Torwart-Netz und halb auf Mut im Spielernetz. „Gut herausgelaufen“ zählt zusätzlich halb auf Kommandos/Mut.']},
@@ -2139,7 +2140,9 @@ const A={
   swReset(){sw.running=false;sw.elapsed=0;swPaint();},
   kid(d){const n=plist().length;if(!n)return;S.kidIdx=(S.kidIdx+d+n)%n;render(true);},
   kidSel(v){S.kidIdx=+v;render(true);},
-  rate(pid,k,n){const s=clone(S.sessions[S.sessionId]);s.ratings=s.ratings||{};const r=s.ratings[pid]=s.ratings[pid]||{};if(r[k]===n)delete r[k];else r[k]=n;saveDoc('sessions',S.sessionId,s);render(true);},
+  rate(pid,k,n){const s=clone(S.sessions[S.sessionId]);s.ratings=s.ratings||{};const r=s.ratings[pid]=s.ratings[pid]||{};if(isNum(r[k])&&r[k]%1){s.avgOrig=s.avgOrig||{};(s.avgOrig[pid]=s.avgOrig[pid]||{})[k]=r[k];}if(r[k]===n)delete r[k];else r[k]=n;saveDoc('sessions',S.sessionId,s);render(true);},
+  // Gemittelten Wert (Zusammenlegen mit Co-Trainer) nach versehentlichem Tippen zurückholen
+  rateAvg(pid,k){const s=clone(S.sessions[S.sessionId]);const a=((s.avgOrig||{})[pid]||{})[k];if(!isNum(a))return;s.ratings=s.ratings||{};(s.ratings[pid]=s.ratings[pid]||{})[k]=a;saveDoc('sessions',S.sessionId,s);render(true);toast('Mittelwert wiederhergestellt');},
   mood(pid,n){const s=clone(S.sessions[S.sessionId]);s.mood=s.mood||{};if(s.mood[pid]===n)delete s.mood[pid];else s.mood[pid]=n;saveDoc('sessions',S.sessionId,s);render(true);},
   note(pid,el){const s=clone(S.sessions[S.sessionId]);s.notes=s.notes||{};const v=el.value;if(v.trim())s.notes[pid]=v;else delete s.notes[pid];saveDoc('sessions',S.sessionId,s);},
   async shareText(sel){const el=$(sel);if(!el)return;if(navigator.share){try{await navigator.share({text:el.value});}catch(e){}return;}A.copy(sel);},
