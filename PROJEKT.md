@@ -1,4 +1,4 @@
-# TrainerRadar – Projektübersicht (Stand: Version 113, 11.11.2026)
+# TrainerRadar – Projektübersicht (Stand: Version 114, 11.11.2026)
 
 Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wurde und warum.
 **Maßgeblich ist immer der Code im Repository** – bei Widersprüchen gilt der Code, nicht diese Datei.
@@ -106,6 +106,7 @@ Diese Datei ist das Gedächtnis des Projekts. Sie fasst zusammen, was gebaut wur
 - **V86:** Live-Karten und Bank mit Positionskürzeln (`slotAbbr`: TW, IV, VL/VR, ZM, LM/RM, MS, ST, LA/RA) und Wert; ★ = stärkste Position (`bestSlot`, Mix, inkl. Fuß/Spielweise, TW wenn höher). In 4er/5er-Reihen ohne Wert der stärksten Position (`.w4 .bv`).
 - **V87:** Live-Karten ohne Zusatzzeile: Positionsschild `.pbadge` an der Ecke (gelb + ★ = stärkste Position); Werte beim Antippen in `.selhint` (`posInfo`). Bank behält „★Kürzel Wert“.
 - **V88:** Zweites Schild rechts oben `.pbadge.r` „★Kürzel“ = stärkste Position (Christians Wunsch); beide gelb, wenn gleich.
+- **V114:** Import: `sameMatch` (gleicher Tag + gleicher Gegner via `oppKey`, sonst je Seite nur ein Spiel am Tag; nicht beide live) → `mergeMatch`: Live-Daten aus der Live-Erfassung, `mergeRatings` mittelt Spielbewertungen. Für Ablauf Helfer live + Trainer/Co-Trainer nur Spielbewertung (Christian 12.11.2026).
 - **V113:** `A.rate` merkt überschriebene Mittelwerte in `s.avgOrig[pid][k]`; `rbAvg` zeigt dann „↺ Ø x,5“, `A.rateAvg` stellt ihn wieder her.
 - **V112:** `rbCls`/`rbAvg`: nicht ganzzahlige Bewertungen (gemittelt) zeigen beide Nachbar-Knöpfe umrandet (.half) und „Ø x,5“ am Bereich.
 - **V111:** `mergeGameRec`: Spielbewertungen (ratings) je Kind und Kategorie gemittelt, wenn beide eingetragen haben, sonst übernommen; mood/notes wie bisher (Christian 12.11.2026).
